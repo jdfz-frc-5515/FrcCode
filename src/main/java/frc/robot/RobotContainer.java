@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import edu.wpi.first.math.MathUtil;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -45,9 +46,9 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getRawAxis(1) * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getRawAxis(0)* MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRawAxis(4) * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(MathUtil.applyDeadband(-joystick.getRawAxis(1), 0.05) * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(MathUtil.applyDeadband(-joystick.getRawAxis(0), 0.05) * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(MathUtil.applyDeadband(-joystick.getRawAxis(4), 0.05) * MaxAngularRate) // Drive counterclockwise with negative X (left)
                     )
         );
 
