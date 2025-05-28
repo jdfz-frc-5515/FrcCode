@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
+import frc.robot.commands.MoveToCmd;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ImprovedCommandXboxController;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
@@ -54,6 +54,8 @@ public class RobotContainer {
         // m_driverController.b().whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
         // m_driverController.x().whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
         // m_driverController.y().whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+
+        m_driverController.a().whileTrue(new MoveToCmd(drivetrain, m_driverController));
 
         // reset the field-centric heading on left bumper press
         m_driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
