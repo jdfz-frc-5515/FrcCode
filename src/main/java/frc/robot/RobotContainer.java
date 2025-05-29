@@ -20,7 +20,8 @@ import frc.robot.commands.MoveToCmd;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ImprovedCommandXboxController;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
-import frc.robot.commands.FaceObjectCmd;;
+import frc.robot.commands.FaceObjectCmd;
+import frc.robot.commands.minMoveDrivetrain;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -65,7 +66,15 @@ public class RobotContainer {
 
         // reset the field-centric heading on left bumper press
         m_driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-        m_driverController.rightBumper().whileTrue(new FaceObjectCmd(drivetrain));
+        // m_driverController.rightBumper().whileTrue(new FaceObjectCmd(drivetrain));
+        m_driverController.rightBumper().onTrue(new InstantCommand(() -> {
+            drivetrain.resetHeadingForOdo(0);
+        }));
+        m_driverController.povUp().whileTrue(new minMoveDrivetrain(drivetrain, 0));
+        m_driverController.povLeft().whileTrue(new minMoveDrivetrain(drivetrain, 1));
+        m_driverController.povDown().whileTrue(new minMoveDrivetrain(drivetrain, 2));
+        m_driverController.povRight().whileTrue(new minMoveDrivetrain(drivetrain, 3));
+        // m_driverController.povUp()
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
