@@ -16,10 +16,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
+import frc.robot.commands.MoveToCmd;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ImprovedCommandXboxController;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
+import frc.robot.commands.FaceObjectCmd;;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -60,9 +61,11 @@ public class RobotContainer {
         // }));
 
         
+        m_driverController.a().whileTrue(new MoveToCmd(drivetrain, m_driverController));
+
         // reset the field-centric heading on left bumper press
         m_driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-
+        m_driverController.rightBumper().whileTrue(new FaceObjectCmd(drivetrain));
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
