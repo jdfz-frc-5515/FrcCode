@@ -1,9 +1,12 @@
 package frc.robot.subsystems;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 // import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Library.team1706.MathUtils;
 
 public class ImprovedCommandXboxController extends CommandXboxController {
+    private double axisDeadBand = 0.05;
     /** Represents a digital button on an XboxController. */
     public enum Button {
         kAutoButton(0),
@@ -135,4 +138,41 @@ public class ImprovedCommandXboxController extends CommandXboxController {
     // public ChassisSpeeds getDesiredRelativeSpeeds(){
     //     return new ChassisSpeeds(this.getLeftY(), this.getLeftX(), -this.getRightX() * 10.);
     // }
+
+
+      /**
+   * Get the X axis value of left side of the controller.
+   *
+   * @return The axis value.
+   */
+  public double getLeftX() {
+    return MathUtil.applyDeadband(super.getLeftX(), axisDeadBand);
+  }
+
+  /**
+   * Get the X axis value of right side of the controller.
+   *
+   * @return The axis value.
+   */
+  public double getRightX() {
+    return MathUtil.applyDeadband(super.getRightX(), axisDeadBand);
+  }
+
+  /**
+   * Get the Y axis value of left side of the controller.
+   *
+   * @return The axis value.
+   */
+  public double getLeftY() {
+    return MathUtil.applyDeadband(super.getLeftY(), axisDeadBand);
+  }
+
+  /**
+   * Get the Y axis value of right side of the controller.
+   *
+   * @return The axis value.
+   */
+  public double getRightY() {
+    return MathUtil.applyDeadband(super.getRightY(), axisDeadBand);
+  }
 }

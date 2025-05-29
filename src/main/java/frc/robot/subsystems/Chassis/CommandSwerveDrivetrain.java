@@ -91,7 +91,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             Volts.of(4), // Reduce dynamic step voltage to 4 V to prevent brownout
             null,        // Use default timeout (10 s)
             // Log state with SignalLogger class
-            state -> SignalLogger.writeString("SysIdTranslation_State", state.toString())
+            state -> {
+                SignalLogger.writeString("SysIdTranslation_State", state.toString());
+            }
         ),
         new SysIdRoutine.Mechanism(
             output -> setControl(m_translationCharacterization.withVolts(output)),
@@ -333,7 +335,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-        updateOdometry();
+        // updateOdometry();
     }
 
     private void startSimThread() {
@@ -376,6 +378,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void updateOdometry(){
+
+        
         LimelightHelpers.SetRobotOrientation(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT, getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT);
         // ImprovedLL.MT2stddevs devs = ImprovedLL.getmt2Devs();
@@ -384,7 +388,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             DriverStation.reportWarning(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT + " Diconnected!", false);
             return;
         }
-
+        
         if (Math.abs(getSpeeds().omegaRadiansPerSecond) <= 4*Math.PI 
             && mt2.tagCount > 0 
             && mt2.avgTagDist < 4 
@@ -396,9 +400,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 // VecBuilder.fill(0.00001,0.00001, 100000000.)
                 // VecBuilder.fill(devs.xdev, devs.ydev, 100000000.)
             );
+
             SmartDashboard.putNumber("tA", mt2.avgTagArea );
-            SmartDashboard.putNumber("Dev",
-            Constants.PoseEstimatorConstants.tAtoDev.get(mt2.avgTagArea));
+            SmartDashboard.putNumber("Dev", Constants.PoseEstimatorConstants.tAtoDev.get(mt2.avgTagArea));
         }
         
     }

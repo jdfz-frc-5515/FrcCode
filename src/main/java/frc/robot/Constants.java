@@ -105,4 +105,9 @@ public class Constants {
 
         
     }
+
+    public static void initializeConstants(){
+        for(var p : PoseEstimatorConstants.tAtoDevPoints)
+            PoseEstimatorConstants.tAtoDev.put(p.getX(), p.getY());
+    }
 }

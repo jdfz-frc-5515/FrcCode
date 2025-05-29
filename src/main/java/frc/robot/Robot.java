@@ -14,6 +14,7 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
 
   public Robot() {
+    Constants.initializeConstants();
     m_robotContainer = new RobotContainer();
   }
 

@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
@@ -54,7 +55,11 @@ public class RobotContainer {
         // m_driverController.b().whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
         // m_driverController.x().whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
         // m_driverController.y().whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        // m_driverController.rightBumper().onTrue(new InstantCommand(() -> {
+        //     logger.flush();
+        // }));
 
+        
         // reset the field-centric heading on left bumper press
         m_driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 

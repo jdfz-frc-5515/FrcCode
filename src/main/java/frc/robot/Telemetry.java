@@ -30,6 +30,8 @@ public class Telemetry {
      */
     public Telemetry(double maxSpeed) {
         MaxSpeed = maxSpeed;
+        SignalLogger.setPath("/home/lvuser/logs");
+        // SignalLogger.enableAutoLogging(true);
         SignalLogger.start();
     }
 
@@ -120,5 +122,11 @@ public class Telemetry {
 
             SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
         }
+    }
+
+    public void flush() {
+        System.out.println("logger flush performed!~~~~~~~~~~~~~~~~~");
+        SignalLogger.stop();
+        SignalLogger.start();
     }
 }
