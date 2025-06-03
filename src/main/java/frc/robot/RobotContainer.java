@@ -21,6 +21,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ImprovedCommandXboxController;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
 import frc.robot.commands.FaceObjectCmd;
+import frc.robot.commands.GoToCoralCmd;
 import frc.robot.commands.minMoveDrivetrain;
 
 public class RobotContainer {
@@ -63,7 +64,7 @@ public class RobotContainer {
 
         
         m_driverController.a().whileTrue(new MoveToCmd(drivetrain, m_driverController));
-
+        m_driverController.b().whileTrue(new GoToCoralCmd(drivetrain));
         // reset the field-centric heading on left bumper press
         m_driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         // m_driverController.rightBumper().whileTrue(new FaceObjectCmd(drivetrain));
