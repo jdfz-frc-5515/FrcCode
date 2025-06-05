@@ -440,6 +440,27 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         ));
     }
 
+    public void customMoveWithSpeed(double xSpeed, double ySpeed) {
+        SwerveRequest.RobotCentric request = new SwerveRequest.RobotCentric();
+        request = request.withVelocityX(xSpeed);
+        request = request.withVelocityY(ySpeed);
+        this.setControl(request);
+    }
+    public void customRotate(double angularSpeed) {
+        SwerveRequest.RobotCentric request = new SwerveRequest.RobotCentric();
+        request = request.withRotationalRate(angularSpeed).withVelocityX(0).withVelocityY(0);
+        this.setControl(request);
+    }
+
+    public void customStopMoving(boolean doIt) {
+        if (!doIt) {
+            return;
+        }
+        SwerveRequest.RobotCentric request = new SwerveRequest.RobotCentric();
+        request = request.withVelocityX(0).withVelocityY(0).withRotationalRate(0);
+        this.setControl(request);
+    }
+
     public Command autoMoveToPoseCommand(Pose2d pose){
         return this.applyRequest(() -> m_moveToPoseDrive.withSpeeds(getAutoMoveToPoseSpeeds(pose)));
     }
@@ -683,6 +704,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      */
     public boolean isNearTranslation(Translation2d t, double distance){
         return getPose().getTranslation().getDistance(t) <= distance;
+    }
+
+    public void resetHeadingForOdo(double angle) {
+        this.resetRotation(Rotation2d.fromDegrees(angle));
     }
 
 
