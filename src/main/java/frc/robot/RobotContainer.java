@@ -67,6 +67,7 @@ public class RobotContainer {
         m_driverController.b().whileTrue(new GoToCoralCmd(drivetrain));
         // reset the field-centric heading on left bumper press
         m_driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
         // m_driverController.rightBumper().whileTrue(new FaceObjectCmd(drivetrain));
         m_driverController.rightBumper().onTrue(new InstantCommand(() -> {
             drivetrain.resetHeadingForOdo(0);
@@ -76,6 +77,7 @@ public class RobotContainer {
         m_driverController.povDown().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 2));
         m_driverController.povRight().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 3));
         // m_driverController.povUp()
+
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
