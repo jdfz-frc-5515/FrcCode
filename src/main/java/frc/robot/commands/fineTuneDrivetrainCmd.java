@@ -10,11 +10,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
 
 /** An example command that uses an example subsystem. */
-public class minMoveDrivetrain extends Command {
+public class fineTuneDrivetrainCmd extends Command {
   private final CommandSwerveDrivetrain m_subsystem;
   private int direction;
   // direction: 0 up 1 left 2 down 3 right
-  public minMoveDrivetrain(CommandSwerveDrivetrain subsystem, int povDirection) {
+  public fineTuneDrivetrainCmd(CommandSwerveDrivetrain subsystem, int povDirection) {
     m_subsystem = subsystem;
     addRequirements(subsystem);
     direction = povDirection;

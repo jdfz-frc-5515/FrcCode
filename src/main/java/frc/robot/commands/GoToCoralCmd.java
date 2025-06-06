@@ -11,18 +11,46 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
 
-import static edu.wpi.first.units.Units.Rotation;
-
-import com.ctre.phoenix6.swerve.SwerveRequest;
-
 /** An example command that uses an example subsystem. */
 public class GoToCoralCmd extends Command {
   private final CommandSwerveDrivetrain m_subsystem;
+  private Pose2d currentCoral = new Pose2d(-1, -1, new Rotation2d(3));
+  private int flew = 0;
   public GoToCoralCmd(CommandSwerveDrivetrain subsystem) {
     m_subsystem = subsystem;
     addRequirements(subsystem);
   }
 
+  // public Pose2d getTargetPose2d() {
+  //   old method with tx -> 0
+  //   String coralLimelight = "limelight-right";
+  //   double h_l = 0.19199;
+  //   double h_3 = 0.25961;
+  //   double ty = LimelightHelpers.getTY(coralLimelight);
+    // double h2 = Math.sqrt(Math.pow(h_l/Math.sin(-Math.toRadians(ty)), 2) - Math.pow(h_l, 2))-0.2;
+  //   System.out.println(h2);
+  //   Pose2d robotPose = m_subsystem.getPose();
+  //   double robotAngle = m_subsystem.getPose().getRotation().getRadians();
+  //   double coralX = robotPose.getX() + Math.cos(robotAngle) * (h2+h_3);
+  //   double coralY = robotPose.getY() + Math.sin(robotAngle) * (h2+h_3);
+  //   Pose2d coralPose = new Pose2d(coralX, coralY, robotPose.getRotation());
+  //   return coralPose;
+  // }
+  public Pose2d getTargetPose2d() {
+    String coralLimeLight = "limelight-right";
+    double h_l = 0.19199;
+    double h_3 = 0.25961;
+    double tx = -Math.toRadians(LimelightHelpers.getTX(coralLimeLight)/180*Math.PI);
+    double ty = -Math.toRadians(LimelightHelpers.getTY(coralLimeLight));
+    double h2 = Math.sqrt(Math.pow(h_l/Math.sin(ty), 2) - Math.pow(h_l, 2));
+    Pose2d robotPose = m_subsystem.getPose();
+    double robotAngle = m_subsystem.getPose().getRotation().getRadians();
+    double aX = h_3*Math.cos(robotAngle) + h2*Math.cos(tx);
+    double aY = h2*Math.sin(tx) - h_3*Math.sin(robotAngle);
+    Rotation2d coralAngle = new Rotation2d(robotAngle + Math.atan(aY/aX));
+    Pose2d coralPose2d = new Pose2d(robotPose.getX()+aX, robotPose.getY()-aY, coralAngle);
+    return coralPose2d;
+  }
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {}
@@ -31,45 +59,39 @@ public class GoToCoralCmd extends Command {
   @Override
   public void execute() {
     String coralLimelight = "limelight-right";
-    double h_l = 0.19199;
-    double h_3 = 0.25961;
     boolean hasTarget = LimelightHelpers.getTV(coralLimelight);
     SmartDashboard.putBoolean("ll hasT", hasTarget);
+    int didFlyTolerance = 10;
     if (!hasTarget) {
-      m_subsystem.customStopMoving(true);
+      flew += 1;
+      if (flew >= didFlyTolerance) {
+        System.out.println("flewn");
+        // find new coral here
+        return;
+      }
+    }
+    else {
+      flew = 0;
+    }
+    Pose2d tempCoralPose = getTargetPose2d();
+    double distanceTolerance = 0.5;
+    double eucDistance = tempCoralPose.getTranslation().getDistance(currentCoral.getTranslation());
+    SmartDashboard.putNumber("Target Distance", eucDistance);
+    // SmartDashboard.putNumber("euc DIstance", eucDistance);
+    // SmartDashboard.putString("temp coral pose", tempCoralPose.toString());
+    // SmartDashboard.putString("current coral pose", currentCoral.toString());
+    // System.out.println(eucDistance);
+    if (eucDistance < distanceTolerance) {
+      System.out.println("no change");
+      // currentCoral = tempCoralPose;
+      m_subsystem.autoMoveToPose(currentCoral);
       return;
     }
-    double txDeadBand = 3;
-    double tx = LimelightHelpers.getTX(coralLimelight);
-    if (Math.abs(tx) > txDeadBand) {
-      m_subsystem.customRotate(-tx*0.1);
-      System.out.println("mimimimi");
-      return;
+    else {
+      System.out.println("change");
+      currentCoral = tempCoralPose;
     }
-    double ty = LimelightHelpers.getTY(coralLimelight);
-    double h2 = Math.sqrt(Math.pow(h_l/Math.sin(-Math.toRadians(ty)), 2) - Math.pow(h_l, 2))+0.3;
-    System.out.println(h2);
-    Pose2d robotPose = m_subsystem.getPose();
-    double coralX = robotPose.getX() + Math.cos(Math.toRadians(tx)) * (h2+h_3);
-    double coralY = robotPose.getY() + Math.sin(Math.toRadians(tx)) * (h2+h_3);
-    Pose2d coralPose = new Pose2d(coralX, coralY, robotPose.getRotation());
-    // Pose2d coralPose = new Pose2d(0.5, 0.5, robotPose.getRotation());
-    m_subsystem.autoMoveToPose(coralPose);
-    // System.out.println(rotate);
-    // System.out.println(-tx*0.2);
-    // SwerveRequest.RobotCentric request = new SwerveRequest.RobotCentric();
-    // double rotationalRate = -tx*0.05;
-    // if (Math.abs(tx) < 3) {
-    //   rotationalRate = 0;
-    // }
-    // double forwardSpeed = 0.0;
-    // if (0 < ta && ta < 3.5) {
-    //     forwardSpeed = Math.abs(3.5-ta) * 0.5;
-    //     // forwardSpeed = 0.1;
-    // }
-    // request = request.withRotationalRate(rotationalRate);
-    // request = request.withVelocityX(forwardSpeed);
-    // m_subsystem.setControl(request.withVelocityY(0).withDeadband(0.0));
+    m_subsystem.autoMoveToPose(currentCoral);
   }
 
   // Called once the command ends or is interrupted.

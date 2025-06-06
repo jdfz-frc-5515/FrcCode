@@ -22,7 +22,7 @@ import frc.robot.subsystems.ImprovedCommandXboxController;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
 import frc.robot.commands.FaceObjectCmd;
 import frc.robot.commands.GoToCoralCmd;
-import frc.robot.commands.minMoveDrivetrain;
+import frc.robot.commands.fineTuneDrivetrainCmd;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -71,10 +71,10 @@ public class RobotContainer {
         m_driverController.rightBumper().onTrue(new InstantCommand(() -> {
             drivetrain.resetHeadingForOdo(0);
         }));
-        m_driverController.povUp().whileTrue(new minMoveDrivetrain(drivetrain, 0));
-        m_driverController.povLeft().whileTrue(new minMoveDrivetrain(drivetrain, 1));
-        m_driverController.povDown().whileTrue(new minMoveDrivetrain(drivetrain, 2));
-        m_driverController.povRight().whileTrue(new minMoveDrivetrain(drivetrain, 3));
+        m_driverController.povUp().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 0));
+        m_driverController.povLeft().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 1));
+        m_driverController.povDown().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 2));
+        m_driverController.povRight().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 3));
         // m_driverController.povUp()
         drivetrain.registerTelemetry(logger::telemeterize);
     }
