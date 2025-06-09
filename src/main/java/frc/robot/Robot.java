@@ -10,11 +10,14 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.LimelightHelpers;
 
 public class Robot extends TimedRobot {
+  public static Robot inst = null;
+
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
 
   public Robot() {
+    inst = this;
     Constants.initializeConstants();
     m_robotContainer = new RobotContainer();
   }

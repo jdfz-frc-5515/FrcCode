@@ -39,6 +39,7 @@ import com.pathplanner.lib.util.FileVersionException;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
@@ -359,6 +360,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public ChassisSpeeds getSpeeds(){
         return this.getState().Speeds;
+    }
+
+    public SwerveModuleState[] getModuleStates() {
+        return this.getState().ModuleStates;
     }
 
     public void driveFieldCentric(ChassisSpeeds speeds){
