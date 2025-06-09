@@ -26,8 +26,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-    String coralLimelight = "limelight-right";
-    LimelightHelpers.setPipelineIndex(coralLimelight, 2);
+    LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_OBJECT_DETECTION, 2);
     System.out.println("mimim");
   }
 
@@ -58,7 +57,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
     String coralLimelight = "limelight-right";
-    LimelightHelpers.setPipelineIndex(coralLimelight, 1);
+    LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_OBJECT_DETECTION, 1);
   }
 
   @Override
