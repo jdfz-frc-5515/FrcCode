@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
+import frc.robot.Constants;
 
 /** An example command that uses an example subsystem. */
 public class GoToCoralCmd extends Command {
@@ -37,7 +38,7 @@ public class GoToCoralCmd extends Command {
   //   return coralPose;
   // }
   public Pose2d getTargetPose2d() {
-    String coralLimeLight = "limelight-right";
+    String coralLimeLight = Constants.LIME_LIGHT_OBJECT_DETECTION;
     double h_l = 0.19199;
     double h_3 = 0.25961;
     double tx = -Math.toRadians(LimelightHelpers.getTX(coralLimeLight)/180*Math.PI);
@@ -58,7 +59,7 @@ public class GoToCoralCmd extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    String coralLimelight = "limelight-right";
+    String coralLimelight = Constants.LIME_LIGHT_OBJECT_DETECTION;
     boolean hasTarget = LimelightHelpers.getTV(coralLimelight);
     SmartDashboard.putBoolean("ll hasT", hasTarget);
     int didFlyTolerance = 10;
@@ -74,6 +75,7 @@ public class GoToCoralCmd extends Command {
       flew = 0;
     }
     Pose2d tempCoralPose = getTargetPose2d();
+    SmartDashboard.putNumber("coral angle", tempCoralPose.getRotation().getDegrees());
     double distanceTolerance = 0.5;
     double eucDistance = tempCoralPose.getTranslation().getDistance(currentCoral.getTranslation());
     SmartDashboard.putNumber("Target Distance", eucDistance);
