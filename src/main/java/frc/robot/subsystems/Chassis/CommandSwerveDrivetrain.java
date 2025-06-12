@@ -336,7 +336,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-        updateOdometry();
+        updateOdometry(Constants.LIME_LIGHT_ARPIL_TAG_NAME_LEFT);
+        updateOdometry(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT);
     }
 
     private void startSimThread() {
@@ -382,15 +383,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         );
     }
 
-    public void updateOdometry(){
+    public void updateOdometry(String llName){
 
         
-        LimelightHelpers.SetRobotOrientation(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT, getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT);
+        LimelightHelpers.SetRobotOrientation(llName, getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(llName);
         // ImprovedLL.MT2stddevs devs = ImprovedLL.getmt2Devs();
         // ImprovedLL.mt2stdDev stdDev = ImprovedLL.getmt2Dev(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT); 
         if(mt2 == null) {
-            DriverStation.reportWarning(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT + " Diconnected!", false);
+            DriverStation.reportWarning(llName + " Diconnected!", false);
             return;
         }
         
