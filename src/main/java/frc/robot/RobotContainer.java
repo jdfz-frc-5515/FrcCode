@@ -9,7 +9,12 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -20,7 +25,6 @@ import frc.robot.commands.MoveToCmd;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ImprovedCommandXboxController;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
-import frc.robot.commands.FaceObjectCmd;
 import frc.robot.commands.GoToCoralCmd;
 import frc.robot.commands.fineTuneDrivetrainCmd;
 
@@ -39,18 +43,30 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+
+    private final StructArrayPublisher<SwerveModuleState> swerveStatePublisher;
+    private final StructPublisher<Pose2d> robotPospublisher = NetworkTableInstance.getDefault()
+        .getStructTopic("MyPose", Pose2d.struct).publish();
+
     public RobotContainer() {
+        ControlPadHelper.init();
+
+        swerveStatePublisher = NetworkTableInstance.getDefault()
+            .getStructArrayTopic("/MyStates", SwerveModuleState.struct).publish();
+
+        drivetrain.setDefaultCommand(
+            drivetrain.run(() -> drivetrain.driveFieldCentric(m_driverController))
+        );
+
         configureBindings();
+
+        drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
-        drivetrain.setDefaultCommand(
 
-                drivetrain.run(() -> drivetrain.driveFieldCentric(m_driverController))
-        );
-        
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -77,11 +93,21 @@ public class RobotContainer {
         m_driverController.povDown().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 2));
         m_driverController.povRight().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 3));
         // m_driverController.povUp()
-
-        drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     public Command getAutonomousCommand() {
         return Commands.print("No autonomous command configured");
+    }
+
+    public void update() {
+        Pose2d pos = drivetrain.getPose();
+        ControlPadHelper.publishRobotPos(pos);
+
+        swerveStatePublisher.set(drivetrain.getModuleStates());
+        robotPospublisher.set(pos);
+    }
+
+    public void updateAlways() {
+        ControlPadHelper.update();
     }
 }

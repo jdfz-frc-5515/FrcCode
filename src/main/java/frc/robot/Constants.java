@@ -22,7 +22,6 @@ import frc.robot.Library.MUtils.SegmentOnTheField;
 import java.awt.geom.Point2D;
 
 public class Constants {
-
     public static String LIME_LIGHT_ARPIL_TAG_NAME_RIGHT = "limelight-right";
     public static String LIME_LIGHT_ARPIL_TAG_NAME_LEFT = "limelight-left";
     public static String LIME_LIGHT_OBJECT_DETECTION = "limelight-up";
