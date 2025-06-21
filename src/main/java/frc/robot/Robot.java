@@ -26,6 +26,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
+    LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT, 2);
+    LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_ARPIL_TAG_NAME_LEFT, 2);
     LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_OBJECT_DETECTION, 2);
     System.out.println("mimim");
   }
@@ -57,7 +59,9 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
     String coralLimelight = "limelight-right";
-    LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_OBJECT_DETECTION, 1);
+    LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_ARPIL_TAG_NAME_LEFT, 0);
+    LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT, 0);
+    LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_OBJECT_DETECTION, 0);
   }
 
   @Override

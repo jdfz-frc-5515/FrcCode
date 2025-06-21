@@ -24,7 +24,8 @@ import java.awt.geom.Point2D;
 public class Constants {
 
     public static String LIME_LIGHT_ARPIL_TAG_NAME_RIGHT = "limelight-right";
-    public static String LIME_LIGHT_OBJECT_DETECTION = "limelight-right";
+    public static String LIME_LIGHT_ARPIL_TAG_NAME_LEFT = "limelight-left";
+    public static String LIME_LIGHT_OBJECT_DETECTION = "limelight-up";
 
     public static class GlobalConstants {
         public final static float INF = (float) Math.pow(10, 6); // this was defined for the 1690 lib
