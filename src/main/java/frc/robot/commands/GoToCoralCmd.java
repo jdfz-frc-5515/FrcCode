@@ -21,35 +21,36 @@ public class GoToCoralCmd extends Command {
     m_subsystem = subsystem;
     addRequirements(subsystem);
   }
-
   // public Pose2d getTargetPose2d() {
-  //   old method with tx -> 0
-  //   String coralLimelight = "limelight-right";
+  //   String coralLimeLight = Constants.LIME_LIGHT_OBJECT_DETECTION;
   //   double h_l = 0.19199;
   //   double h_3 = 0.25961;
-  //   double ty = LimelightHelpers.getTY(coralLimelight);
-    // double h2 = Math.sqrt(Math.pow(h_l/Math.sin(-Math.toRadians(ty)), 2) - Math.pow(h_l, 2))-0.2;
-  //   System.out.println(h2);
+    // double tx = -Math.toRadians(LimelightHelpers.getTX(coralLimeLight)/180*Math.PI);
+    // double ty = -Math.toRadians(LimelightHelpers.getTY(coralLimeLight));
+  //   double h2 = Math.sqrt(Math.pow(h_l/Math.sin(ty), 2) - Math.pow(h_l, 2));
   //   Pose2d robotPose = m_subsystem.getPose();
   //   double robotAngle = m_subsystem.getPose().getRotation().getRadians();
-  //   double coralX = robotPose.getX() + Math.cos(robotAngle) * (h2+h_3);
-  //   double coralY = robotPose.getY() + Math.sin(robotAngle) * (h2+h_3);
-  //   Pose2d coralPose = new Pose2d(coralX, coralY, robotPose.getRotation());
-  //   return coralPose;
+  //   double aX = h_3*Math.cos(robotAngle) + h2*Math.cos(tx);
+  //   double aY = h2*Math.sin(tx) - h_3*Math.sin(robotAngle);
+  //   Rotation2d coralAngle = new Rotation2d(robotAngle + Math.atan(aY/aX));
+  //   Pose2d coralPose2d = new Pose2d(robotPose.getX()+aX, robotPose.getY()-aY, coralAngle);
+  //   return coralPose2d;
   // }
   public Pose2d getTargetPose2d() {
     String coralLimeLight = Constants.LIME_LIGHT_OBJECT_DETECTION;
-    double h_l = 0.19199;
-    double h_3 = 0.25961;
-    double tx = -Math.toRadians(LimelightHelpers.getTX(coralLimeLight)/180*Math.PI);
-    double ty = -Math.toRadians(LimelightHelpers.getTY(coralLimeLight));
-    double h2 = Math.sqrt(Math.pow(h_l/Math.sin(ty), 2) - Math.pow(h_l, 2));
+    double lh = 0.922; // ll to ground height
+    double la = Math.toRadians(35); // ll angle against the wall
+    double tx = Math.toRadians(LimelightHelpers.getTX(coralLimeLight));
+    double ty = Math.toRadians(LimelightHelpers.getTY(coralLimeLight));
+    double lg1 = Math.tan(Math.PI/2-la+ty) * lh;
+    double lg2 = Math.sqrt(Math.pow(lg1, 2)+Math.pow(lh, 2)) * Math.tan(tx);
+    double da = Math.sqrt(Math.pow(lg1, 2)+Math.pow(lg2, 2))*0.6; // direct distance
     Pose2d robotPose = m_subsystem.getPose();
     double robotAngle = m_subsystem.getPose().getRotation().getRadians();
-    double aX = h_3*Math.cos(robotAngle) + h2*Math.cos(tx);
-    double aY = h2*Math.sin(tx) - h_3*Math.sin(robotAngle);
-    Rotation2d coralAngle = new Rotation2d(robotAngle + Math.atan(aY/aX));
-    Pose2d coralPose2d = new Pose2d(robotPose.getX()+aX, robotPose.getY()-aY, coralAngle);
+    double Cx = robotPose.getX() + Math.cos(robotAngle-Math.PI) * da;
+    double Cy = robotPose.getY() + Math.sin(robotAngle-Math.PI) * da;
+    Rotation2d Cr = new Rotation2d(robotAngle - tx*2);
+    Pose2d coralPose2d = new Pose2d(Cx, Cy, Cr);
     return coralPose2d;
   }
   // Called when the command is initially scheduled.
@@ -67,6 +68,7 @@ public class GoToCoralCmd extends Command {
       flew += 1;
       if (flew >= didFlyTolerance) {
         System.out.println("flewn");
+        m_subsystem.customStopMoving(true);
         // find new coral here
         return;
       }
@@ -75,17 +77,14 @@ public class GoToCoralCmd extends Command {
       flew = 0;
     }
     Pose2d tempCoralPose = getTargetPose2d();
-    SmartDashboard.putNumber("coral angle", tempCoralPose.getRotation().getDegrees());
+    // SmartDashboard.putNumber("coral angle", tempCoralPose.getRotation().getDegrees());
+    // SmartDashboard.putNumber("current angle", m_subsystem.getPose().getRotation().getDegrees());
     double distanceTolerance = 0.5;
     double eucDistance = tempCoralPose.getTranslation().getDistance(currentCoral.getTranslation());
-    SmartDashboard.putNumber("Target Distance", eucDistance);
-    // SmartDashboard.putNumber("euc DIstance", eucDistance);
-    // SmartDashboard.putString("temp coral pose", tempCoralPose.toString());
-    // SmartDashboard.putString("current coral pose", currentCoral.toString());
-    // System.out.println(eucDistance);
+    // SmartDashboard.putNumber("current coral X", currentCoral.getX());
+    // SmartDashboard.putNumber("Target Distance", eucDistance);
     if (eucDistance < distanceTolerance) {
       System.out.println("no change");
-      // currentCoral = tempCoralPose;
       m_subsystem.autoMoveToPose(currentCoral);
       return;
     }
