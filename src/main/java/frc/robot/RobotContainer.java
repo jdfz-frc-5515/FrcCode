@@ -22,7 +22,9 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.MoveToCmd;
+import frc.robot.commands.GIntakeCmd;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.GroundIntakeSubsystem;
 import frc.robot.subsystems.ImprovedCommandXboxController;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
 import frc.robot.commands.GoToCoralCmd;
@@ -42,6 +44,7 @@ public class RobotContainer {
     // private final CommandXboxController joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final GroundIntakeSubsystem gIntakeSubsystem = new GroundIntakeSubsystem();
 
 
     private final StructArrayPublisher<SwerveModuleState> swerveStatePublisher;
@@ -81,6 +84,10 @@ public class RobotContainer {
         
         m_driverController.a().whileTrue(new MoveToCmd(drivetrain, m_driverController));
         m_driverController.b().whileTrue(new GoToCoralCmd(drivetrain));
+        m_driverController.x().whileTrue(new GIntakeCmd(gIntakeSubsystem, false));
+        m_driverController.y().whileTrue(new GIntakeCmd(gIntakeSubsystem, true));
+        // m_driverController.x().whileTrue(new SpinIntake(() -> m_driverController.getRightTriggerAxis()));
+        // m_driverController.y().whileTrue(new StopIntake());
         // reset the field-centric heading on left bumper press
         m_driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
