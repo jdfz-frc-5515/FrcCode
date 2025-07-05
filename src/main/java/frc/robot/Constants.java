@@ -183,4 +183,100 @@ public class Constants {
         public static final double StationDetectionArea = 0.3;
 
     }
+
+    public static final class TurningArm {
+        public static final int motorID = 13;
+        public static final int canCoderID = 14;
+        public static final String canBusName = "rio";
+        public static final double KP = 7;
+        public static final double KI = 1.0;
+        public static final double KD = 0.1;
+        public static final double KV = 0.0; // 0.1
+        public static final double KS = 0.0;
+        public static final double KA = 0.0;
+        public static final double Velocity = 10; // 100.0;
+        public static final double Acceleration = 20; // 600.0;
+        public static final double Jerk = 0.0;
+        public static final double SensorToMechanismRatio = 1.0;
+        public static final double RotorToSensorRatio = 44;
+        // bigger value means arm is more expanded(clockwise)
+        public static final double zeroPos = 0;
+        public static final double basePos = 0.4146980;
+        public static final double l1Pos = 1.039307;//0.407227;
+        public static final double l2Pos = 1.039307;
+        public static final double dodgePos =  1.139307;  // the pos that allows elevator to move
+        public static final double l3Pos = 1.039307;
+        public static final double l4Pos = 0.6;
+        public static final double ball1Pos = 4.3;
+        public static final double ball2Pos = 4.3;
+    }
+
+    public static final class Elevator {
+        public static final int primaryMotorID = 15;
+        public static final int followerMotorID = 16;
+        public static final int canCoderID = 17;
+        public static final String canBusName = "rio";
+        public static class Up {
+            public static final double KP = 5; // 25;  // 5; // 20.0;
+            public static final double KI = 0; //3.2; // 0;
+            public static final double KD = 0.1; //0.2;
+            public static final double KV = 0.5;//1;//0.1;
+            public static final double KS = 0.05;//0.05;
+            public static final double KA = 0;//0.07;
+        }
+        public static class Down {
+            public static final double KP = 5; // 10.0;
+            public static final double KI = 0;
+            public static final double KD = 0.1;
+            public static final double KV = 1;//1;//0.1;
+            public static final double KS = 0;//0.05;
+            public static final double KA = 0;//0.07;
+        }
+
+        public static final double Velocity = 30; // 30;//50;
+        public static final double Acceleration = 30;// 100;// 75;
+        public static final double Jerk = 0;
+        public static final double SensorToMechanismRatio = 1.0;
+        public static final double RotorToSensorRatio = 4.8;//11.33;
+        // smaller value means higher position
+        public static final double zeroPos = 0;
+        public static final double basePos = 0;
+
+        public static final double l1Pos = -4.41582; // -1.75;
+        public static final double l2Pos = -4.41582;
+        public static final double l3Pos = -8.385644;
+        public static final double l4Pos = -14;
+        public static final double ball1Pos = -2.8;
+        public static final double ball2Pos = -7;
+        public static final double upDodgePos = -6.5;
+        public static final double downDodgePos = -3.47;
+    }
+
+
+    public static final class Intake {
+        public static final int motorID = 18;
+        public static final String canBusName = "rio";
+        public static final double KP = 0.5;
+        public static final double KI = 0;
+        public static final double KD = 0;
+        public static final double KS = 0;
+        public static final double KV = 0;
+        public static final double KA = 0;
+        public static final double coralInSpeed = 15;
+        public static final double coralInSlowSpeed = 2;
+        public static final double coralInReverseSpeed = -3;
+        public static final double coralOutSpeed = 30;
+        public static final double BallInSpeed = -40;
+        public static final double BAllOutSpeed = 15;
+    }
+
+    public static final class Candle {
+        public static final int candleID = 19;
+        public static final String canBusName = "rio";
+    }
+
+    public static final class PathPlanner {
+        public static final double constraintsSpeed = 2.;
+        public static final double constraintsAccel = 2.;
+    }
 }
