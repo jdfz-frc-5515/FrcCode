@@ -69,6 +69,22 @@ public class Constants {
 
     }
 
+    public static final class GIntakeConstants {
+        public static final int GIntakeTurnID = 16;
+        public static final int GIntakeDriveID = 15;
+        public static final int GIntakeCCID = 19;
+        public static final double retractCCRotation = 0.0;
+        public static final double expandCCRotation = 1.4;
+        public static final class turnMotorConst {
+            public static final double kP = 4;
+            public static final double kI = 0.0;
+            public static final double kD = 0.0;
+            public static final double kS = 0.0;
+            public static final double kV = 0.0;
+            public static final double kA = 0.0;
+        }
+    }
+
     public static final class AutoConstants {
         // Path Following
         public static final double followPathTranslationkP = 5.; // TODO

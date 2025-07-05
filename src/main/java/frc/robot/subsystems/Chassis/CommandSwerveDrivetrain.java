@@ -50,7 +50,8 @@ import frc.robot.Constants;
 
 import frc.robot.Library.MUtils.SegmentOnTheField;
 import frc.robot.Library.team1706.MathUtils;
-import frc.robot.Library.MUtils;;
+import frc.robot.Library.MUtils;
+import edu.wpi.first.math.MathUtil;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -210,10 +211,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      *                                  unspecified or set to 0 Hz, this is 250 Hz on
      *                                  CAN FD, and 100 Hz on CAN 2.0.
      * @param odometryStandardDeviation The standard deviation for odometry calculation
-     *                                  in the form [x, y, theta]ᵀ, with units in meters
+     *                                  in the form [x, y, theta], with units in meters
      *                                  and radians
      * @param visionStandardDeviation   The standard deviation for vision calculation
-     *                                  in the form [x, y, theta]ᵀ, with units in meters
+     *                                  in the form [x, y, theta], with units in meters
      *                                  and radians
      * @param modules                   Constants for each specific module
      */
@@ -378,8 +379,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public void driveFieldCentric(ImprovedCommandXboxController controller){
         driveFieldCentric(
-            -MathUtils.signedPow(controller.getLeftY(), 1.3) * manual_MaxSpeed,
-            -MathUtils.signedPow(controller.getLeftX(), 1.3) * manual_MaxSpeed,
+            -MathUtils.signedPow(MathUtil.applyDeadband(controller.getLeftY(), 0.1), 1.3) * manual_MaxSpeed,
+            -MathUtils.signedPow(MathUtil.applyDeadband(controller.getLeftX(), 0.1), 1.3) * manual_MaxSpeed,
             -controller.getRightX() * manual_MaxAngularRate
         );
     }
@@ -393,7 +394,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // ImprovedLL.MT2stddevs devs = ImprovedLL.getmt2Devs();
         // ImprovedLL.mt2stdDev stdDev = ImprovedLL.getmt2Dev(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT); 
         if(mt2 == null) {
-            DriverStation.reportWarning(llName + " Diconnected!", false);
+            // DriverStation.reportWarning(llName + " Diconnected!", false);
             return;
         }
         

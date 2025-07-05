@@ -5,6 +5,9 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
+
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -21,21 +24,6 @@ public class GoToCoralCmd extends Command {
     m_subsystem = subsystem;
     addRequirements(subsystem);
   }
-  // public Pose2d getTargetPose2d() {
-  //   String coralLimeLight = Constants.LIME_LIGHT_OBJECT_DETECTION;
-  //   double h_l = 0.19199;
-  //   double h_3 = 0.25961;
-    // double tx = -Math.toRadians(LimelightHelpers.getTX(coralLimeLight)/180*Math.PI);
-    // double ty = -Math.toRadians(LimelightHelpers.getTY(coralLimeLight));
-  //   double h2 = Math.sqrt(Math.pow(h_l/Math.sin(ty), 2) - Math.pow(h_l, 2));
-  //   Pose2d robotPose = m_subsystem.getPose();
-  //   double robotAngle = m_subsystem.getPose().getRotation().getRadians();
-  //   double aX = h_3*Math.cos(robotAngle) + h2*Math.cos(tx);
-  //   double aY = h2*Math.sin(tx) - h_3*Math.sin(robotAngle);
-  //   Rotation2d coralAngle = new Rotation2d(robotAngle + Math.atan(aY/aX));
-  //   Pose2d coralPose2d = new Pose2d(robotPose.getX()+aX, robotPose.getY()-aY, coralAngle);
-  //   return coralPose2d;
-  // }
   public Pose2d getTargetPose2d() {
     String coralLimeLight = Constants.LIME_LIGHT_OBJECT_DETECTION;
     double lh = 0.922; // ll to ground height
