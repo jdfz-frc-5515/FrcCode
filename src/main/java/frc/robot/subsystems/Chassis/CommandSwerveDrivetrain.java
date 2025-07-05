@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -383,6 +384,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         );
     }
 
+    static final double MAX_LL_LATENCY = 100; // 100 ms, this is the maximum latency we accept from the limelight
     public void updateOdometry(String llName){
 
         
@@ -399,16 +401,37 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             && mt2.tagCount > 0 
             && mt2.avgTagDist < 4 
             && Math.hypot(getSpeeds().vxMetersPerSecond, getSpeeds().vyMetersPerSecond) < 2
+            && mt2.latency < MAX_LL_LATENCY // 抛弃高延时
         ) {
+
+            // 以下1,2,3来自DeepSeek
+            // 1. 获取当前 FPGA 时间基准
+            double currentFPGATime = Timer.getFPGATimestamp();
+
+            // 2. 将延迟转换为秒
+            double latencySeconds = mt2.latency / 1000.0;
+
+            // 3. 计算实际捕获时间
+            double captureTime = currentFPGATime - latencySeconds;
+
+            // 旧版：
+            // double captureTime = Utils.fpgaToCurrentTime(mt2.timestampSeconds);
+
+            double data = Constants.PoseEstimatorConstants.tAtoDev.get(mt2.avgTagArea);
             addVisionMeasurement(mt2.pose,
-                Utils.fpgaToCurrentTime(mt2.timestampSeconds),
-                VecBuilder.fill(Constants.PoseEstimatorConstants.tAtoDev.get(mt2.avgTagArea), Constants.PoseEstimatorConstants.tAtoDev.get(mt2.avgTagArea), 100000000)
+                captureTime,
+                VecBuilder.fill(data, data, 100000000)
                 // VecBuilder.fill(0.00001,0.00001, 100000000.)
                 // VecBuilder.fill(devs.xdev, devs.ydev, 100000000.)
             );
 
             SmartDashboard.putNumber("tA", mt2.avgTagArea );
-            SmartDashboard.putNumber("Dev", Constants.PoseEstimatorConstants.tAtoDev.get(mt2.avgTagArea));
+            SmartDashboard.putNumber("Dev", data);
+        }
+        else {
+            if (mt2.latency >= MAX_LL_LATENCY) {
+                DriverStation.reportWarning(llName + " latency too high: " + mt2.latency + " ms", false);
+            }
         }
         
     }
