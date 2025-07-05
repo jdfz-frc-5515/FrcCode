@@ -4,28 +4,21 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Rotation;
-
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.GIntakeConstants;
 
 public class GroundIntakeSubsystem extends SubsystemBase {
   private final TalonFX m_turnMotor = new TalonFX(GIntakeConstants.GIntakeTurnID);
   private final TalonFX m_driveMotor = new TalonFX(GIntakeConstants.GIntakeDriveID);
-  private final CANcoder m_CaNcoder = new CANcoder(GIntakeConstants.GIntakeCCID);
+  private final CANcoder m_CANcoder = new CANcoder(GIntakeConstants.GIntakeCCID);
 
   private TalonFXConfiguration turnMotorConfiguration () {
     TalonFXConfiguration turnMotorConfig = new TalonFXConfiguration();
@@ -68,6 +61,10 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     PositionVoltage request = goToRotationRequestion(GIntakeConstants.retractCCRotation);
     System.out.println("retract request");
     m_turnMotor.setControl(request);
+  }
+
+  public void zeroCC() {
+    m_CANcoder.setPosition(0);
   }
 
   public void startIntake () {

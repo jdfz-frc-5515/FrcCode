@@ -49,7 +49,8 @@ import frc.robot.Constants;
 
 import frc.robot.Library.MUtils.SegmentOnTheField;
 import frc.robot.Library.team1706.MathUtils;
-import frc.robot.Library.MUtils;;
+import frc.robot.Library.MUtils;
+import edu.wpi.first.math.MathUtil;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -377,8 +378,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public void driveFieldCentric(ImprovedCommandXboxController controller){
         driveFieldCentric(
-            -MathUtils.signedPow(controller.getLeftY(), 1.3) * manual_MaxSpeed,
-            -MathUtils.signedPow(controller.getLeftX(), 1.3) * manual_MaxSpeed,
+            -MathUtils.signedPow(MathUtil.applyDeadband(controller.getLeftY(), 0.1), 1.3) * manual_MaxSpeed,
+            -MathUtils.signedPow(MathUtil.applyDeadband(controller.getLeftX(), 0.1), 1.3) * manual_MaxSpeed,
             -controller.getRightX() * manual_MaxAngularRate
         );
     }
@@ -391,7 +392,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // ImprovedLL.MT2stddevs devs = ImprovedLL.getmt2Devs();
         // ImprovedLL.mt2stdDev stdDev = ImprovedLL.getmt2Dev(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT); 
         if(mt2 == null) {
-            DriverStation.reportWarning(llName + " Diconnected!", false);
+            // DriverStation.reportWarning(llName + " Diconnected!", false);
             return;
         }
         

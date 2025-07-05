@@ -73,8 +73,8 @@ public class Constants {
         public static final int GIntakeTurnID = 16;
         public static final int GIntakeDriveID = 15;
         public static final int GIntakeCCID = 19;
-        public static final double retractCCRotation = -1.4;
-        public static final double expandCCRotation = 0.0;
+        public static final double retractCCRotation = 0.0;
+        public static final double expandCCRotation = 1.4;
         public static final class turnMotorConst {
             public static final double kP = 4;
             public static final double kI = 0.0;
