@@ -51,7 +51,7 @@ public class GIntakeCmd extends Command {
             g_subsystem.reverseIntake();
             g_subsystem.retractGIntake();
             g_subsystem.stopIntake();
-            g_subsystem.zeroCC();
+            // g_subsystem.zeroCC();
             System.out.println("retract");
         }
     }

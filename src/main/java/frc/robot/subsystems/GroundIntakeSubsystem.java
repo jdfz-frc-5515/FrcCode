@@ -68,7 +68,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     }
 
     public void startIntake() {
-        m_driveMotor.set(0.3);
+        m_driveMotor.set(0.5);
     }
 
     public void stopIntake() {
@@ -76,7 +76,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     }
 
     public void reverseIntake() {
-        m_driveMotor.set(-0.1);
+        m_driveMotor.set(-0.3);
     }
 
     @Override

@@ -82,10 +82,15 @@ public class RobotContainer {
         // }));
 
         
-        m_driverController.a().whileTrue(new MoveToCmd(drivetrain, m_driverController));
+        // m_driverController.a().whileTrue(new MoveToCmd(drivetrain, m_driverController));
         m_driverController.b().whileTrue(new GoToCoralCmd(drivetrain));
         m_driverController.x().whileTrue(new GIntakeCmd(gIntakeSubsystem, false));
         m_driverController.y().whileTrue(new GIntakeCmd(gIntakeSubsystem, true));
+
+        m_driverController.a().onTrue(new InstantCommand(() -> {
+            System.out.println("00000000000000000000000000000000000");
+            gIntakeSubsystem.zeroCC();
+        }));
         // m_driverController.x().whileTrue(new SpinIntake(() -> m_driverController.getRightTriggerAxis()));
         // m_driverController.y().whileTrue(new StopIntake());
         // reset the field-centric heading on left bumper press
