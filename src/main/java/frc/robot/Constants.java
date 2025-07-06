@@ -16,10 +16,17 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 // import frc.robot.Library.MUtils.SegmentOnTheField;
 import frc.robot.Library.MUtils.SegmentOnTheField;
 
 import java.awt.geom.Point2D;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Constants {
     public static String LIME_LIGHT_ARPIL_TAG_NAME_RIGHT = "limelight-right";
@@ -75,6 +82,11 @@ public class Constants {
         public static final int GIntakeCCID = 19;
         public static final double retractCCRotation = 0.0;
         public static final double expandCCRotation = 1.4;
+
+        public static final double Velocity = 30; // 30;//50;
+        public static final double Acceleration = 30;// 100;// 75;
+        public static final double Jerk = 0;
+        
         public static final class turnMotorConst {
             public static final double kP = 4;
             public static final double kI = 0.0;
@@ -278,5 +290,73 @@ public class Constants {
     public static final class PathPlanner {
         public static final double constraintsSpeed = 2.;
         public static final double constraintsAccel = 2.;
+    }
+
+    public final class FieldInfo {
+        
+        // 常量Map定义
+        public static final Map<Long, APInfo> AP_MAP;
+        public static final long[] blueApIds = {
+            17, 18, 19, 20, 21, 22,
+        };
+        public static final long[] redApIds = {
+            6, 7, 8, 9, 10, 11,
+        };
+
+        public static double coralBranchOffset = 0.164338;
+        public static double coralVerticalOffset = -0.55;
+        
+        // 接入点信息类
+        public static class APInfo {
+            private final int id;
+            private final double x;
+            private final double y;
+            private final int theta;    // 这个是机器对着它的角度，机器的角度
+            private final int theta2;   // 这个是AprilTag所在边的角度
+            private final int algea;    // 0和1代表Algea在上层还是下层
+            private final List<Integer> sourceList;
+
+            public APInfo(int id, double x, double y, int theta, int theta2, int algea, List<Integer> sourceList) {
+                this.id = id;
+                this.x = x;
+                this.y = y;
+                this.theta = theta;
+                this.theta2 = theta2;
+                this.algea = algea;
+                this.sourceList = sourceList;
+            }
+
+            // Getter方法
+            public int getId() { return id; }
+            public double getX() { return x; }
+            public double getY() { return y; }
+            public int getTheta() { return theta; }
+            public int getTheta2() { return theta2; }
+            public int getAlgea() { return algea; }
+            public List<Integer> getSourceList() { return sourceList; }
+        }
+
+        // 静态初始化常量Map
+        static {
+            Map<Long, APInfo> map = new HashMap<>();
+            
+            map.put(17l, new APInfo(17, 4.073906, 3.306318, 60, 330, 0, Arrays.asList(12)));
+            map.put(18l, new APInfo(18, 3.6576, 4.0259, 0, 270, 1, Arrays.asList(12, 13)));
+            map.put(19l, new APInfo(19, 4.073906, 4.745482, -60, 210, 0, Arrays.asList(13)));
+            map.put(20l, new APInfo(20, 4.90474, 4.7475482, -120, 150, 1, Arrays.asList(13)));
+            map.put(21l, new APInfo(21, 5.321046, 4.0259, 180, 90, 0, Arrays.asList(12, 13)));
+            map.put(22l, new APInfo(22, 4.90474, 3.306318, 120, 30, 1, Arrays.asList(12)));
+            map.put(6l, new APInfo(6, 13.474446, 3.306318, 120, 30, 0, Arrays.asList(1)));
+            map.put(7l, new APInfo(7, 13.890498, 4.0259, 180, 90, 1, Arrays.asList(1, 2)));
+            map.put(8l, new APInfo(8, 13.474446, 4.745482, -120, 150, 0, Arrays.asList(2)));
+            map.put(9l, new APInfo(9, 12.643358, 4.745482, -60, 210, 1, Arrays.asList(2)));
+            map.put(10l, new APInfo(10, 12.227306, 4.0259, 0, 270, 0, Arrays.asList(1, 2)));
+            map.put(11l, new APInfo(11, 12.643358, 3.306318, 60, 330, 1, Arrays.asList(1)));
+            
+            AP_MAP = Collections.unmodifiableMap(map);
+        }
+
+        // 私有构造防止实例化
+        private FieldInfo() {}
     }
 }

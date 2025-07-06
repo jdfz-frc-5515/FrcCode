@@ -79,9 +79,9 @@ public class TurningArm2025 extends SubsystemBase {
     int runingCount = 0;
     @Override
     public void periodic() {
-        runingCount++;
-        // This method will be called once per scheduler run
-        SmartDashboard.putNumber("TurningArm run", runingCount);
+        // runingCount++;
+        // // This method will be called once per scheduler run
+        // SmartDashboard.putNumber("TurningArm run", runingCount);
         // SmartDashboard.putBoolean("Elevator Top", elevatorTop());
         updateState();
     }

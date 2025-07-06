@@ -45,7 +45,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 import frc.robot.subsystems.ImprovedCommandXboxController;
-import frc.robot.subsystems.Vision.LimelightHelpers;
+import frc.robot.LimelightHelpers;
 import frc.robot.Constants;
 
 import frc.robot.Library.MUtils.SegmentOnTheField;

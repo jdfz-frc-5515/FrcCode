@@ -16,6 +16,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -266,6 +268,27 @@ public class ControlPadHelper {
 
     public static void publishRobotPos(Pose2d pos) {
         robotPosTopic.publishDoubleArray(new double[]{pos.getTranslation().getX(), pos.getTranslation().getY(), pos.getRotation().getDegrees()});
+    }
+
+    public static void setControlPadInfoData(long aprilTagId, long level, long branch) {
+        if (aprilTagId < 0) {
+            if (controlPadInfo.data.aprilTagId >= 0) {
+                aprilTagId = controlPadInfo.data.aprilTagId ;
+            }
+            else {
+                aprilTagId = DriverStation.getAlliance().get().equals(Alliance.Blue) ? 17 : 6;
+            }
+        }
+        controlPadInfo.data.aprilTagId = aprilTagId;
+
+        if (level >= 0) {
+            controlPadInfo.data.level = level;
+        }
+        if (branch >= -1) {
+            controlPadInfo.data.branch = branch;
+        }
+     
+        publishControlPadInfoRecall();
     }
 
     private static void publishControlPadInfoRecall() {

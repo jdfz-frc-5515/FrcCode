@@ -77,7 +77,7 @@ public class Elevator2025 extends SubsystemBase {
     private final TalonFX m_primaryMotor = new TalonFX(Constants.Elevator.primaryMotorID, Constants.Elevator.canBusName);
     private final TalonFX m_followerMotor = new TalonFX(Constants.Elevator.followerMotorID, Constants.Elevator.canBusName);
     private final CANcoder m_canCoder = new CANcoder(Constants.Elevator.canCoderID, Constants.Elevator.canBusName);
-    public MotionMagicVoltage motionMagicVoltage1 = new MotionMagicVoltage(0);
+    private MotionMagicVoltage motionMagicVoltage1 = new MotionMagicVoltage(0);
     private final VelocityVoltage driveVelocity = new VelocityVoltage(0);
     // public MotionMagicVoltage motionMagicVoltage2 = new MotionMagicVoltage(1);
     private final DutyCycleOut driveDutyCycle = new DutyCycleOut(0);

@@ -1,29 +1,28 @@
 package frc.robot.commands;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
-import edu.wpi.first.math.MathUtil;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.ControlPadHelper;
 import frc.robot.Robot;
 import frc.robot.ControlPadHelper.ControlPadInfo;
+import frc.robot.GlobalConfig;
+import frc.robot.LimelightHelpers;
+import frc.robot.subsystems.GroundIntakeSubsystem;
 import frc.robot.subsystems.Candle2025.Candle2025;
+import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator2025.Elevator2025;
 import frc.robot.subsystems.Elevator2025.Elevator2025.EV_STATE;
 import frc.robot.subsystems.Intake2025.Intake2025;
@@ -103,9 +102,11 @@ public class UpperSystem2025Cmd extends Command {
     private STATE curState = STATE.ZERO;
     private RUNNING_STATE curRunningState = RUNNING_STATE.DONE;
 
+    private CommandSwerveDrivetrain m_chassis;
     private TurningArm2025 m_turningArm;
     private Elevator2025 m_elevator;
     private Intake2025 m_intake;
+    private GroundIntakeSubsystem m_groundIntake;
     private Candle2025 m_candle;
     // private MoveTo2025 m_moveTo;
     // TODO: additional subsystems: sensor for checking if we are carrying Coral;
@@ -117,8 +118,11 @@ public class UpperSystem2025Cmd extends Command {
     private Trigger resetCanCodePositionBtn;
     private Trigger resetToZeroPosBtn;
     // private Trigger switchCoralnBallBtn;
-    private Trigger aimCoralBtn;
+    private Trigger aimLeftCoralBtn;
+    private Trigger aimRigthCoralBtn;
+    private Trigger aimGroundCoralBtn;
     private Trigger intakeTrigger;
+    private Trigger groundIntakeSwitchTrigger;
 
     private Trigger elevatorTuningUpTrigger;
     private Trigger elevatorTuningDownTrigger;
@@ -133,21 +137,18 @@ public class UpperSystem2025Cmd extends Command {
     private boolean isCarryingCoralFromDebug = false;
     private boolean isCarryingBallFromDebug = false;
 
+    private Command autoMoveCmd = null;
+
     ActionRunner m_actionRunner = null;
 
     public UpperSystem2025Cmd(
-            TurningArm2025 turningArm, Elevator2025 elev, Intake2025 intake, Candle2025 candle,/*  MoveTo2025 moveto,*/
-            Trigger resetToZeroPosBtn, Trigger switchCnB, Trigger aimCoral, Trigger intakeTrigger, Trigger _catchBall, Trigger _toggleBall,
-            Trigger test_arm, Trigger test_zero) {
+            CommandSwerveDrivetrain chassis,
+            TurningArm2025 turningArm, Elevator2025 elev, Intake2025 intake, GroundIntakeSubsystem groundIntake, Candle2025 candle/*  MoveTo2025 moveto,*/
+        ) {
 
         inst = this;
 
-        // for debug begin
-        // switchCnB = null;
-        test_arm = null;
-        test_zero = null;
-        // for debug end
-
+        m_chassis = chassis; // 底盘不用addRequirements，这里只是引用数据，控制
 
         this.m_turningArm = turningArm;
         addRequirements(m_turningArm);
@@ -158,6 +159,9 @@ public class UpperSystem2025Cmd extends Command {
         this.m_intake = intake;
         addRequirements(m_intake);
 
+        this.m_groundIntake = groundIntake;
+        addRequirements(m_groundIntake);
+
         this.m_candle = candle;
         addRequirements(m_candle);
 
@@ -166,104 +170,152 @@ public class UpperSystem2025Cmd extends Command {
 
         schedule();
 
-        if (test_arm != null) {
-            this.test_armBtn = test_arm;
-            this.test_armBtn.onTrue(new InstantCommand(() -> {
-                m_elevator.setState(EV_STATE.L4);
-                /// m_turningArm.setState(TA_STATE.BASE);
-            }));
-        }
-
-        if (test_zero != null) {
-            this.test_zeroBtn = test_zero;
-            this.test_zeroBtn.onTrue(new InstantCommand(() -> {
-                m_elevator.setState(EV_STATE.ZERO);
-                /// m_turningArm.setState(TA_STATE.ZERO);
-            }));
-        }
-
-        if (resetToZeroPosBtn != null) {
-            this.resetToZeroPosBtn = resetToZeroPosBtn;
-            this.resetToZeroPosBtn.onTrue(new InstantCommand(() -> {
-                setState(STATE.ZERO);
-            }));
-        }
-
-        // if (switchCnB != null) {
-        //     this.switchCoralnBallBtn = switchCnB;
-        //     this.switchCoralnBallBtn.onTrue(new InstantCommand(() -> {
-        //         if (curState == STATE.READY_FOR_LOAD_CORAL) {
-        //             setState(STATE.READY_FOR_LOAD_BALL);
-        //         } else if (curState == STATE.READY_FOR_LOAD_BALL) {
-        //             setState(STATE.READY_FOR_LOAD_CORAL);
-        //         }
-        //     }));
-        // }
-
-        if (aimCoral != null) {
-            // this.aimCoralBtn = aimCoral;
-            // this.aimCoralBtn.onTrue(new InstantCommand(() -> {
-            //     ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
-            //     if (info == null) {
-            //         return;
-            //     }
-
-            //     Pose2d targetPos = Constants.aimPoses.get(info.aprilTagId);
-
-            //     if (targetPos == null) {
-            //         System.out.println("Aim2025Cmd init targetPos is null");
-            //         return;
-            //     }
-            //     SmartDashboard.putNumber("Aim2025Cmd", info.aprilTagId);
-            //     SmartDashboard.putString("Aim2025Cmd target", targetPos.toString());
-        
-            //     // StateController.getInstance().useVisionOdometry = false;
-            //     m_moveTo.init(targetPos);
-            // })).whileFalse(new InstantCommand(() -> {
-            //     this.m_moveTo.cancelAimMoveCmd();
-            // }));
-        }
-
-        if (intakeTrigger != null) {
-            this.intakeTrigger = intakeTrigger;
-            this.intakeTrigger.onTrue(new InstantCommand(() -> {
-                if (curState == STATE.BALL1 || curState == STATE.BALL2) {
-                    this.m_intake.toggleBallIntake();
-                }
-                else {
-                    this.m_intake.toggleCoralIntake();
-                }
-                
-            }));
-        }
-
-        if (_catchBall != null) {
-            this.catchBallTrigger = _catchBall;
-            this.catchBallTrigger.whileTrue(new InstantCommand(()-> {
-                if ((curState == STATE.BALL1 || curState == STATE.BALL2) && curRunningState == RUNNING_STATE.DONE) {
-                    m_elevator.setOffset(-1.5);
-                    m_intake.toggleBallIntake(true);                    
-                }
-
-            })).onFalse(new InstantCommand(() -> {
-                m_elevator.clearOffset();
-                m_intake.toggleBallIntake(false);
-            }));
-        }
-
-        if (_toggleBall != null) {
-            this.toggleBallTrigger = _toggleBall;
-            this.toggleBallTrigger.onTrue(new InstantCommand(() -> {
-                if (curState == STATE.BALL1 || curState == STATE.BALL2) {
-                    setState(STATE.READY_FOR_LOAD_CORAL);
-                }
-                else if (curState == STATE.L3 || curState == STATE.L4) {
-                    setState(STATE.L1);
-                }
-            }));
-        }
-
         initDebug();
+    }
+
+    public void setResetToZeroPosTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (this.resetToZeroPosBtn != null) {
+            DriverStation.reportError("setResetToZeroPosTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+
+        this.resetToZeroPosBtn = t;
+        this.resetToZeroPosBtn.onTrue(new InstantCommand(() -> {
+            setState(STATE.ZERO);
+        }));
+    }
+
+    public void setAimLeftCoralTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (this.aimLeftCoralBtn != null) {
+            DriverStation.reportError("setAimLeftCoralTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        this.aimLeftCoralBtn = t;
+        
+
+        this.aimLeftCoralBtn.whileTrue(new SequentialCommandGroup(
+            new InstantCommand(() -> {
+                System.out.println("Aim Left Coral");
+                ControlPadHelper.setControlPadInfoData(-1, -1, -1);
+            }),
+            new ParallelCommandGroup(
+                getMoveToCoralCmd()
+                // TODO: 检查机器和目标的距离，进入一定距离以后升起电梯
+            )
+        ));
+    }
+
+    public void setAimRightCoralTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (this.aimRigthCoralBtn != null) {
+            DriverStation.reportError("setAimRightCoralTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        this.aimRigthCoralBtn = t;
+        this.aimRigthCoralBtn.whileTrue(new SequentialCommandGroup(
+            new InstantCommand(() -> {
+                System.out.println("Aim Left Coral");
+                ControlPadHelper.setControlPadInfoData(-1, -1, 1);
+            }),
+            new ParallelCommandGroup(
+                getMoveToCoralCmd()
+                // TODO: 检查机器和目标的距离，进入一定距离以后升起电梯
+            )
+        ));
+    }
+
+    public void setAimGroundCoralTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (this.aimGroundCoralBtn != null) {
+            DriverStation.reportError("setAimGroundCoralTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        this.aimGroundCoralBtn = t;
+        this.aimGroundCoralBtn.onTrue(new InstantCommand(() -> {
+            System.out.println("Aim Ground Coral");
+        }));
+    }
+
+    public void setIntakeTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (intakeTrigger != null) {
+            DriverStation.reportError("setIntakeTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        intakeTrigger = t;
+        intakeTrigger.onTrue(new InstantCommand(() -> {
+            if (curState == STATE.BALL1 || curState == STATE.BALL2) {
+                m_intake.toggleBallIntake();
+            }
+            else {
+                m_intake.toggleCoralIntake();
+            }
+        }));
+    }
+
+    public void setCatchBallTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (catchBallTrigger != null) {
+            DriverStation.reportError("setCatchBallTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        catchBallTrigger = t;
+        catchBallTrigger.onTrue(new InstantCommand(() -> {
+            if (curState == STATE.BALL1 || curState == STATE.BALL2) {
+                m_elevator.setOffset(-1.5);
+                m_intake.toggleBallIntake(true);
+            }
+        })).onFalse(new InstantCommand(() -> {
+            m_elevator.clearOffset();
+            m_intake.toggleBallIntake(false);
+        }));
+    }
+
+    public void setToggleBallTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (toggleBallTrigger != null) {
+            DriverStation.reportError("setToggleBallTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        toggleBallTrigger = t;
+        toggleBallTrigger.onTrue(new InstantCommand(() -> {
+            if (curState == STATE.BALL1 || curState == STATE.BALL2) {
+                setState(STATE.READY_FOR_LOAD_CORAL);
+            }
+            else if (curState == STATE.L3 || curState == STATE.L4) {
+                setState(STATE.L1);
+            }
+        }));
+    }
+
+    public void setGroundIntakeSwitchTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (groundIntakeSwitchTrigger != null) {
+            DriverStation.reportError("setGroundIntakeSwitchTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        groundIntakeSwitchTrigger = t;
+        groundIntakeSwitchTrigger.onTrue(new InstantCommand(() -> {
+            m_groundIntake.toggle();
+        }));
     }
 
     public void setElevatorTuningUpTrigger(Trigger t) {
@@ -275,6 +327,7 @@ public class UpperSystem2025Cmd extends Command {
             m_elevator.toggleTuningUp();
         }));
     }
+
 
     public void setElevatorTuningDownTrigger(Trigger t) {
         if (t == null || elevatorTuningDownTrigger != null) {
@@ -315,9 +368,10 @@ public class UpperSystem2025Cmd extends Command {
             this.resetCanCodePositionBtn = t;
             this.resetCanCodePositionBtn.onTrue(new InstantCommand(() -> {
                 if (Robot.inst.isTestEnabled()) {
-                    System.out.println("reset elevator and turning arm's cancoder position to 0");
+                    System.out.println("reset elevator, ground intake and turning arm's cancoder position to 0");
                     m_elevator.resetCancodePosition();
                     m_turningArm.resetCancodePosition();
+                    m_groundIntake.resetCancodePosition();
                 }
                 else {
                     System.out.println("No No No, only working at TEST mode! reset elevator and turning arm's cancoder position to 0");
@@ -336,7 +390,8 @@ public class UpperSystem2025Cmd extends Command {
         lockElevatorTrigger = t;
         lockElevatorTrigger.onTrue(new InstantCommand(() -> {
             m_elevator.lockMotor();
-            m_turningArm.unlockMotor();
+            m_turningArm.lockMotor();
+            m_groundIntake.lockMotor();
         }));
     }
 
@@ -348,6 +403,7 @@ public class UpperSystem2025Cmd extends Command {
         unlockElevatorTrigger.onTrue(new InstantCommand(() -> {
             m_elevator.unlockMotor();
             m_turningArm.unlockMotor();
+            m_groundIntake.unlockMotor();
         }));
     }
 
@@ -403,6 +459,7 @@ public class UpperSystem2025Cmd extends Command {
             m_elevator.init();
             m_turningArm.init(); 
             m_intake.init();
+            m_groundIntake.init();
             m_candle.init();
             setState(STATE.READY_FOR_LOAD_CORAL);
         }
@@ -426,6 +483,7 @@ public class UpperSystem2025Cmd extends Command {
         System.out.println("UpperSystemCmd END ======>" + interrupted);
         m_elevator.onDisable();
         m_turningArm.onDisable();
+        m_groundIntake.onDisable();
         m_candle.onDisable();
     }
     
@@ -931,6 +989,109 @@ public class UpperSystem2025Cmd extends Command {
 
     public void setStateBall2() {
         setState(STATE.BALL2);
+    }
+
+    public long getNearestSeenCoralAprilTag1() {
+        LimelightHelpers.LimelightResults left = LimelightHelpers.getLatestResults(Constants.LIME_LIGHT_ARPIL_TAG_NAME_LEFT);
+        LimelightHelpers.LimelightResults right = LimelightHelpers.getLatestResults(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT);
+
+        Map<Long, LimelightHelpers.LimelightTarget_Fiducial> map = new HashMap<>();
+        for (int i = 0; i < left.targets_Fiducials.length; ++i) {
+            LimelightHelpers.LimelightTarget_Fiducial data = left.targets_Fiducials[i];
+            long id = Math.round(data.fiducialID);
+            if (!map.containsKey(id)) {
+                map.put(id, data);
+            }
+        }
+        for (int i = 0; i < right.targets_Fiducials.length; ++i) {
+            LimelightHelpers.LimelightTarget_Fiducial data = right.targets_Fiducials[i];
+            long id = Math.round(data.fiducialID);
+            if (!map.containsKey(id)) {
+                map.put(id, data);
+            }
+        }
+
+        if (map.isEmpty()) {
+            System.out.println("No seen coral AprilTag");
+            return -1;
+        }
+        LimelightHelpers.LimelightTarget_Fiducial[] list = (LimelightHelpers.LimelightTarget_Fiducial[])map.values().toArray();
+
+        Pose2d robotPos= m_chassis.getPose();
+        long minDistanceApId = -1;
+        double minDistance = Double.MAX_VALUE;
+        for (LimelightHelpers.LimelightTarget_Fiducial data : list) {
+            long apId = Math.round(data.fiducialID);
+            Constants.FieldInfo.APInfo ap = Constants.FieldInfo.AP_MAP.get(apId);
+            Pose2d apPose = new Pose2d(ap.getX(), ap.getY(), new Rotation2d(Units.degreesToRadians(ap.getTheta())));
+
+            double distance = robotPos.getTranslation().getDistance(apPose.getTranslation());
+            if (distance < minDistance) {
+                minDistanceApId = (long)ap.getId();
+            }
+        }
+
+        return minDistanceApId;
+    }
+
+
+
+    public long getNearestSeenCoralAprilTag() {
+        Constants.FieldInfo.APInfo[] apList = MiscUtils.getApInfoByAlliance();
+        if (apList.length == 0) {
+            return -1;
+        }
+        Pose2d robotPos= m_chassis.getPose();
+        long minDistanceApId = -1;
+        double minDistance = Double.MAX_VALUE;
+        for (Constants.FieldInfo.APInfo ap : apList) {
+            Pose2d apPose = new Pose2d(ap.getX(), ap.getY(), new Rotation2d(Units.degreesToRadians(ap.getTheta())));
+
+            double distance = robotPos.getTranslation().getDistance(apPose.getTranslation());
+            if (distance < minDistance) {
+                minDistanceApId = (long)ap.getId();
+            }
+        }
+
+        return minDistanceApId;
+    }
+
+    private Command getMoveToCoralCmd() {
+        long targetApId = getNearestSeenCoralAprilTag();
+        if (targetApId == -1) {
+            return new InstantCommand(() -> {
+                System.out.println("1111");
+            });
+        }
+        ControlPadHelper.setControlPadInfoData(targetApId, -10l, -10l);
+        ControlPadHelper.ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
+        if (info == null) {
+            return new InstantCommand(() -> {
+                System.out.println("2222");
+            });
+        }
+        long apId = info.aprilTagId;
+        Pose2d targetPos;
+        if (info.branch == 0) {
+            targetPos = MiscUtils.getCoralBallPos(apId);
+        }
+        else {
+            targetPos = MiscUtils.getCoralShooterPos(apId, info.branch == -1);
+        }
+
+        if (autoMoveCmd != null) {
+            autoMoveCmd.cancel();
+            autoMoveCmd = null;
+        }
+        return m_chassis.autoMoveToPoseCommand(targetPos);
+    }
+
+    private void moveToGroundCoral() {
+        if (autoMoveCmd != null) {
+            autoMoveCmd.cancel();
+            autoMoveCmd = null;
+        }
+        autoMoveCmd = new GoToCoralCmd(m_chassis);
     }
 
 
