@@ -110,21 +110,19 @@ public class RobotContainer {
 
         UpperSystem2025Cmd cmd = UpperSystem2025Cmd.inst;
 
-        Trigger zeroUpperPosBtn = m_driverController.b();
+        
+        Trigger zeroUpperPosBtn = m_driverController.rightStick();
         Trigger aimGroundCoralBtn = m_driverController.a();
         Trigger aimLeftCoralBtn = m_driverController.leftBumper();
         Trigger aimRightCoralBtn = m_driverController.rightBumper();
         Trigger intakeBtn = m_driverController.y();        // 启动intake,从上面漏斗intake
         Trigger groundIntakeSwitchBtn = m_driverController.x(); // 启动/收起 地吸
-        Trigger catchBallBtn = null;    // 抓球模式下，启动抓球功能
-        Trigger toggleBallBtn = null;   // 切换抓球还是射珊瑚
-
+        Trigger catchBallBtn = m_driverController.b();    // 抓球模式下，启动抓球功能
         cmd.setResetToZeroPosTrigger(zeroUpperPosBtn);
         cmd.setAimLeftCoralTrigger(aimLeftCoralBtn);
         cmd.setAimRightCoralTrigger(aimRightCoralBtn);
         cmd.setIntakeTrigger(intakeBtn);
         cmd.setCatchBallTrigger(catchBallBtn);
-        cmd.setToggleBallTrigger(toggleBallBtn);
         cmd.setGroundIntakeSwitchTrigger(groundIntakeSwitchBtn);
 
         aimGroundCoralBtn.whileTrue(new GoToCoralCmd(drivetrain));
@@ -145,23 +143,18 @@ public class RobotContainer {
         m_driverController.povLeft().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 1));
         m_driverController.povDown().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 2));
         m_driverController.povRight().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 3));
+
+        m_driverController.leftTrigger().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 4));
+        m_driverController.rightTrigger().whileTrue(new fineTuneDrivetrainCmd(drivetrain, 5));
         // m_driverController.povUp() 
     }
 
     private void configureDriver2Bindings() {
-        m_driverController2.a().onTrue(new InstantCommand(() -> {
-            ControlPadHelper.setControlPadInfoData(-10, 1, -10);
-        }));
-        m_driverController2.x().onTrue(new InstantCommand(() -> {
-            ControlPadHelper.setControlPadInfoData(-10, 2, -10);
-        }));
-        m_driverController2.y().onTrue(new InstantCommand(() -> {
-            ControlPadHelper.setControlPadInfoData(-10, 3, -10);
-        }));
-
-        // m_driverController2.b().onTrue(new InstantCommand(() -> {
-        //     ControlPadHelper.setControlPadInfoData(-10, 2, -10);
-        // }));
+        UpperSystem2025Cmd cmd = UpperSystem2025Cmd.inst;
+        cmd.setLnTrigger(m_driverController2.a(), m_driverController2.b(), m_driverController2.x(), m_driverController2.y());
+        cmd.setSwitchIntakeSourceTrigger(m_driverController2.rightBumper());
+        cmd.setSwitchCoralAndBallTrigger(m_driverController2.leftBumper());
+        cmd.setGroundIntakeOutTakeTrigger(m_driverController2.rightTrigger());
     }
 
     private void configureDriver3Bindings() {

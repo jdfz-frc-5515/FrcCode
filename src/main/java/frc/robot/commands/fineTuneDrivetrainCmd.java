@@ -31,23 +31,35 @@ public class fineTuneDrivetrainCmd extends Command {
     public void execute() {
         // double x_speed = (direction == 1 || direction == 3) ? 0.5 : 0;
         // double y_speed = (direction == 0 || direction == 2) ? 0.5 : 0;
-        double x_speed = 0;
-        double y_speed = 0;
-        if (direction == 0) {
-            x_speed = 0.5;
+
+        if (direction < 4) {
+            double x_speed = 0;
+            double y_speed = 0;
+            if (direction == 0) {
+                x_speed = 0.5;
+            }
+            if (direction == 2) {
+                x_speed = -0.5;
+            }
+            if (direction == 1) {
+                y_speed = 0.5;
+            }
+            if (direction == 3) {
+                y_speed = -0.5;
+            }
+            SmartDashboard.putBoolean("min moving", true);
+            m_subsystem.customMoveWithSpeed(x_speed, y_speed);
+            SmartDashboard.putBoolean("min moving", false);
         }
-        if (direction == 2) {
-            x_speed = -0.5;
+        else if (direction == 4) {
+            // 逆时针旋转
+            m_subsystem.customRotate(0.5);
         }
-        if (direction == 1) {
-            y_speed = 0.5;
+        else if (direction == 5) {
+            // 顺时针旋转
+            m_subsystem.customRotate(-0.5);
         }
-        if (direction == 3) {
-            y_speed = -0.5;
-        }
-        SmartDashboard.putBoolean("min moving", true);
-        m_subsystem.customMoveWithSpeed(x_speed, y_speed);
-        SmartDashboard.putBoolean("min moving", false);
+
     }
 
     // Called once the command ends or is interrupted.

@@ -80,12 +80,16 @@ public class Constants {
         public static final int GIntakeTurnID = 16;
         public static final int GIntakeDriveID = 15;
         public static final int GIntakeCCID = 19;
+        public static final String canBusName = "rio";
         public static final double retractCCRotation = 0.0;
         public static final double expandCCRotation = 1.4;
 
         public static final double Velocity = 20; // 30;//50;
         public static final double Acceleration = 40;// 100;// 75;
         public static final double Jerk = 120;
+
+        public static final double SensorToMechanismRatio = 1.0;
+        public static final double RotorToSensorRatio = 16;
         
         public static final class turnMotorConst {
             public static final double kP = 20;

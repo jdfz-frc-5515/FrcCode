@@ -43,9 +43,9 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         DONE,
     }
 
-    private final TalonFX m_turnMotor = new TalonFX(GIntakeConstants.GIntakeTurnID);
-    private final TalonFX m_driveMotor = new TalonFX(GIntakeConstants.GIntakeDriveID);
-    private final CANcoder m_CANcoder = new CANcoder(GIntakeConstants.GIntakeCCID);
+    private final TalonFX m_turnMotor = new TalonFX(GIntakeConstants.GIntakeTurnID, GIntakeConstants.canBusName);
+    private final TalonFX m_driveMotor = new TalonFX(GIntakeConstants.GIntakeDriveID, GIntakeConstants.canBusName);
+    private final CANcoder m_CANcoder = new CANcoder(GIntakeConstants.GIntakeCCID, GIntakeConstants.canBusName);
     private MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
     private final double NONE_POS = -9999;
@@ -66,8 +66,8 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         turnMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
         turnMotorConfig.MotorOutput.NeutralMode = lockMotor ? NeutralModeValue.Brake : NeutralModeValue.Coast;
 
-        turnMotorConfig.Feedback.SensorToMechanismRatio = 1;
-        turnMotorConfig.Feedback.RotorToSensorRatio = 16;
+        turnMotorConfig.Feedback.SensorToMechanismRatio = GIntakeConstants.SensorToMechanismRatio;
+        turnMotorConfig.Feedback.RotorToSensorRatio = GIntakeConstants.RotorToSensorRatio;
 
         turnMotorConfig.MotionMagic.MotionMagicCruiseVelocity = Constants.GIntakeConstants.Velocity;
         turnMotorConfig.MotionMagic.MotionMagicAcceleration = Constants.GIntakeConstants.Acceleration;
