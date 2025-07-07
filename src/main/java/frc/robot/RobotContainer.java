@@ -110,12 +110,12 @@ public class RobotContainer {
 
         UpperSystem2025Cmd cmd = UpperSystem2025Cmd.inst;
 
-        Trigger zeroUpperPosBtn = null;
-        Trigger aimGroundCoralBtn = m_driverController2.a();
-        Trigger aimLeftCoralBtn = m_driverController2.leftBumper();
-        Trigger aimRightCoralBtn = m_driverController2.rightBumper();
-        Trigger intakeBtn = m_driverController2.y();        // 启动intake,从上面漏斗intake
-        Trigger groundIntakeSwitchBtn = m_driverController2.x(); // 启动/收起 地吸
+        Trigger zeroUpperPosBtn = m_driverController.b();
+        Trigger aimGroundCoralBtn = m_driverController.a();
+        Trigger aimLeftCoralBtn = m_driverController.leftBumper();
+        Trigger aimRightCoralBtn = m_driverController.rightBumper();
+        Trigger intakeBtn = m_driverController.y();        // 启动intake,从上面漏斗intake
+        Trigger groundIntakeSwitchBtn = m_driverController.x(); // 启动/收起 地吸
         Trigger catchBallBtn = null;    // 抓球模式下，启动抓球功能
         Trigger toggleBallBtn = null;   // 切换抓球还是射珊瑚
 

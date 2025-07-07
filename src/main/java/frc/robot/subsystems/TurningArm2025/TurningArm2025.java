@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.awt.Container;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
@@ -34,7 +35,8 @@ public class TurningArm2025 extends SubsystemBase {
     public enum TA_STATE {
         NONE,
         ZERO,
-        BASE,
+        GI, // ground intake
+        UI, // up intake
         L1,
         L2,
         L3,
@@ -309,8 +311,10 @@ public class TurningArm2025 extends SubsystemBase {
         switch (state) {
             case ZERO:
                 return Constants.TurningArm.zeroPos;
-            case BASE:
-                return Constants.TurningArm.basePos;
+            case GI:
+                return Constants.TurningArm.groundIntakePos;
+            case UI:
+                return Constants.TurningArm.upIntakePos;
             case L1:
                 return Constants.TurningArm.l1Pos;
             case L2:

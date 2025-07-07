@@ -137,7 +137,7 @@ public class Intake2025 extends SubsystemBase {
         return !intakeCoralSensor0.get() && !intakeCoralSensor1.get();
     }
 
-    private boolean isCoralTotallyOut() {
+    public boolean isCoralTotallyOut() {
         return intakeCoralSensor0.get() == true && intakeCoralSensor1.get() == true;
     }
 

@@ -66,15 +66,30 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         turnMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
         turnMotorConfig.MotorOutput.NeutralMode = lockMotor ? NeutralModeValue.Brake : NeutralModeValue.Coast;
 
+        turnMotorConfig.Feedback.SensorToMechanismRatio = 1;
+        turnMotorConfig.Feedback.RotorToSensorRatio = 16;
+
         turnMotorConfig.MotionMagic.MotionMagicCruiseVelocity = Constants.GIntakeConstants.Velocity;
         turnMotorConfig.MotionMagic.MotionMagicAcceleration = Constants.GIntakeConstants.Acceleration;
         turnMotorConfig.MotionMagic.MotionMagicJerk = Constants.GIntakeConstants.Jerk;
+
+        /* Current Limiting */
+        turnMotorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        turnMotorConfig.CurrentLimits.SupplyCurrentLimit = 20;
+        turnMotorConfig.CurrentLimits.SupplyCurrentLowerLimit = 30;
+        turnMotorConfig.CurrentLimits.SupplyCurrentLowerTime = 0.02;
         return turnMotorConfig;
     }
 
     private TalonFXConfiguration getDriveMotorConfiguration() {
         TalonFXConfiguration driveMotorConfig = new TalonFXConfiguration();
         driveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+        /* Current Limiting */
+        driveMotorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        driveMotorConfig.CurrentLimits.SupplyCurrentLimit = 20;
+        driveMotorConfig.CurrentLimits.SupplyCurrentLowerLimit = 30;
+        driveMotorConfig.CurrentLimits.SupplyCurrentLowerTime = 0.02;
         return driveMotorConfig;
     }
 
@@ -231,7 +246,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     }
 
     public void startIntake() {
-        m_driveMotor.set(0.5);
+        m_driveMotor.set(0.3);
     }
 
     public void stopIntake() {
@@ -252,6 +267,8 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         }
         double pos = getStatePos(curState);
         SmartDashboard.putNumber("GI ccc targetPos", pos);
+        SmartDashboard.putNumber("GI ccc curPos", m_CANcoder.getPosition().getValueAsDouble());
+        SmartDashboard.putString("GI ccc runningState", curRunningState.name());
         SmartDashboard.putString("GI ccc curState", curState.name());
 
         if (MiscUtils.compareDouble(pos, NONE_POS)) {
@@ -265,7 +282,13 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         }
 
 
-        m_turnMotor.setControl(motionMagicVoltage.withPosition(pos));
+        if (curRunningState == GI_RUNNING_STATE.RUNNING) {
+            m_turnMotor.setControl(motionMagicVoltage.withPosition(pos));
+        }
+        else {
+            m_turnMotor.stopMotor();
+        }
+        
     }
 
     @Override
