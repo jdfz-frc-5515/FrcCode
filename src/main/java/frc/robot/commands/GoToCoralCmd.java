@@ -6,8 +6,6 @@ package frc.robot.commands;
 
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
 
-import static edu.wpi.first.units.Units.Meters;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -29,17 +27,21 @@ public class GoToCoralCmd extends Command {
     public Pose2d getTargetPose2d() {
         String coralLimeLight = Constants.LIME_LIGHT_OBJECT_DETECTION;
         double lh = 0.922; // ll to ground height
-        double la = Math.toRadians(35); // ll angle against the wall
+        double la = Math.toRadians(45); // ll angle against the wall
         double tx = Math.toRadians(LimelightHelpers.getTX(coralLimeLight));
         double ty = Math.toRadians(LimelightHelpers.getTY(coralLimeLight));
         double lg1 = Math.tan(Math.PI / 2 - la + ty) * lh;
         double lg2 = Math.sqrt(Math.pow(lg1, 2) + Math.pow(lh, 2)) * Math.tan(tx);
-        double da = Math.sqrt(Math.pow(lg1, 2) + Math.pow(lg2, 2)) * 0.6; // direct distance
+        double da = Math.sqrt(Math.pow(lg1, 2) + Math.pow(lg2, 2)); // direct distance
         Pose2d robotPose = m_subsystem.getPose();
         double robotAngle = m_subsystem.getPose().getRotation().getRadians();
-        double Cx = robotPose.getX() + Math.cos(robotAngle - Math.PI) * da;
-        double Cy = robotPose.getY() + Math.sin(robotAngle - Math.PI) * da;
-        Rotation2d Cr = new Rotation2d(robotAngle - tx * 2);
+        double shiftLeft = 0.05;
+        double shiftAngle = robotAngle;
+        double shiftX = Math.sin(shiftAngle)*shiftLeft;
+        double shiftY = Math.cos(shiftAngle)*shiftLeft;
+        double Cx = robotPose.getX() + Math.cos(robotAngle - Math.PI) * da+shiftX;
+        double Cy = robotPose.getY() + Math.sin(robotAngle - Math.PI) * da-shiftY;
+        Rotation2d Cr = new Rotation2d(robotAngle - tx);
         Pose2d coralPose2d = new Pose2d(Cx, Cy, Cr);
         return coralPose2d;
     }
