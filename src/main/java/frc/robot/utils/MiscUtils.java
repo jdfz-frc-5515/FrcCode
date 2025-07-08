@@ -64,13 +64,16 @@ public final class MiscUtils {
 
     public static Constants.FieldInfo.APInfo[] getApInfoByAlliance() {
         long[] apIds = DriverStation.getAlliance().get().equals(Alliance.Blue) ? Constants.FieldInfo.blueApIds : Constants.FieldInfo.redApIds;
-        Map<Long, Constants.FieldInfo.APInfo> map = new HashMap<>();
+        // Map<Long, Constants.FieldInfo.APInfo> map = new HashMap<>();
+        Constants.FieldInfo.APInfo[] ret = new Constants.FieldInfo.APInfo[apIds.length];
+        int index = 0;
         for (long id : apIds) {
             if (Constants.FieldInfo.AP_MAP.containsKey(id)) {
-                map.put(id, Constants.FieldInfo.AP_MAP.get(id));
+                // map.put(id, Constants.FieldInfo.AP_MAP.get(id));
+                ret[index++] = Constants.FieldInfo.AP_MAP.get(id);
             }
         }
-        return (Constants.FieldInfo.APInfo[])map.values().toArray();
+        return ret;
     }
 
     private static Pose2d calcOffsetPoint(double x, double y, double angle, double n, double offset, double newAngle) {

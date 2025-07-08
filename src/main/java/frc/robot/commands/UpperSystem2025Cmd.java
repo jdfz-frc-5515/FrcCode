@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 
+import java.awt.Cursor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -38,7 +40,8 @@ public class UpperSystem2025Cmd extends Command {
     private enum STATE {
         NONE,
         ZERO,
-        READY_FOR_LOAD_CORAL,
+        READY_FOR_LOAD_GROUND_CORAL,
+        READY_FOR_LOAD_UP_CORAL,
         L1,
         L2,
         L3,
@@ -48,18 +51,19 @@ public class UpperSystem2025Cmd extends Command {
     }
 
     // -1 down, 1 up, 0 unknow
-    private int[][] table = new int[][]{
-        //          NONE, ZERO,  READY_FOR_LOAD_CORAL, L1, L2, L3, L4, BALL1, BALL2
-        new int[]{  0,    0,     0,                    0,  0,  0,  0,   0,     0     },// NONE
-        new int[]{  0,    0,     -1,                   -1, -1, -1, -1, -1,    -1     },// ZERO
-        new int[]{  0,    1,     0,                    -1, -1, -1, -1, -1,    -1     },// READY_FOR_LOAD_CORAL
-        new int[]{  0,    1,     1,                    0,  -1, -1, -1, -1,    0     },// L1
-        new int[]{  0,    1,     1,                    1,  0,  -1, -1, -1,    0     },// L2
-        new int[]{  0,    1,     1,                    1,  1,  0,  -1, -1,    0     },// L3
-        new int[]{  0,    1,     1,                    1,  1,  1,  0,  -1,    0     },// L4
-        new int[]{  0,    0,     1,                    0,  0,  0,  0,   0,    1    },// BALL1
-        new int[]{  0,    0,     1,                    0,  0,  0,  0,  -1 ,    0    },// BALL2
-    };
+    // private int[][] table = new int[][]{
+    //     //          NONE, ZERO, READY_FOR_LOAD_GROUND_CORAL  READY_FOR_LOAD_UP_CORAL, L1, L2, L3, L4, BALL1, BALL2
+    //     new int[]{  0,    0,    0,                               0,                    0,  0,  0,  0,   0,     0     },// NONE
+    //     new int[]{  0,    0,   -1,                              -1,                   -1, -1, -1, -1, -1,    -1     },// ZERO
+    //     new int[]{  0,    1,    0,                               0,                   -1, -1, -1, -1, -1,    -1     },//READY_FOR_LOAD_GROUND_CORAL
+    //     new int[]{  0,    1,    0,                               0,                    -1, -1, -1, -1, -1,    -1     },// READY_FOR_LOAD_UP_CORAL
+    //     new int[]{  0,    1,    1,                               1,                    0,  -1, -1, -1, -1,    0     },// L1
+    //     new int[]{  0,    1,    1,                               1,                    1,  0,  -1, -1, -1,    0     },// L2
+    //     new int[]{  0,    1,    1,                               1,                    1,  1,  0,  -1, -1,    0     },// L3
+    //     new int[]{  0,    1,    1,                               1,                    1,  1,  1,  0,  -1,    0     },// L4
+    //     new int[]{  0,    0,    1,                               1,                    0,  0,  0,  0,   0,    1    },// BALL1
+    //     new int[]{  0,    0,    1,                               1,                    0,  0,  0,  0,  -1 ,    0    },// BALL2
+    // };
 
     // private STATE[] STATE_UP_DIR = new STATE[] {
     //     STATE.ZERO,
@@ -130,7 +134,18 @@ public class UpperSystem2025Cmd extends Command {
     private Trigger armTuningDownTrigger;
 
     private Trigger catchBallTrigger;
-    private Trigger toggleBallTrigger;
+
+    private Trigger switchIntakeSourceTrigger;  // 切换Intake来源，地吸或者上面漏斗
+    private Trigger switchCoralAndBallTrigger;  // 切换Coral模式还是Aglea模式
+
+    // L1,L2,L3,L4, 有Coral时改变电梯位置，无Coral时预约下次电梯高度
+    private Trigger L1Trigger;
+    private Trigger L2Trigger;
+    private Trigger L3Trigger;
+    private Trigger L4Trigger;
+
+    private Trigger groundIntakeOutTakeTrigger;  // 地吸反转，吐Coral
+
 
     private final boolean isDebugEnabled = true;
 
@@ -140,6 +155,8 @@ public class UpperSystem2025Cmd extends Command {
     private Command autoMoveCmd = null;
 
     ActionRunner m_actionRunner = null;
+
+    private boolean m_isIntakeFromGround = true; // 从地吸拿Coral还是从漏斗拿
 
     public UpperSystem2025Cmd(
             CommandSwerveDrivetrain chassis,
@@ -205,7 +222,28 @@ public class UpperSystem2025Cmd extends Command {
                 ControlPadHelper.setControlPadInfoData(-1, -1, -1);
             }),
             new ParallelCommandGroup(
-                getMoveToCoralCmd()
+                new FunctionalCommand(
+                    ()-> {
+                        // init
+                        getMoveToCoralCmd();
+                        if (autoMoveCmd != null) {
+                            autoMoveCmd.schedule();
+                        }
+                    }, 
+                    ()-> {
+                        // excute
+                    }, 
+                    interrupted -> {
+                        // onEnd
+                    },
+                    ()-> {
+                        // isFinished
+                        if (autoMoveCmd == null) {
+                            return true;
+                        }
+                        return autoMoveCmd.isFinished();
+                    }
+                )
                 // TODO: 检查机器和目标的距离，进入一定距离以后升起电梯
             )
         ));
@@ -226,7 +264,28 @@ public class UpperSystem2025Cmd extends Command {
                 ControlPadHelper.setControlPadInfoData(-1, -1, 1);
             }),
             new ParallelCommandGroup(
-                getMoveToCoralCmd()
+                new FunctionalCommand(
+                    ()-> {
+                        // init
+                        getMoveToCoralCmd();
+                        if (autoMoveCmd != null) {
+                            autoMoveCmd.schedule();
+                        }
+                    }, 
+                    ()-> {
+                        // excute
+                    }, 
+                    interrupted -> {
+                        // onEnd
+                    },
+                    ()-> {
+                        // isFinished
+                        if (autoMoveCmd == null) {
+                            return true;
+                        }
+                        return autoMoveCmd.isFinished();
+                    }
+                )
                 // TODO: 检查机器和目标的距离，进入一定距离以后升起电梯
             )
         ));
@@ -256,10 +315,14 @@ public class UpperSystem2025Cmd extends Command {
         }
         intakeTrigger = t;
         intakeTrigger.onTrue(new InstantCommand(() -> {
-            if (curState == STATE.BALL1 || curState == STATE.BALL2) {
-                m_intake.toggleBallIntake();
-            }
-            else {
+            // TODO: 这里注释掉的几行是旧代码，似乎有问题
+            // if (getIsInAgleaMode()) {
+            //     m_intake.toggleBallIntake();
+            // }
+            // else {
+            //     m_intake.toggleCoralIntake();
+            // }
+            if (!getIsInAgleaMode()) {
                 m_intake.toggleCoralIntake();
             }
         }));
@@ -275,32 +338,13 @@ public class UpperSystem2025Cmd extends Command {
         }
         catchBallTrigger = t;
         catchBallTrigger.onTrue(new InstantCommand(() -> {
-            if (curState == STATE.BALL1 || curState == STATE.BALL2) {
+            if (getIsInAgleaMode()) {
                 m_elevator.setOffset(-1.5);
                 m_intake.toggleBallIntake(true);
             }
         })).onFalse(new InstantCommand(() -> {
             m_elevator.clearOffset();
             m_intake.toggleBallIntake(false);
-        }));
-    }
-
-    public void setToggleBallTrigger(Trigger t) {
-        if (t == null) {
-            return;
-        }
-        if (toggleBallTrigger != null) {
-            DriverStation.reportError("setToggleBallTrigger trigger bind multiple times. Please check your code!", true);
-            return;
-        }
-        toggleBallTrigger = t;
-        toggleBallTrigger.onTrue(new InstantCommand(() -> {
-            if (curState == STATE.BALL1 || curState == STATE.BALL2) {
-                setState(STATE.READY_FOR_LOAD_CORAL);
-            }
-            else if (curState == STATE.L3 || curState == STATE.L4) {
-                setState(STATE.L1);
-            }
         }));
     }
 
@@ -315,6 +359,136 @@ public class UpperSystem2025Cmd extends Command {
         groundIntakeSwitchTrigger = t;
         groundIntakeSwitchTrigger.onTrue(new InstantCommand(() -> {
             m_groundIntake.toggle();
+        }));
+    }
+
+    public void setLnTrigger(Trigger l1, Trigger l2, Trigger l3, Trigger l4) {
+        if (l1 != null) {
+            if (L1Trigger != null) {
+                DriverStation.reportError("setLnTrigger L1 trigger bind multiple times. Please check your code!", true);
+            }
+            else {
+                L1Trigger = l1;
+                L1Trigger.onTrue(new InstantCommand(() -> {
+                    if (getIsCarryingCoral()) {
+                        setState(STATE.L1);
+                    }
+                    else {
+                        ControlPadHelper.setControlPadInfoData(-10, 0, -10);
+                    }
+                    
+                }));
+            }
+        }
+
+        if (l2 != null) {
+            if (L2Trigger != null) {
+                DriverStation.reportError("setLnTrigger L2 trigger bind multiple times. Please check your code!", true);
+            }
+            else {
+                L2Trigger = l2;
+                L2Trigger.onTrue(new InstantCommand(() -> {
+                    if (getIsCarryingCoral()) {
+                        setState(STATE.L2);
+                    }
+                    else {
+                        ControlPadHelper.setControlPadInfoData(-10, 1, -10);
+                    }
+                    
+                }));
+            }
+        }
+
+        if (l3 != null) {
+            if (L3Trigger != null) {
+                DriverStation.reportError("setLnTrigger L3 trigger bind multiple times. Please check your code!", true);
+            }
+            else {
+                L3Trigger = l3;
+                L3Trigger.onTrue(new InstantCommand(() -> {
+                    if (getIsCarryingCoral()) {
+                        setState(STATE.L3);
+                    }
+                    else {
+                        ControlPadHelper.setControlPadInfoData(-10, 2, -10);
+                    }
+                    
+                }));
+            }
+        }
+
+        if (l4 != null) {
+            if (L4Trigger != null) {
+                DriverStation.reportError("setLnTrigger L4 trigger bind multiple times. Please check your code!", true);
+            }
+            else {
+                L4Trigger = l4;
+                L4Trigger.onTrue(new InstantCommand(() -> {
+                    if (getIsCarryingCoral()) {
+                        setState(STATE.L4);
+                    }
+                    else {
+                        ControlPadHelper.setControlPadInfoData(-10, 3, -10);
+                    }
+                    
+                }));
+            }
+        }
+    }
+
+    public void setSwitchIntakeSourceTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (switchIntakeSourceTrigger != null) {
+            DriverStation.reportError("switchIntakeSourceTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        switchIntakeSourceTrigger = t;
+        switchIntakeSourceTrigger.onTrue(new InstantCommand(() -> {
+            m_isIntakeFromGround = !m_isIntakeFromGround;
+            if (m_isIntakeFromGround && curState == STATE.READY_FOR_LOAD_UP_CORAL) {
+                setState(STATE.READY_FOR_LOAD_GROUND_CORAL);
+            }
+            if (!m_isIntakeFromGround && curState == STATE.READY_FOR_LOAD_GROUND_CORAL) {
+                setState(STATE.READY_FOR_LOAD_UP_CORAL);
+            }
+        }));
+    }
+
+    public void setSwitchCoralAndBallTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (switchCoralAndBallTrigger != null) {
+            DriverStation.reportError("setSwitchCoralAndBallTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        switchCoralAndBallTrigger = t;
+        switchCoralAndBallTrigger.onTrue(new InstantCommand(() -> {
+            // 这里切换Coral或者Aglea模式，只简单判断当前是否在Ball1或者Ball2模式下，
+            // 进一步的切换条件判断在setState函数里会处理，比如持有Coral的时候不允许切换等
+            if (getIsInAgleaMode()) {
+                setState(m_isIntakeFromGround ? STATE.READY_FOR_LOAD_GROUND_CORAL : STATE.READY_FOR_LOAD_UP_CORAL);
+            }
+            else {
+                setState(STATE.BALL1);
+            }
+            
+        }));
+    }
+
+    public void setGroundIntakeOutTakeTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (groundIntakeOutTakeTrigger != null) {
+            DriverStation.reportError("setGroundIntakeOutTakeTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        groundIntakeOutTakeTrigger = t;
+        groundIntakeOutTakeTrigger.onTrue(new InstantCommand(() -> {
+            // TODO: 地吸反转吐Coral
         }));
     }
 
@@ -413,7 +587,7 @@ public class UpperSystem2025Cmd extends Command {
             //     setState(STATE.ZERO);
             // }));
             ControlPadHelper.DebugCtrl.onReadyForloadCoral.onTrue(new InstantCommand(() -> {
-                setState(STATE.READY_FOR_LOAD_CORAL);
+                setState(m_isIntakeFromGround ? STATE.READY_FOR_LOAD_GROUND_CORAL : STATE.READY_FOR_LOAD_UP_CORAL);
             }));
             ControlPadHelper.DebugCtrl.onL1.onTrue(new InstantCommand(() -> {
                 setState(STATE.L1);
@@ -422,7 +596,7 @@ public class UpperSystem2025Cmd extends Command {
                 setState(STATE.L2);
             }));
             ControlPadHelper.DebugCtrl.onL3.onTrue(new InstantCommand(() -> {
-                setState(STATE.L3);
+                // setState(STATE.L3);
             }));
             ControlPadHelper.DebugCtrl.onL4.onTrue(new InstantCommand(() -> {
                 setState(STATE.L4);
@@ -461,7 +635,10 @@ public class UpperSystem2025Cmd extends Command {
             m_intake.init();
             m_groundIntake.init();
             m_candle.init();
-            setState(STATE.READY_FOR_LOAD_CORAL);
+
+            // 下面两行要联动，m_isIntakeFromGround改成false的时候，setState要变成READY_FOR_LOAD_UP_CORAL
+            m_isIntakeFromGround = true;
+            setState(STATE.READY_FOR_LOAD_GROUND_CORAL);
         }
         else if (Robot.inst.isTest()){
             System.out.println("UpperSystemCmd init in test");
@@ -518,6 +695,10 @@ public class UpperSystem2025Cmd extends Command {
         return false;
     }
 
+    private boolean getIsInAgleaMode() {
+        return curState == STATE.BALL1 || curState == STATE.BALL2;
+    }
+
     private void setState(STATE newState) {
         System.out.println("UpperSystem2025Cmd::setState: try set: " + curState + " -> " + newState
                 + " isCarryingCoral: " + getIsCarryingCoral() + " isCarryingBall: " + getIsCarryingBall());
@@ -525,19 +706,20 @@ public class UpperSystem2025Cmd extends Command {
             return;
         }
 
-        if (curState == STATE.ZERO && newState != STATE.READY_FOR_LOAD_CORAL) {
-            // if we are in zero state, we can only go to READY_FOR_LOAD_CORAL state
+        if (curState == STATE.ZERO && (newState != STATE.READY_FOR_LOAD_GROUND_CORAL || newState != STATE.READY_FOR_LOAD_UP_CORAL)) {
+            // if we are in zero state, we can only go to READY_FOR_LOAD_CORAL state or READY_FOR_LOAD_UP_CORAL
             return;
         }
 
         if (newState == STATE.L1 || newState == STATE.L2 || newState == STATE.L3 || newState == STATE.L4) {
-            if (curState != STATE.READY_FOR_LOAD_CORAL
+            if (curState != STATE.READY_FOR_LOAD_GROUND_CORAL
+                    && curState != STATE.READY_FOR_LOAD_UP_CORAL
                     && curState != STATE.L1
                     && curState != STATE.L2
                     && curState != STATE.L3
                     && curState != STATE.L4) {
-                // if we are not in READY_FOR_LOAD_CORAL, L1, L2, L3, L4, refuse to go to L1,
-                // L2, L3, L4
+                // if we are not in READY_FOR_LOAD_CORAL, READY_FOR_LOAD_UP_CORAL, L1, L2, L3, L4, 
+                // refuse to go to L1, L2, L3, L4
                 return;
             }
             if (!getIsCarryingCoral() || getIsCarryingBall()) {
@@ -548,7 +730,7 @@ public class UpperSystem2025Cmd extends Command {
         }
 
         if (newState == STATE.BALL1 || newState == STATE.BALL2) {
-            if (curState != STATE.READY_FOR_LOAD_CORAL && curState != STATE.BALL1 && curState != STATE.BALL2) {
+            if (curState != STATE.READY_FOR_LOAD_GROUND_CORAL && curState != STATE.READY_FOR_LOAD_UP_CORAL && curState != STATE.BALL1 && curState != STATE.BALL2) {
                 // if we are not in READY_FOR_LOAD_BALL, refuse to go to BALL1
                 return;
             }
@@ -558,9 +740,9 @@ public class UpperSystem2025Cmd extends Command {
             }
         }
 
-        if (newState == STATE.READY_FOR_LOAD_CORAL) {
+        if (newState == STATE.READY_FOR_LOAD_GROUND_CORAL || newState == STATE.READY_FOR_LOAD_UP_CORAL) {
             if (getIsCarryingBall() || getIsCarryingCoral()) {
-                // if we are carrying ball or coral, refuse to go to READY_FOR_LOAD_CORAL
+                // if we are carrying ball or coral, refuse to go to READY_FOR_LOAD_CORAL or READY_FOR_LOAD_UP_CORAL
                 return;
             }
         }
@@ -581,133 +763,278 @@ public class UpperSystem2025Cmd extends Command {
 
 
     private int curRunningDir = 0;
-    private void doStateAction_____OLD(TA_STATE taState, EV_STATE evState) {
-        if (curRunningState == RUNNING_STATE.NEW_SET)
-        {
-            STATE sx = lastState;
-            STATE sy = curState;
-            // sx = STATE.ZERO;
-            // sy = STATE.READY_FOR_LOAD_BALL;
-            int tx = sx.ordinal();
-            int ty = sy.ordinal(); //
+    // private void doStateAction_____OLD(TA_STATE taState, EV_STATE evState) {
+    //     if (curRunningState == RUNNING_STATE.NEW_SET)
+    //     {
+    //         STATE sx = lastState;
+    //         STATE sy = curState;
+    //         // sx = STATE.ZERO;
+    //         // sy = STATE.READY_FOR_LOAD_BALL;
+    //         int tx = sx.ordinal();
+    //         int ty = sy.ordinal(); //
 
-            curRunningDir = table[ty][tx];
-            System.out.println("tx: " + tx + " ty: " + ty);
-            System.out.println("curRunningDir is " + curRunningDir);
-        }
+    //         curRunningDir = table[ty][tx];
+    //         System.out.println("tx: " + tx + " ty: " + ty);
+    //         System.out.println("curRunningDir is " + curRunningDir);
+    //     }
 
-        if (curRunningDir == -1) {
-            // down
-            switch (curRunningState) {
-                case NEW_SET:
-                    m_elevator.setState(evState);   
-                    curRunningState = RUNNING_STATE.RUNNING;
-                    break;
-                case RUNNING:
-                    if (m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE) {
-                        m_turningArm.setState(taState);
-                        if (m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE) {
-                            curRunningState = RUNNING_STATE.DONE;
-                        }
-                    }
-                    break;
-                case DONE:
-                    break;
-            }
-        }
-        else if (curRunningDir == 0) {
-            switch (curRunningState) {
-                case NEW_SET:
-                    m_turningArm.setState(taState);
-                    m_elevator.setState(evState);
-                    curRunningState = RUNNING_STATE.RUNNING;
-                    break;
-                case RUNNING:
-                    if (m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE &&
-                            m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE) {
-                        curRunningState = RUNNING_STATE.DONE;
-                    }
-                    break;
-                case DONE:
-                    break;
-            }
-        }
-        else if (curRunningDir == 1) {
-            // up
-            switch (curRunningState) {
-                case NEW_SET:
-                    m_turningArm.setState(taState);
+    //     if (curRunningDir == -1) {
+    //         // down
+    //         switch (curRunningState) {
+    //             case NEW_SET:
+    //                 m_elevator.setState(evState);   
+    //                 curRunningState = RUNNING_STATE.RUNNING;
+    //                 break;
+    //             case RUNNING:
+    //                 if (m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE) {
+    //                     m_turningArm.setState(taState);
+    //                     if (m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE) {
+    //                         curRunningState = RUNNING_STATE.DONE;
+    //                     }
+    //                 }
+    //                 break;
+    //             case DONE:
+    //                 break;
+    //         }
+    //     }
+    //     else if (curRunningDir == 0) {
+    //         switch (curRunningState) {
+    //             case NEW_SET:
+    //                 m_turningArm.setState(taState);
+    //                 m_elevator.setState(evState);
+    //                 curRunningState = RUNNING_STATE.RUNNING;
+    //                 break;
+    //             case RUNNING:
+    //                 if (m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE &&
+    //                         m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE) {
+    //                     curRunningState = RUNNING_STATE.DONE;
+    //                 }
+    //                 break;
+    //             case DONE:
+    //                 break;
+    //         }
+    //     }
+    //     else if (curRunningDir == 1) {
+    //         // up
+    //         switch (curRunningState) {
+    //             case NEW_SET:
+    //                 m_turningArm.setState(taState);
                       
-                    curRunningState = RUNNING_STATE.RUNNING;
-                    break;
-                case RUNNING:
-                    if (m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE) {
-                        m_elevator.setState(evState); 
-                        if (m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE) {
-                            curRunningState = RUNNING_STATE.DONE;
-                        }
-                    }
-                    break;
-                case DONE:
-                    break;
-            }
-        }
-    }
+    //                 curRunningState = RUNNING_STATE.RUNNING;
+    //                 break;
+    //             case RUNNING:
+    //                 if (m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE) {
+    //                     m_elevator.setState(evState); 
+    //                     if (m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE) {
+    //                         curRunningState = RUNNING_STATE.DONE;
+    //                     }
+    //                 }
+    //                 break;
+    //             case DONE:
+    //                 break;
+    //         }
+    //     }
+    // }
 
+
+    // private void doStateAction__old2(TA_STATE taState, EV_STATE evState) {
+    //     boolean isNeedDodge = false;
+    //     boolean isBall2Down = false;
+    //     if (curRunningState == RUNNING_STATE.NEW_SET)
+    //     {
+    //         STATE sx = lastState;
+    //         STATE sy = curState;
+    //         int tx = sx.ordinal();
+    //         int ty = sy.ordinal(); //
+
+    //         curRunningDir = table[ty][tx];
+    //         System.out.println("doStateAction NEW_SET: lastState: " + lastState.name() + ", curState: " + curState.name());
+    //         System.out.println("doStateAction NEW_SET: tx: " + tx + " ty: " + ty);
+    //         System.out.println("doStateAction NEW_SET: curRunningDir is " + curRunningDir);
+
+    //         if ((lastState != STATE.BALL1 && lastState != STATE.BALL2) &&
+    //             (curState == STATE.BALL1 || curState == STATE.BALL2)) {
+    //             isNeedDodge = false;
+    //         }
+    //         else if ((lastState == STATE.BALL1 || lastState == STATE.BALL2) &&
+    //             (curState == STATE.BALL1 || curState == STATE.BALL2)) {
+    //             isNeedDodge = false;
+    //         }
+    //         else if ((lastState == STATE.BALL1 || lastState == STATE.BALL2) &&
+    //             (curState == STATE.READY_FOR_LOAD_GROUND_CORAL)) {
+    //             isNeedDodge = false;
+    //             isBall2Down = true;
+    //         }
+    //         else {
+    //             double[] dodgePosList = m_elevator.getDodgePosOrderFromUp2Down();
+    //             double elevatorStartPos = m_elevator.getCurPos();
+    //             double elevatorEndPos = m_elevator.getStatePos(evState);
+    //             for (int i = 0; i < dodgePosList.length; i++) {
+    //                 if (MiscUtils.isBeween(dodgePosList[i], elevatorStartPos, elevatorEndPos)) {
+    //                     isNeedDodge = true;
+    //                     break;
+    //                 }
+    //             }
+    //         }
+
+
+    //         System.out.println("doStateAction NEW_SET: isNeedDodge: " + isNeedDodge);
+    //         if (m_actionRunner != null) {
+    //             m_actionRunner.cancel();
+    //         }
+    //         m_actionRunner = new ActionRunner();
+
+    //         if (curRunningDir == -1) {
+    //             // down
+    //             if (isNeedDodge) {
+    //                 m_actionRunner.addQueueAction(
+    //                     () -> { // init
+    //                     m_turningArm.setState(TA_STATE.DODGE);
+    //                     },
+    //                     () -> { // update
+    //                     },
+    //                     () -> {},   // onCancel
+    //                     () -> { // endCondition
+    //                         return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
+    //                     }
+    //                 );
+    //             }
+    //             m_actionRunner.addQueueAction(
+    //                 () -> { // init
+    //                     m_elevator.setState(evState);
+    //                 },
+    //                 () -> { // update
+    //                 },
+    //                 () -> {},   // onCancel
+    //                 () -> { // endCondition
+    //                     return m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE;
+    //                 }
+    //             )
+    //             .addConditionAction(
+    //                 () -> { // init
+    //                     m_turningArm.setState(taState);
+    //                 },
+    //                 () -> { // update
+    //                 },
+    //                 () -> {},   // onCancel
+    //                 // startCondition
+    //                 isNeedDodge ?
+    //                 () -> { 
+    //                     return m_elevator.isCurPosBelow(Constants.Elevator.downDodgePos);
+    //                 } : (isBall2Down ? () -> {
+    //                     return m_elevator.isCurPosBelow(m_elevator.getStatePos(EV_STATE.BALL1));
+    //                 } :
+    //                 () -> true),
+    //                 () -> { // endCondition
+    //                     return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
+    //                 }
+    //             )
+    //             // .addQueueAction(                    
+    //             //     () -> { // init
+    //             //         m_turningArm.setState(taState);
+    //             //     },
+    //             //     () -> { // update
+    //             //     },
+    //             //     () -> {},   // onCancel
+    //             //     () -> { // endCondition
+    //             //         return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
+    //             // })
+    //             .start();
+    //         }
+    //         else if (curRunningDir == 1) {
+    //             // up
+    //             if (isNeedDodge) {
+    //                 m_actionRunner.addQueueAction(
+    //                     () -> { // init
+    //                     m_turningArm.setState(TA_STATE.DODGE);
+    //                     },
+    //                     () -> { // update
+    //                     },
+    //                     () -> {},   // onCancel
+    //                     () -> { // endCondition
+    //                         return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
+    //                     }
+    //                 );
+    //             }
+    //             m_actionRunner.addQueueAction(
+    //                 () -> { // init
+    //                     m_elevator.setState(evState);
+    //                 },
+    //                 () -> { // update
+    //                 },
+    //                 () -> {},   // onCancel
+    //                 () -> { // endCondition
+    //                     return m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE;
+    //                 }
+    //             )
+    //             .addConditionAction(
+    //                 () -> { // init
+    //                     m_turningArm.setState(taState);
+    //                 },
+    //                 () -> { // update
+    //                 },
+    //                 () -> {},   // onCancel
+    //                 // startCondition
+    //                 isNeedDodge ? 
+    //                 () -> { 
+    //                     return m_elevator.isCurPosUpper(Constants.Elevator.upDodgePos);
+    //                 } : 
+    //                 () -> true,
+    //                 () -> { // endCondition
+    //                     return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
+    //                 }
+    //             )
+    //             // .addQueueAction(                    
+    //             //     () -> { // init
+    //             //         m_turningArm.setState(taState);
+    //             //     },
+    //             //     () -> { // update
+    //             //     },
+    //             //     () -> {},   // onCancel
+    //             //     () -> { // endCondition
+    //             //         return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
+    //             //     }
+    //             // )
+    //             .start();
+    //         }
+
+    //         curRunningState = RUNNING_STATE.RUNNING;
+    //     }
+
+
+    //     if (curRunningState == RUNNING_STATE.RUNNING) {
+    //         m_actionRunner.update();
+    //         if (m_actionRunner.getIsDone()) {
+    //             curRunningState = RUNNING_STATE.DONE;
+    //         }
+    //     }
+    // }
 
     private void doStateAction(TA_STATE taState, EV_STATE evState) {
-        boolean isNeedDodge = false;
-        boolean isBall2Down = false;
+
         if (curRunningState == RUNNING_STATE.NEW_SET)
         {
-            STATE sx = lastState;
-            STATE sy = curState;
-            int tx = sx.ordinal();
-            int ty = sy.ordinal(); //
-
-            curRunningDir = table[ty][tx];
-            System.out.println("doStateAction NEW_SET: lastState: " + lastState.name() + ", curState: " + curState.name());
-            System.out.println("doStateAction NEW_SET: tx: " + tx + " ty: " + ty);
-            System.out.println("doStateAction NEW_SET: curRunningDir is " + curRunningDir);
-
-            if ((lastState != STATE.BALL1 && lastState != STATE.BALL2) &&
-                (curState == STATE.BALL1 || curState == STATE.BALL2)) {
-                isNeedDodge = false;
-            }
-            else if ((lastState == STATE.BALL1 || lastState == STATE.BALL2) &&
-                (curState == STATE.BALL1 || curState == STATE.BALL2)) {
-                isNeedDodge = false;
-            }
-            else if ((lastState == STATE.BALL1 || lastState == STATE.BALL2) &&
-                (curState == STATE.READY_FOR_LOAD_CORAL)) {
-                isNeedDodge = false;
-                isBall2Down = true;
-            }
-            else {
-                double[] dodgePosList = m_elevator.getDodgePosOrderFromUp2Down();
-                double elevatorStartPos = m_elevator.getCurPos();
-                double elevatorEndPos = m_elevator.getStatePos(evState);
-                for (int i = 0; i < dodgePosList.length; i++) {
-                    if (MiscUtils.isBeween(dodgePosList[i], elevatorStartPos, elevatorEndPos)) {
-                        isNeedDodge = true;
-                        break;
-                    }
-                }
-            }
-
-
-            System.out.println("doStateAction NEW_SET: isNeedDodge: " + isNeedDodge);
+            curRunningDir = getMovingDir(lastState, curState);
             if (m_actionRunner != null) {
                 m_actionRunner.cancel();
             }
             m_actionRunner = new ActionRunner();
 
             if (curRunningDir == -1) {
-                // down
-                if (isNeedDodge) {
-                    m_actionRunner.addQueueAction(
+                m_actionRunner.addQueueAction(
                         () -> { // init
-                        m_turningArm.setState(TA_STATE.DODGE);
+                            m_elevator.setState(evState);
+                        },
+                        () -> { // update
+                        },
+                        () -> {},   // onCancel
+                        () -> { // endCondition
+                            return m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE;
+                        }
+                    )
+                    .addQueueAction(
+                        () -> { // init
+                            m_turningArm.setState(taState);
                         },
                         () -> { // update
                         },
@@ -715,9 +1042,23 @@ public class UpperSystem2025Cmd extends Command {
                         () -> { // endCondition
                             return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
                         }
-                    );
-                }
-                m_actionRunner.addQueueAction(
+                    )
+                    .start();
+            }
+            else if (curRunningDir == 1 || curRunningDir == 0) {
+                m_actionRunner
+                .addQueueAction(
+                    () -> { // init
+                        m_turningArm.setState(taState);
+                    },
+                    () -> { // update
+                    },
+                    () -> {},   // onCancel
+                    () -> { // endCondition
+                        return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
+                    }
+                )
+                .addQueueAction(
                     () -> { // init
                         m_elevator.setState(evState);
                     },
@@ -728,97 +1069,10 @@ public class UpperSystem2025Cmd extends Command {
                         return m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE;
                     }
                 )
-                .addConditionAction(
-                    () -> { // init
-                        m_turningArm.setState(taState);
-                    },
-                    () -> { // update
-                    },
-                    () -> {},   // onCancel
-                    // startCondition
-                    isNeedDodge ?
-                    () -> { 
-                        return m_elevator.isCurPosBelow(Constants.Elevator.downDodgePos);
-                    } : (isBall2Down ? () -> {
-                        return m_elevator.isCurPosBelow(m_elevator.getStatePos(EV_STATE.BALL1));
-                    } :
-                    () -> true),
-                    () -> { // endCondition
-                        return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
-                    }
-                )
-                // .addQueueAction(                    
-                //     () -> { // init
-                //         m_turningArm.setState(taState);
-                //     },
-                //     () -> { // update
-                //     },
-                //     () -> {},   // onCancel
-                //     () -> { // endCondition
-                //         return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
-                // })
                 .start();
             }
-            else if (curRunningDir == 1) {
-                // up
-                if (isNeedDodge) {
-                    m_actionRunner.addQueueAction(
-                        () -> { // init
-                        m_turningArm.setState(TA_STATE.DODGE);
-                        },
-                        () -> { // update
-                        },
-                        () -> {},   // onCancel
-                        () -> { // endCondition
-                            return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
-                        }
-                    );
-                }
-                m_actionRunner.addQueueAction(
-                    () -> { // init
-                        m_elevator.setState(evState);
-                    },
-                    () -> { // update
-                    },
-                    () -> {},   // onCancel
-                    () -> { // endCondition
-                        return m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE;
-                    }
-                )
-                .addConditionAction(
-                    () -> { // init
-                        m_turningArm.setState(taState);
-                    },
-                    () -> { // update
-                    },
-                    () -> {},   // onCancel
-                    // startCondition
-                    isNeedDodge ? 
-                    () -> { 
-                        return m_elevator.isCurPosUpper(Constants.Elevator.upDodgePos);
-                    } : 
-                    () -> true,
-                    () -> { // endCondition
-                        return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
-                    }
-                )
-                // .addQueueAction(                    
-                //     () -> { // init
-                //         m_turningArm.setState(taState);
-                //     },
-                //     () -> { // update
-                //     },
-                //     () -> {},   // onCancel
-                //     () -> { // endCondition
-                //         return m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE;
-                //     }
-                // )
-                .start();
-            }
-
             curRunningState = RUNNING_STATE.RUNNING;
         }
-
 
         if (curRunningState == RUNNING_STATE.RUNNING) {
             m_actionRunner.update();
@@ -834,9 +1088,12 @@ public class UpperSystem2025Cmd extends Command {
                 doStateAction(TA_STATE.ZERO, EV_STATE.ZERO);
                 // updateStateZero();
                 break;
-            case READY_FOR_LOAD_CORAL:
-                doStateAction(TA_STATE.BASE, EV_STATE.BASE);
+            case READY_FOR_LOAD_GROUND_CORAL:
+                doStateAction(TA_STATE.GI, EV_STATE.BASE);
                 // updateStateReadyForLoadCoral();
+                break;
+            case READY_FOR_LOAD_UP_CORAL:
+                doStateAction(TA_STATE.UI, EV_STATE.BASE);
                 break;
             case L1:
                 doStateAction(TA_STATE.L1, EV_STATE.L1);
@@ -876,7 +1133,8 @@ public class UpperSystem2025Cmd extends Command {
         switch (curState) {
             case ZERO:
                 break;
-            case READY_FOR_LOAD_CORAL:
+            case READY_FOR_LOAD_GROUND_CORAL:
+            case READY_FOR_LOAD_UP_CORAL:
                 if (getIsCarryingCoral()) {
                     setState(STATE.L1);
                 }
@@ -886,7 +1144,7 @@ public class UpperSystem2025Cmd extends Command {
             case L3:
             case L4:
                 if (!getIsCarryingCoral()) {
-                    setState(STATE.READY_FOR_LOAD_CORAL);
+                    setState(m_isIntakeFromGround ? STATE.READY_FOR_LOAD_GROUND_CORAL : STATE.READY_FOR_LOAD_UP_CORAL);
                 }
                 break;
             default:
@@ -1060,14 +1318,14 @@ public class UpperSystem2025Cmd extends Command {
         long targetApId = getNearestSeenCoralAprilTag();
         if (targetApId == -1) {
             return new InstantCommand(() -> {
-                System.out.println("1111");
+                System.out.println("getMoveToCoralCmd: no aprilTag found!!!!");
             });
         }
         ControlPadHelper.setControlPadInfoData(targetApId, -10l, -10l);
         ControlPadHelper.ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
         if (info == null) {
             return new InstantCommand(() -> {
-                System.out.println("2222");
+                System.out.println("getMoveToCoralCmd: getControlPadInfo error!!!!!!!!!!!!!!!!");
             });
         }
         long apId = info.aprilTagId;
@@ -1075,15 +1333,23 @@ public class UpperSystem2025Cmd extends Command {
         if (info.branch == 0) {
             targetPos = MiscUtils.getCoralBallPos(apId);
         }
-        else {
+        else if (info.branch == 1 || info.branch == -1) {
             targetPos = MiscUtils.getCoralShooterPos(apId, info.branch == -1);
+        }
+        else {
+            targetPos = new Pose2d();
         }
 
         if (autoMoveCmd != null) {
             autoMoveCmd.cancel();
             autoMoveCmd = null;
         }
-        return m_chassis.autoMoveToPoseCommand(targetPos);
+
+        // for test
+        SmartDashboard.putString("MoveToCoralState", String.format("AP: %d, level: %d, branch: %d, targetPos: %s", apId, info.level, info.branch, targetPos.toString()));
+        return null;
+        // autoMoveCmd = m_chassis.autoMoveToPoseCommand(targetPos);
+        // return autoMoveCmd;
     }
 
     private void moveToGroundCoral() {
@@ -1094,6 +1360,149 @@ public class UpperSystem2025Cmd extends Command {
         autoMoveCmd = new GoToCoralCmd(m_chassis);
     }
 
+    // return: -1 down, 1 up, 0 evelvator no move
+    private int getMovingDir(STATE pre, STATE cur) {
+        switch (pre) {
+            case NONE:
+            case ZERO:
+            case READY_FOR_LOAD_GROUND_CORAL:
+            case READY_FOR_LOAD_UP_CORAL:
+            {
+                switch (cur) {
+                    case NONE:
+                    case ZERO: 
+                    case READY_FOR_LOAD_GROUND_CORAL: 
+                    case READY_FOR_LOAD_UP_CORAL:
+                        return 0;
+                    case L1: 
+                    case L2: 
+                    case L3: 
+                    case L4: 
+                        return 1;
+                    case BALL1: 
+                    case BALL2:
+                        return 1;
+                }
+                break;
+            }
+            case L1: {
+                switch (cur) {
+                    case NONE:
+                    case ZERO: 
+                    case READY_FOR_LOAD_GROUND_CORAL: 
+                    case READY_FOR_LOAD_UP_CORAL:
+                        return -1;
+                    case L1: 
+                        return 0;
+                    case L2: 
+                    case L3: 
+                    case L4: 
+                        return 1;
+                    case BALL1: 
+                    case BALL2:
+                        return 0;
+                }
+                break;
+            }
+            case L2: {
+                switch (cur) {
+                    case NONE:
+                    case ZERO: 
+                    case READY_FOR_LOAD_GROUND_CORAL: 
+                    case READY_FOR_LOAD_UP_CORAL:
+                    case L1: 
+                        return -1;
+                    case L2: 
+                        return 0;
+                    case L3: 
+                    case L4: 
+                        return 1;
+                    case BALL1: 
+                    case BALL2:
+                        return 0;
+                }
+                break;
+            }
+            case L3: {
+                switch (cur) {
+                    case NONE:
+                    case ZERO: 
+                    case READY_FOR_LOAD_GROUND_CORAL: 
+                    case READY_FOR_LOAD_UP_CORAL:
+                    case L1: 
+                    case L2: 
+                        return -1;
+                    case L3: 
+                        return 0;
+                    case L4: 
+                        return 1;
+                    case BALL1: 
+                    case BALL2:
+                        return 0;
+                }
+                break;
+            }
+            case L4: {
+                switch (cur) {
+                    case NONE:
+                    case ZERO: 
+                    case READY_FOR_LOAD_GROUND_CORAL: 
+                    case READY_FOR_LOAD_UP_CORAL:
+                    case L1: 
+                    case L2: 
+                    case L3: 
+                        return -1;
+                    case L4: 
+                        return 0;
+                    case BALL1: 
+                    case BALL2:
+                        return 0;
+                }
+                break;
+            }
+            case BALL1: {
+                switch (cur) {
+                    case NONE:
+                    case ZERO: 
+                    case READY_FOR_LOAD_GROUND_CORAL: 
+                    case READY_FOR_LOAD_UP_CORAL:
+                        return -1;
+                    case L1: 
+                    case L2: 
+                    case L3: 
+                    case L4: 
+                        return 0;
+                    case BALL1: 
+                        return 0;
+                    case BALL2:
+                        return 1;
+                }
+                break;
+            }
+            case BALL2: {
+                switch (cur) {
+                    case NONE:
+                    case ZERO: 
+                    case READY_FOR_LOAD_GROUND_CORAL: 
+                    case READY_FOR_LOAD_UP_CORAL:
+                        return -1;
+                    case L1: 
+                    case L2: 
+                    case L3: 
+                    case L4: 
+                        return 0;
+                    case BALL1: 
+                        return -1;
+                    case BALL2:
+                        return 0;
+                }
+                break;
+            }
+            default:
+                return 0;
+        }
+        return 0;
+    }
 
     protected void telemetry() {
 
@@ -1107,7 +1516,7 @@ public class UpperSystem2025Cmd extends Command {
             "isCarryingCoral: " + getIsCarryingCoral() + " isCarryingBall: " + getIsCarryingBall());
 
         SmartDashboard.putString("US2025Cmd_Sub_Running_State", "arm: " + m_turningArm.getCurRunningState() + " elevator: " + m_elevator.getCurRunningState() + " elevator state: " + m_elevator.getState());
-                // DON'T DELETE UP CODES
+        // DON'T DELETE UP CODES
         // DON'T DELETE UP CODES
         // DON'T DELETE UP CODES
     }

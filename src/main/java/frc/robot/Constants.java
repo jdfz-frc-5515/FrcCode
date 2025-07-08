@@ -80,18 +80,22 @@ public class Constants {
         public static final int GIntakeTurnID = 16;
         public static final int GIntakeDriveID = 15;
         public static final int GIntakeCCID = 19;
+        public static final String canBusName = "rio";
         public static final double retractCCRotation = 0.0;
         public static final double expandCCRotation = 1.4;
 
-        public static final double Velocity = 30; // 30;//50;
-        public static final double Acceleration = 30;// 100;// 75;
-        public static final double Jerk = 0;
+        public static final double Velocity = 20; // 30;//50;
+        public static final double Acceleration = 40;// 100;// 75;
+        public static final double Jerk = 120;
+
+        public static final double SensorToMechanismRatio = 1.0;
+        public static final double RotorToSensorRatio = 16;
         
         public static final class turnMotorConst {
-            public static final double kP = 4;
+            public static final double kP = 20;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
-            public static final double kS = 0.0;
+            public static final double kS = 3.0;
             public static final double kV = 0.0;
             public static final double kA = 0.0;
         }
@@ -213,20 +217,21 @@ public class Constants {
         public static final double RotorToSensorRatio = 44;
         // bigger value means arm is more expanded(clockwise)
         public static final double zeroPos = 0;
-        public static final double basePos = 0.4146980;
-        public static final double l1Pos = 1.039307;//0.407227;
-        public static final double l2Pos = 1.039307;
+        public static final double groundIntakePos = 1.25;//0.042;
+        public static final double upIntakePos = 1.25;
+        public static final double l1Pos = 1.69;//0.407227;
+        public static final double l2Pos = 1.69;
         public static final double dodgePos =  1.139307;  // the pos that allows elevator to move
-        public static final double l3Pos = 1.039307;
-        public static final double l4Pos = 0.6;
+        public static final double l3Pos = 1.80;
+        public static final double l4Pos = 1.80;
         public static final double ball1Pos = 4.3;
         public static final double ball2Pos = 4.3;
     }
 
     public static final class Elevator {
-        public static final int primaryMotorID = 15;
-        public static final int followerMotorID = 16;
-        public static final int canCoderID = 17;
+        public static final int primaryMotorID = 20;
+        public static final int followerMotorID = 21;
+        public static final int canCoderID = 22;
         public static final String canBusName = "rio";
         public static class Up {
             public static final double KP = 5; // 25;  // 5; // 20.0;
@@ -256,8 +261,8 @@ public class Constants {
 
         public static final double l1Pos = -4.41582; // -1.75;
         public static final double l2Pos = -4.41582;
-        public static final double l3Pos = -8.385644;
-        public static final double l4Pos = -14;
+        public static final double l3Pos = -8.28;
+        public static final double l4Pos = -14.5;
         public static final double ball1Pos = -2.8;
         public static final double ball2Pos = -7;
         public static final double upDodgePos = -6.5;
@@ -283,7 +288,7 @@ public class Constants {
     }
 
     public static final class Candle {
-        public static final int candleID = 19;
+        public static final int candleID = 23;
         public static final String canBusName = "rio";
     }
 

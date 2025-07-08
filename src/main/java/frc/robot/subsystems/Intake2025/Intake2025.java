@@ -130,7 +130,7 @@ public class Intake2025 extends SubsystemBase {
     public boolean getIsCarryingCoral() {
         // return isIntakeCoralSensorOn;
         // System.out.println("------------------------=============> " + curState.name());
-        return curState == STATE.CARRYING_CORAL;
+        return curState == STATE.CARRYING_CORAL || curState == STATE.CORAL_OUT;
     }
 
     private boolean isAllSensored() {
