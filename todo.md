@@ -17,4 +17,4 @@ Coral模式 Aglea模式切换（左Bumper）
 旋转微调
 除了地吸反转，上面的都需要测试
 
-整理UpperSystem的setState考虑新加的READY_FOR_LOAD_GROUND_CORAL和READY_FOR_LOAD_UP_CORAL状态
+整理UpperSystem的setState考虑新加的READY_FOR_LOAD_GROUND_CORAL和READY_FOR_LOAD_UP_CORAL状态(done)

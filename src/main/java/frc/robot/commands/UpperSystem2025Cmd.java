@@ -706,19 +706,20 @@ public class UpperSystem2025Cmd extends Command {
             return;
         }
 
-        if (curState == STATE.ZERO && newState != STATE.READY_FOR_LOAD_GROUND_CORAL) {
-            // if we are in zero state, we can only go to READY_FOR_LOAD_CORAL state
+        if (curState == STATE.ZERO && (newState != STATE.READY_FOR_LOAD_GROUND_CORAL || newState != STATE.READY_FOR_LOAD_UP_CORAL)) {
+            // if we are in zero state, we can only go to READY_FOR_LOAD_CORAL state or READY_FOR_LOAD_UP_CORAL
             return;
         }
 
         if (newState == STATE.L1 || newState == STATE.L2 || newState == STATE.L3 || newState == STATE.L4) {
             if (curState != STATE.READY_FOR_LOAD_GROUND_CORAL
+                    && curState != STATE.READY_FOR_LOAD_UP_CORAL
                     && curState != STATE.L1
                     && curState != STATE.L2
                     && curState != STATE.L3
                     && curState != STATE.L4) {
-                // if we are not in READY_FOR_LOAD_CORAL, L1, L2, L3, L4, refuse to go to L1,
-                // L2, L3, L4
+                // if we are not in READY_FOR_LOAD_CORAL, READY_FOR_LOAD_UP_CORAL, L1, L2, L3, L4, 
+                // refuse to go to L1, L2, L3, L4
                 return;
             }
             if (!getIsCarryingCoral() || getIsCarryingBall()) {
@@ -729,7 +730,7 @@ public class UpperSystem2025Cmd extends Command {
         }
 
         if (newState == STATE.BALL1 || newState == STATE.BALL2) {
-            if (curState != STATE.READY_FOR_LOAD_GROUND_CORAL && curState != STATE.BALL1 && curState != STATE.BALL2) {
+            if (curState != STATE.READY_FOR_LOAD_GROUND_CORAL && curState != STATE.READY_FOR_LOAD_UP_CORAL && curState != STATE.BALL1 && curState != STATE.BALL2) {
                 // if we are not in READY_FOR_LOAD_BALL, refuse to go to BALL1
                 return;
             }
@@ -739,9 +740,9 @@ public class UpperSystem2025Cmd extends Command {
             }
         }
 
-        if (newState == STATE.READY_FOR_LOAD_GROUND_CORAL) {
+        if (newState == STATE.READY_FOR_LOAD_GROUND_CORAL || newState == STATE.READY_FOR_LOAD_UP_CORAL) {
             if (getIsCarryingBall() || getIsCarryingCoral()) {
-                // if we are carrying ball or coral, refuse to go to READY_FOR_LOAD_CORAL
+                // if we are carrying ball or coral, refuse to go to READY_FOR_LOAD_CORAL or READY_FOR_LOAD_UP_CORAL
                 return;
             }
         }
@@ -1133,6 +1134,7 @@ public class UpperSystem2025Cmd extends Command {
             case ZERO:
                 break;
             case READY_FOR_LOAD_GROUND_CORAL:
+            case READY_FOR_LOAD_UP_CORAL:
                 if (getIsCarryingCoral()) {
                     setState(STATE.L1);
                 }
@@ -1514,7 +1516,7 @@ public class UpperSystem2025Cmd extends Command {
             "isCarryingCoral: " + getIsCarryingCoral() + " isCarryingBall: " + getIsCarryingBall());
 
         SmartDashboard.putString("US2025Cmd_Sub_Running_State", "arm: " + m_turningArm.getCurRunningState() + " elevator: " + m_elevator.getCurRunningState() + " elevator state: " + m_elevator.getState());
-                // DON'T DELETE UP CODES
+        // DON'T DELETE UP CODES
         // DON'T DELETE UP CODES
         // DON'T DELETE UP CODES
     }

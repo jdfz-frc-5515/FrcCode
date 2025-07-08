@@ -21,6 +21,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -43,6 +44,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         DONE,
     }
 
+    private DigitalInput coralSensor = new DigitalInput(3);
     private final TalonFX m_turnMotor = new TalonFX(GIntakeConstants.GIntakeTurnID, GIntakeConstants.canBusName);
     private final TalonFX m_driveMotor = new TalonFX(GIntakeConstants.GIntakeDriveID, GIntakeConstants.canBusName);
     private final CANcoder m_CANcoder = new CANcoder(GIntakeConstants.GIntakeCCID, GIntakeConstants.canBusName);
@@ -257,6 +259,9 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         m_driveMotor.set(-0.3);
     }
 
+    private boolean isCoralIn() {
+        return coralSensor.get() == false;
+    }
 
     protected void updateState() {
         if (curState == GI_STATE.EXPAND) {
@@ -295,6 +300,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     public void periodic() {
         // This method will be called once per scheduler run
         updateState();
+        telemetry();
     }
 
     @Override
@@ -312,5 +318,12 @@ public class GroundIntakeSubsystem extends SubsystemBase {
             default:
                 return NONE_POS;
         }
+    }
+
+    protected void telemetry() {
+        SmartDashboard.putString("GroundIntake state", curState.name());
+        SmartDashboard.putString("GroundIntake sensor", "state: " + coralSensor.get());
+
+
     }
 }
