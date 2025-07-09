@@ -23,6 +23,8 @@ public class Intake2025 extends SubsystemBase {
     private final int intakeCoralSensorOnTickCountThreshold = 0;       // a tick is about 1/50 second(50Hz)
     private final int intakeCoralSensorOffTickCountThreshold = 0;      // a tick is about 1/50 second(50Hz)
 
+    private boolean canAdjusetCoralPosition = false;
+
     public enum STATE {
         READY,
         CORAL_IN,
@@ -69,6 +71,10 @@ public class Intake2025 extends SubsystemBase {
     public void init() {
         m_motor.getConfigurator().apply(getMotorConfiguration());
         setState(STATE.READY);
+    }
+
+    public void setCanAdjusetCoralPosition(boolean on) {
+        canAdjusetCoralPosition = on;
     }
 
     public void toggleCoralIntake() {
@@ -119,6 +125,7 @@ public class Intake2025 extends SubsystemBase {
 
     public void startShoot() {
         if (this.curState == STATE.CARRYING_CORAL) {
+            canAdjusetCoralPosition = false;
             setState(STATE.CORAL_OUT);
         }
     }
@@ -186,8 +193,13 @@ public class Intake2025 extends SubsystemBase {
                     speed = Constants.Intake.coralInSlowSpeed;
                 }
                 if (isAllSensored()) {
-                    coralInState = CORAL_IN_STATE.STEP1;
-                    speed = Constants.Intake.coralInReverseSpeed;
+                    // coralInState = CORAL_IN_STATE.STEP1;
+                    // speed = Constants.Intake.coralInReverseSpeed;
+
+                    // majun 2025-7-9:
+                    curState = STATE.CARRYING_CORAL;
+                    coralInState = CORAL_IN_STATE.READY;
+                    speed = 0;
                 }
             }
             break;
@@ -218,7 +230,7 @@ public class Intake2025 extends SubsystemBase {
                 speed = 0;
                 break;
             case CARRYING_CORAL:
-                if (!intakeCoralSensor1.get()) {
+                if (!intakeCoralSensor1.get() && canAdjusetCoralPosition) {
                     speed = Constants.Intake.coralInReverseSpeed;
                 }
                 else {

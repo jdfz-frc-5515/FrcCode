@@ -78,34 +78,34 @@ public final class GlobalConfig {
 
 
     public static boolean init() {
-        try {
-            for (int i = 0; i < aimAprilTagIds.length; ++i) {
-                for (int j = 0; j < 2; ++j) {
-                    String pathName = getApPathName(aimAprilTagIds[i], j == 0);
-                    PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
-                    System.out.println("=========== " + pathName + " loaded ===============");
-                    aimPathDic.put(pathName, path);
-                }
+        // try {
+        //     for (int i = 0; i < aimAprilTagIds.length; ++i) {
+        //         for (int j = 0; j < 2; ++j) {
+        //             String pathName = getApPathName(aimAprilTagIds[i], j == 0);
+        //             PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+        //             System.out.println("=========== " + pathName + " loaded ===============");
+        //             aimPathDic.put(pathName, path);
+        //         }
 
-                String pathName = getBallPathName(aimAprilTagIds[i]);
-                PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
-                System.out.println("=========== " + pathName + " loaded ===============");
-                aimPathDic.put(pathName, path);
-            }
+        //         String pathName = getBallPathName(aimAprilTagIds[i]);
+        //         PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+        //         System.out.println("=========== " + pathName + " loaded ===============");
+        //         aimPathDic.put(pathName, path);
+        //     }
 
-            for (int i = 0; i < sourcePath.length; ++i) {
-                String pathName = sourcePath[i];
-                PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
-                System.out.println("=========== " + pathName + " loaded ===============");
-                aimPathDic.put(pathName, path);
-            }
+        //     for (int i = 0; i < sourcePath.length; ++i) {
+        //         String pathName = sourcePath[i];
+        //         PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+        //         System.out.println("=========== " + pathName + " loaded ===============");
+        //         aimPathDic.put(pathName, path);
+        //     }
 
 
-            return true;
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        //     return true;
+        // }
+        // catch (Exception e) {
+        //     e.printStackTrace();
+        // }
         return false;
     }
 

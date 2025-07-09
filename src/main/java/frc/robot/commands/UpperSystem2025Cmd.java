@@ -213,20 +213,11 @@ public class UpperSystem2025Cmd extends Command {
         }));
     }
 
-    public void setAimLeftCoralTrigger(Trigger t) {
-        if (t == null) {
-            return;
-        }
-        if (this.aimLeftCoralBtn != null) {
-            DriverStation.reportError("setAimLeftCoralTrigger trigger bind multiple times. Please check your code!", true);
-            return;
-        }
-        this.aimLeftCoralBtn = t;
-        
-
-        this.aimLeftCoralBtn.whileTrue(new SequentialCommandGroup(
+    public Command getMoveToCoralCmdGroup(long aprilTagId, long level, long branch) {
+        // 这是一个Command的组合，组合了移动到目标，然后抬升电梯两个动作
+        return new SequentialCommandGroup(
             new InstantCommand(() -> {
-                ControlPadHelper.setControlPadInfoData(-1, -1, -1);
+                ControlPadHelper.setControlPadInfoData(aprilTagId, level, branch);
             })
             , new ParallelCommandGroup(
                 new FunctionalCommand(
@@ -266,7 +257,65 @@ public class UpperSystem2025Cmd extends Command {
             , new InstantCommand(() -> {
                 setStateLn();
             })
-        ));
+        );
+    }
+
+    public void setAimLeftCoralTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (this.aimLeftCoralBtn != null) {
+            DriverStation.reportError("setAimLeftCoralTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        this.aimLeftCoralBtn = t;
+
+        this.aimLeftCoralBtn.whileTrue(getMoveToCoralCmdGroup(-1, -1, -1));
+        
+
+        // this.aimLeftCoralBtn.whileTrue(new SequentialCommandGroup(
+        //     new InstantCommand(() -> {
+        //         ControlPadHelper.setControlPadInfoData(-1, -1, -1);
+        //     })
+        //     , new ParallelCommandGroup(
+        //         new FunctionalCommand(
+        //             ()-> {
+        //                 // init
+        //                 getMoveToCoralCmd();
+        //                 if (autoMoveCmd != null) {
+        //                     autoMoveCmd.schedule();
+        //                 }
+        //             }, 
+        //             ()-> {
+        //                 // excute
+        //             }, 
+        //             interrupted -> {
+        //                 // onEnd
+        //                 if (interrupted) {
+        //                     if (autoMoveCmd != null) {
+        //                         autoMoveCmd.cancel();
+        //                         autoMoveCmd = null;
+        //                     }
+        //                 }
+        //             },
+        //             ()-> {
+        //                 // isFinished
+        //                 if (autoMoveCmd == null) {
+        //                     return true;
+        //                 }
+        //                 if (m_chassis.isAtTargetPose()) {
+        //                     autoMoveCmd.cancel();
+        //                     autoMoveCmd = null;
+        //                     return true;
+        //                 }
+        //                 return false;
+        //             }
+        //         )
+        //     )
+        //     , new InstantCommand(() -> {
+        //         setStateLn();
+        //     })
+        // ));
     }
 
     public void setAimRightCoralTrigger(Trigger t) {
@@ -278,50 +327,51 @@ public class UpperSystem2025Cmd extends Command {
             return;
         }
         this.aimRigthCoralBtn = t;
-        this.aimRigthCoralBtn.whileTrue(new SequentialCommandGroup(
-            new InstantCommand(() -> {
-                System.out.println("Aim Left Coral");
-                ControlPadHelper.setControlPadInfoData(-1, -1, 1);
-            }),
-            new ParallelCommandGroup(
-                new FunctionalCommand(
-                    ()-> {
-                        // init
-                        getMoveToCoralCmd();
-                        if (autoMoveCmd != null) {
-                            autoMoveCmd.schedule();
-                        }
-                    }, 
-                    ()-> {
-                        // excute
-                    }, 
-                    interrupted -> {
-                        // onEnd
-                        if (interrupted) {
-                            if (autoMoveCmd != null) {
-                                autoMoveCmd.cancel();
-                                autoMoveCmd = null;
-                            }
-                        }
-                    },
-                    ()-> {
-                        // isFinished
-                        if (autoMoveCmd == null) {
-                            return true;
-                        }
-                        if (m_chassis.isAtTargetPose()) {
-                            autoMoveCmd.cancel();
-                            autoMoveCmd = null;
-                            return true;
-                        }
-                        return false;
-                    }
-                )
-            )
-            , new InstantCommand(() -> {
-                setStateLn();
-            })
-        ));
+        this.aimRigthCoralBtn.whileTrue(getMoveToCoralCmdGroup(-1, -1, 1));
+        // this.aimRigthCoralBtn.whileTrue(new SequentialCommandGroup(
+        //     new InstantCommand(() -> {
+        //         System.out.println("Aim Left Coral");
+        //         ControlPadHelper.setControlPadInfoData(-1, -1, 1);
+        //     }),
+        //     new ParallelCommandGroup(
+        //         new FunctionalCommand(
+        //             ()-> {
+        //                 // init
+        //                 getMoveToCoralCmd();
+        //                 if (autoMoveCmd != null) {
+        //                     autoMoveCmd.schedule();
+        //                 }
+        //             }, 
+        //             ()-> {
+        //                 // excute
+        //             }, 
+        //             interrupted -> {
+        //                 // onEnd
+        //                 if (interrupted) {
+        //                     if (autoMoveCmd != null) {
+        //                         autoMoveCmd.cancel();
+        //                         autoMoveCmd = null;
+        //                     }
+        //                 }
+        //             },
+        //             ()-> {
+        //                 // isFinished
+        //                 if (autoMoveCmd == null) {
+        //                     return true;
+        //                 }
+        //                 if (m_chassis.isAtTargetPose()) {
+        //                     autoMoveCmd.cancel();
+        //                     autoMoveCmd = null;
+        //                     return true;
+        //                 }
+        //                 return false;
+        //             }
+        //         )
+        //     )
+        //     , new InstantCommand(() -> {
+        //         setStateLn();
+        //     })
+        // ));
     }
 
     public void setAimGroundCoralTrigger(Trigger t) {
@@ -389,9 +439,9 @@ public class UpperSystem2025Cmd extends Command {
                 L1Trigger = l1;
                 L1Trigger.onTrue(new InstantCommand(() -> {
                     ControlPadHelper.setControlPadInfoData(-10, 0, -10);
-                    if (getIsCarryingCoral()) {
-                        setState(STATE.L1);
-                    }                    
+                    // if (getIsCarryingCoral()) {
+                    //     setState(STATE.L1);
+                    // }                    
                 }));
             }
         }
@@ -404,9 +454,9 @@ public class UpperSystem2025Cmd extends Command {
                 L2Trigger = l2;
                 L2Trigger.onTrue(new InstantCommand(() -> {
                     ControlPadHelper.setControlPadInfoData(-10, 1, -10);
-                    if (getIsCarryingCoral()) {
-                        setState(STATE.L2);
-                    }
+                    // if (getIsCarryingCoral()) {
+                    //     setState(STATE.L2);
+                    // }
                 }));
             }
         }
@@ -419,9 +469,9 @@ public class UpperSystem2025Cmd extends Command {
                 L3Trigger = l3;
                 L3Trigger.onTrue(new InstantCommand(() -> {
                     ControlPadHelper.setControlPadInfoData(-10, 2, -10);
-                    if (getIsCarryingCoral()) {
-                        setState(STATE.L3);
-                    }
+                    // if (getIsCarryingCoral()) {
+                    //     setState(STATE.L3);
+                    // }
                 }));
             }
         }
@@ -434,9 +484,9 @@ public class UpperSystem2025Cmd extends Command {
                 L4Trigger = l4;
                 L4Trigger.onTrue(new InstantCommand(() -> {
                     ControlPadHelper.setControlPadInfoData(-10, 3, -10);
-                    if (getIsCarryingCoral()) {
-                        setState(STATE.L4);
-                    }
+                    // if (getIsCarryingCoral()) {
+                    //     setState(STATE.L4);
+                    // }
                 }));
             }
         }
@@ -1179,6 +1229,9 @@ public class UpperSystem2025Cmd extends Command {
             case L4:
                 if (!getIsCarryingCoral()) {
                     setState(m_isIntakeFromGround ? STATE.READY_FOR_LOAD_GROUND_CORAL : STATE.READY_FOR_LOAD_UP_CORAL);
+                }
+                if (curRunningState == RUNNING_STATE.DONE) {
+                    m_intake.setCanAdjusetCoralPosition(true);
                 }
                 break;
             default:
