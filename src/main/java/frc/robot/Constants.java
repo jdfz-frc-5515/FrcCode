@@ -84,18 +84,18 @@ public class Constants {
         public static final double retractCCRotation = 0.0;
         public static final double expandCCRotation = 1.4;
 
-        public static final double Velocity = 20; // 30;//50;
-        public static final double Acceleration = 40;// 100;// 75;
-        public static final double Jerk = 120;
+        public static final double Velocity = 5;// 20; // 30;//50;
+        public static final double Acceleration = 10; //40;// 100;// 75;
+        public static final double Jerk = 30; //120;
 
         public static final double SensorToMechanismRatio = 1.0;
-        public static final double RotorToSensorRatio = 16;
+        public static final double RotorToSensorRatio = 4.857;
         
         public static final class turnMotorConst {
-            public static final double kP = 20;
+            public static final double kP = 30;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
-            public static final double kS = 3.0;
+            public static final double kS = 4.0;
             public static final double kV = 0.0;
             public static final double kA = 0.0;
         }
@@ -129,8 +129,8 @@ public class Constants {
         public static final double moveToPoseRotationToleranceRadians = Units.degreesToRadians(3.); // TODO
         public static final double moveToPoseTranslationToleranceMeters = 0.02; // TODO
 
-        public static final double maxMoveToSpeed = 1.; // TODO
-        public static final double maxMoveToAngularVelocity = Units.degreesToRadians(100.); // TODO
+        public static final double maxMoveToSpeed = 3.5; // TODO
+        public static final double maxMoveToAngularVelocity = Units.degreesToRadians(200.); // TODO
 
     }
 
@@ -217,7 +217,7 @@ public class Constants {
         public static final double RotorToSensorRatio = 44;
         // bigger value means arm is more expanded(clockwise)
         public static final double zeroPos = 0;
-        public static final double groundIntakePos = 1.25;//0.042;
+        public static final double groundIntakePos = 0.18;
         public static final double upIntakePos = 1.25;
         public static final double l1Pos = 1.69;//0.407227;
         public static final double l2Pos = 1.69;
@@ -250,7 +250,7 @@ public class Constants {
             public static final double KA = 0;//0.07;
         }
 
-        public static final double Velocity = 30; // 30;//50;
+        public static final double Velocity = 4;// 30; // 30;//50;
         public static final double Acceleration = 30;// 100;// 75;
         public static final double Jerk = 0;
         public static final double SensorToMechanismRatio = 1.0;
@@ -309,7 +309,7 @@ public class Constants {
         };
 
         public static double coralBranchOffset = 0.164338;
-        public static double coralVerticalOffset = -0.55;
+        public static double coralVerticalOffset = 0.55;
         
         // 接入点信息类
         public static class APInfo {

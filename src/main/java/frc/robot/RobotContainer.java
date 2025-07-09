@@ -117,12 +117,14 @@ public class RobotContainer {
         Trigger aimRightCoralBtn = m_driverController.rightBumper();
         Trigger intakeBtn = m_driverController.y();        // 启动intake,从上面漏斗intake
         Trigger groundIntakeSwitchBtn = m_driverController.x(); // 启动/收起 地吸
-        Trigger catchBallBtn = m_driverController.b();    // 抓球模式下，启动抓球功能
+        // Trigger catchBallBtn = m_driverController.b();    // 抓球模式下，启动抓球功能
         cmd.setResetToZeroPosTrigger(zeroUpperPosBtn);
         cmd.setAimLeftCoralTrigger(aimLeftCoralBtn);
         cmd.setAimRightCoralTrigger(aimRightCoralBtn);
-        cmd.setIntakeTrigger(intakeBtn);
-        cmd.setCatchBallTrigger(catchBallBtn);
+        cmd.setIntakeTrigger(intakeBtn);    // 开启intake，shoot，Aglea模式下是挑球
+
+        cmd.setSwitchCoralAndBallTrigger(m_driverController.b());
+
         cmd.setGroundIntakeSwitchTrigger(groundIntakeSwitchBtn);
 
         aimGroundCoralBtn.whileTrue(new GoToCoralCmd(drivetrain));
@@ -153,8 +155,11 @@ public class RobotContainer {
         UpperSystem2025Cmd cmd = UpperSystem2025Cmd.inst;
         cmd.setLnTrigger(m_driverController2.a(), m_driverController2.b(), m_driverController2.x(), m_driverController2.y());
         cmd.setSwitchIntakeSourceTrigger(m_driverController2.rightBumper());
-        cmd.setSwitchCoralAndBallTrigger(m_driverController2.leftBumper());
+        
         cmd.setGroundIntakeOutTakeTrigger(m_driverController2.rightTrigger());
+
+        cmd.setElevatorLevelDownTrigger(m_driverController2.povDown());
+        cmd.setElevatorLevelUpTrigger(m_driverController2.povUp());
     }
 
     private void configureDriver3Bindings() {
@@ -169,6 +174,12 @@ public class RobotContainer {
         cmd.setResetCanCodePositionTrigger(m_driverController3.start());
         cmd.setLockElevatorTrigger(m_driverController3.b());
         cmd.setUnlockElevatorTrigger(m_driverController3.a());
+
+        m_driverController3.leftTrigger()
+            .and(m_driverController3.rightTrigger())
+            .onTrue(new InstantCommand(() -> {
+                GlobalConfig.devMode = !GlobalConfig.devMode;
+            }));
     }
 
     private void registerPathplannerEventsAndNamedCommands() {

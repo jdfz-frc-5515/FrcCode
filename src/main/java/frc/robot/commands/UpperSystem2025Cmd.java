@@ -133,10 +133,12 @@ public class UpperSystem2025Cmd extends Command {
     private Trigger armTuningUpTrigger;
     private Trigger armTuningDownTrigger;
 
-    private Trigger catchBallTrigger;
 
     private Trigger switchIntakeSourceTrigger;  // 切换Intake来源，地吸或者上面漏斗
     private Trigger switchCoralAndBallTrigger;  // 切换Coral模式还是Aglea模式
+
+    private Trigger elevatorLevelUpTrigger;
+    private Trigger elevatorLevelDownTrigger;
 
     // L1,L2,L3,L4, 有Coral时改变电梯位置，无Coral时预约下次电梯高度
     private Trigger L1Trigger;
@@ -185,6 +187,10 @@ public class UpperSystem2025Cmd extends Command {
         // this.m_moveTo = moveto;
         // addRequirements(m_moveTo);
 
+        groundIntake.setUpperIntakeControl(()->{
+            m_intake.startIntake();
+        }, ()-> {});
+
         schedule();
 
         initDebug();
@@ -201,7 +207,9 @@ public class UpperSystem2025Cmd extends Command {
 
         this.resetToZeroPosBtn = t;
         this.resetToZeroPosBtn.onTrue(new InstantCommand(() -> {
-            setState(STATE.ZERO);
+            if (GlobalConfig.devMode) {
+                setState(STATE.ZERO);
+            }
         }));
     }
 
@@ -218,10 +226,9 @@ public class UpperSystem2025Cmd extends Command {
 
         this.aimLeftCoralBtn.whileTrue(new SequentialCommandGroup(
             new InstantCommand(() -> {
-                System.out.println("Aim Left Coral");
                 ControlPadHelper.setControlPadInfoData(-1, -1, -1);
-            }),
-            new ParallelCommandGroup(
+            })
+            , new ParallelCommandGroup(
                 new FunctionalCommand(
                     ()-> {
                         // init
@@ -235,17 +242,30 @@ public class UpperSystem2025Cmd extends Command {
                     }, 
                     interrupted -> {
                         // onEnd
+                        if (interrupted) {
+                            if (autoMoveCmd != null) {
+                                autoMoveCmd.cancel();
+                                autoMoveCmd = null;
+                            }
+                        }
                     },
                     ()-> {
                         // isFinished
                         if (autoMoveCmd == null) {
                             return true;
                         }
-                        return autoMoveCmd.isFinished();
+                        if (m_chassis.isAtTargetPose()) {
+                            autoMoveCmd.cancel();
+                            autoMoveCmd = null;
+                            return true;
+                        }
+                        return false;
                     }
                 )
-                // TODO: 检查机器和目标的距离，进入一定距离以后升起电梯
             )
+            , new InstantCommand(() -> {
+                setStateLn();
+            })
         ));
     }
 
@@ -277,17 +297,30 @@ public class UpperSystem2025Cmd extends Command {
                     }, 
                     interrupted -> {
                         // onEnd
+                        if (interrupted) {
+                            if (autoMoveCmd != null) {
+                                autoMoveCmd.cancel();
+                                autoMoveCmd = null;
+                            }
+                        }
                     },
                     ()-> {
                         // isFinished
                         if (autoMoveCmd == null) {
                             return true;
                         }
-                        return autoMoveCmd.isFinished();
+                        if (m_chassis.isAtTargetPose()) {
+                            autoMoveCmd.cancel();
+                            autoMoveCmd = null;
+                            return true;
+                        }
+                        return false;
                     }
                 )
-                // TODO: 检查机器和目标的距离，进入一定距离以后升起电梯
             )
+            , new InstantCommand(() -> {
+                setStateLn();
+            })
         ));
     }
 
@@ -306,6 +339,7 @@ public class UpperSystem2025Cmd extends Command {
     }
 
     public void setIntakeTrigger(Trigger t) {
+        // 开启intake，shoot，Aglea模式下是挑球
         if (t == null) {
             return;
         }
@@ -315,37 +349,21 @@ public class UpperSystem2025Cmd extends Command {
         }
         intakeTrigger = t;
         intakeTrigger.onTrue(new InstantCommand(() -> {
-            // TODO: 这里注释掉的几行是旧代码，似乎有问题
-            // if (getIsInAgleaMode()) {
-            //     m_intake.toggleBallIntake();
-            // }
-            // else {
-            //     m_intake.toggleCoralIntake();
-            // }
-            if (!getIsInAgleaMode()) {
-                m_intake.toggleCoralIntake();
-            }
-        }));
-    }
-
-    public void setCatchBallTrigger(Trigger t) {
-        if (t == null) {
-            return;
-        }
-        if (catchBallTrigger != null) {
-            DriverStation.reportError("setCatchBallTrigger trigger bind multiple times. Please check your code!", true);
-            return;
-        }
-        catchBallTrigger = t;
-        catchBallTrigger.onTrue(new InstantCommand(() -> {
             if (getIsInAgleaMode()) {
                 m_elevator.setOffset(-1.5);
                 m_intake.toggleBallIntake(true);
             }
-        })).onFalse(new InstantCommand(() -> {
-            m_elevator.clearOffset();
-            m_intake.toggleBallIntake(false);
-        }));
+            else{
+                m_intake.toggleCoralIntake();
+            }
+        }))
+        .onFalse(new InstantCommand(() -> {
+            if (getIsInAgleaMode()) {
+                m_elevator.clearOffset();
+                m_intake.toggleBallIntake(false);
+            }
+        }))
+        ;
     }
 
     public void setGroundIntakeSwitchTrigger(Trigger t) {
@@ -370,13 +388,10 @@ public class UpperSystem2025Cmd extends Command {
             else {
                 L1Trigger = l1;
                 L1Trigger.onTrue(new InstantCommand(() -> {
+                    ControlPadHelper.setControlPadInfoData(-10, 0, -10);
                     if (getIsCarryingCoral()) {
                         setState(STATE.L1);
-                    }
-                    else {
-                        ControlPadHelper.setControlPadInfoData(-10, 0, -10);
-                    }
-                    
+                    }                    
                 }));
             }
         }
@@ -388,13 +403,10 @@ public class UpperSystem2025Cmd extends Command {
             else {
                 L2Trigger = l2;
                 L2Trigger.onTrue(new InstantCommand(() -> {
+                    ControlPadHelper.setControlPadInfoData(-10, 1, -10);
                     if (getIsCarryingCoral()) {
                         setState(STATE.L2);
                     }
-                    else {
-                        ControlPadHelper.setControlPadInfoData(-10, 1, -10);
-                    }
-                    
                 }));
             }
         }
@@ -406,13 +418,10 @@ public class UpperSystem2025Cmd extends Command {
             else {
                 L3Trigger = l3;
                 L3Trigger.onTrue(new InstantCommand(() -> {
+                    ControlPadHelper.setControlPadInfoData(-10, 2, -10);
                     if (getIsCarryingCoral()) {
                         setState(STATE.L3);
                     }
-                    else {
-                        ControlPadHelper.setControlPadInfoData(-10, 2, -10);
-                    }
-                    
                 }));
             }
         }
@@ -424,13 +433,10 @@ public class UpperSystem2025Cmd extends Command {
             else {
                 L4Trigger = l4;
                 L4Trigger.onTrue(new InstantCommand(() -> {
+                    ControlPadHelper.setControlPadInfoData(-10, 3, -10);
                     if (getIsCarryingCoral()) {
                         setState(STATE.L4);
                     }
-                    else {
-                        ControlPadHelper.setControlPadInfoData(-10, 3, -10);
-                    }
-                    
                 }));
             }
         }
@@ -453,6 +459,34 @@ public class UpperSystem2025Cmd extends Command {
             if (!m_isIntakeFromGround && curState == STATE.READY_FOR_LOAD_GROUND_CORAL) {
                 setState(STATE.READY_FOR_LOAD_UP_CORAL);
             }
+        }));
+    }
+
+    public void setElevatorLevelUpTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (elevatorLevelUpTrigger != null) {
+            DriverStation.reportError("elevatorLevelUpTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        elevatorLevelUpTrigger = t;
+        elevatorLevelUpTrigger.onTrue(new InstantCommand(() -> {
+            makeElevatorLevelUpOrDown(true);
+        }));
+    }
+
+    public void setElevatorLevelDownTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (elevatorLevelDownTrigger != null) {
+            DriverStation.reportError("elevatorLevelDownTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        elevatorLevelDownTrigger = t;
+        elevatorLevelDownTrigger.onTrue(new InstantCommand(() -> {
+            makeElevatorLevelUpOrDown(false);
         }));
     }
 
@@ -706,7 +740,7 @@ public class UpperSystem2025Cmd extends Command {
             return;
         }
 
-        if (curState == STATE.ZERO && (newState != STATE.READY_FOR_LOAD_GROUND_CORAL || newState != STATE.READY_FOR_LOAD_UP_CORAL)) {
+        if (curState == STATE.ZERO && (newState != STATE.READY_FOR_LOAD_GROUND_CORAL && newState != STATE.READY_FOR_LOAD_UP_CORAL)) {
             // if we are in zero state, we can only go to READY_FOR_LOAD_CORAL state or READY_FOR_LOAD_UP_CORAL
             return;
         }
@@ -758,7 +792,7 @@ public class UpperSystem2025Cmd extends Command {
         lastState = curState;
         curState = newState;
 
-        // System.out.println("UpperSystem2025Cmd::setState: try set: comfirmed");
+        System.out.println("UpperSystem2025Cmd::setState: try set: comfirmed");
     }
 
 
@@ -1136,7 +1170,7 @@ public class UpperSystem2025Cmd extends Command {
             case READY_FOR_LOAD_GROUND_CORAL:
             case READY_FOR_LOAD_UP_CORAL:
                 if (getIsCarryingCoral()) {
-                    setState(STATE.L1);
+                    // setState(STATE.L1);
                 }
                 break;
             case L1:
@@ -1307,6 +1341,7 @@ public class UpperSystem2025Cmd extends Command {
 
             double distance = robotPos.getTranslation().getDistance(apPose.getTranslation());
             if (distance < minDistance) {
+                minDistance = distance;
                 minDistanceApId = (long)ap.getId();
             }
         }
@@ -1347,9 +1382,9 @@ public class UpperSystem2025Cmd extends Command {
 
         // for test
         SmartDashboard.putString("MoveToCoralState", String.format("AP: %d, level: %d, branch: %d, targetPos: %s", apId, info.level, info.branch, targetPos.toString()));
-        return null;
-        // autoMoveCmd = m_chassis.autoMoveToPoseCommand(targetPos);
-        // return autoMoveCmd;
+        // return null;
+        autoMoveCmd = m_chassis.autoMoveToPoseCommand(targetPos);
+        return autoMoveCmd;
     }
 
     private void moveToGroundCoral() {
@@ -1502,6 +1537,38 @@ public class UpperSystem2025Cmd extends Command {
                 return 0;
         }
         return 0;
+    }
+
+    private void makeElevatorLevelUpOrDown(boolean isUp) {
+        if (!getIsInAgleaMode() && !getIsCarryingCoral()) {
+            return;
+        }
+
+        STATE newState = getNextElevatorLevel(isUp);
+        if (newState != STATE.NONE) {
+            setState(newState);
+        }
+    }
+
+    private STATE getNextElevatorLevel(boolean isUp) {
+        switch (curState) {
+            case L1:
+                return isUp ? STATE.L2 : STATE.L1;
+            case L2:
+                return isUp ? STATE.L3 : STATE.L1;
+            case L3:
+                return isUp ? STATE.L4 : STATE.L2;
+            case L4:
+                return isUp ? STATE.L4 : STATE.L3;
+            case BALL1:
+                return isUp ? STATE.BALL2 : STATE.BALL1;
+            case BALL2:
+                return isUp ? STATE.BALL2 : STATE.BALL1;
+            default:
+                break;
+        }
+
+        return STATE.NONE;
     }
 
     protected void telemetry() {

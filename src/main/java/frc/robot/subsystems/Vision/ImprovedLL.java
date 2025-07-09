@@ -14,8 +14,8 @@ public class ImprovedLL extends LimelightHelpers{
         }
     }
 
-    public static MT2stddevs getmt2Devs(){
-        Double[] devs = NetworkTableInstance.getDefault().getTable(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT).getEntry("stddevs").getDoubleArray(new Double[12]);
+    public static MT2stddevs getmt2Devs(String llName){
+        Double[] devs = NetworkTableInstance.getDefault().getTable(llName).getEntry("stddevs").getDoubleArray(new Double[12]);
         return new MT2stddevs(devs[6], devs[7]);
     }
 }

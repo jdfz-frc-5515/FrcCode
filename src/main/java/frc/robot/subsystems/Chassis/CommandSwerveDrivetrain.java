@@ -171,6 +171,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         configureAutoBuilder();
         configureMoveToPose();
+
     }
 
     /**
@@ -388,8 +389,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     static final double MAX_LL_LATENCY = 100; // 100 ms, this is the maximum latency we accept from the limelight
     public void updateOdometry(String llName){
 
-        
-        LimelightHelpers.SetRobotOrientation(llName, getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        double botRot = getState().Pose.getRotation().getDegrees();
+        double pigeonRot = getRotationFromPigeon();
+
+        Pose2d botPos =  LimelightHelpers.getBotPose2d(llName);
+        SmartDashboard.putString(llName + "ROT-MT1", String.format("%f", botPos.getRotation().getDegrees()));
+        SmartDashboard.putString(llName + "ROT", String.format("%f - %f - %f", botRot, pigeonRot, pigeonRot - zeroOdoDegree));
+        LimelightHelpers.SetRobotOrientation(llName, getRotationFromPigeon() - zeroOdoDegree, 0, 0, 0, 0, 0);
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(llName);
         // ImprovedLL.MT2stddevs devs = ImprovedLL.getmt2Devs();
         // ImprovedLL.mt2stdDev stdDev = ImprovedLL.getmt2Dev(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT); 
@@ -402,7 +408,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             && mt2.tagCount > 0 
             && mt2.avgTagDist < 4 
             && Math.hypot(getSpeeds().vxMetersPerSecond, getSpeeds().vyMetersPerSecond) < 2
-            && mt2.latency < MAX_LL_LATENCY // 抛弃高延时
+            // && mt2.latency < MAX_LL_LATENCY // 抛弃高延时
         ) {
 
             // 以下1,2,3来自DeepSeek
@@ -416,11 +422,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             double captureTime = currentFPGATime - latencySeconds;
 
             // 旧版：
-            // double captureTime = Utils.fpgaToCurrentTime(mt2.timestampSeconds);
+            double captureTime2 = Utils.fpgaToCurrentTime(mt2.timestampSeconds);
+
+            SmartDashboard.putNumber("CapTime latency", mt2.latency);
+            SmartDashboard.putString("CapTime", String.format("c1: %f, c2: %f", captureTime, captureTime2));
 
             double data = Constants.PoseEstimatorConstants.tAtoDev.get(mt2.avgTagArea);
+            SmartDashboard.putString("MT2 pos: ", mt2.pose.toString());
             addVisionMeasurement(mt2.pose,
-                captureTime,
+                captureTime2,
                 VecBuilder.fill(data, data, 100000000)
                 // VecBuilder.fill(0.00001,0.00001, 100000000.)
                 // VecBuilder.fill(devs.xdev, devs.ydev, 100000000.)
@@ -432,6 +442,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         else {
             if (mt2.latency >= MAX_LL_LATENCY) {
                 DriverStation.reportWarning(llName + " latency too high: " + mt2.latency + " ms", false);
+            }
+            else {
+                DriverStation.reportWarning(llName + "vision ignored", false);
             }
         }
         
@@ -737,10 +750,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void resetHeadingForOdo(double angle) {
-        this.resetRotation(Rotation2d.fromDegrees(angle));
+        zeroOdoDegree = getRotationFromPigeon() + angle;
+        // this.resetRotation(Rotation2d.fromDegrees(angle));
     }
 
 
+    private double zeroOdoDegree = 0;
+    private double getRotationFromPigeon() {
+        return this.getPigeon2().getYaw().getValueAsDouble() % 360;
+    }
 
     // public boolean isNearStation(){
     //     return generateStationPose().getTranslation().getDistance(getPose().getTranslation()) <= FieldConstants.StationDetectionArea;

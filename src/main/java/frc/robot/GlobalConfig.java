@@ -9,6 +9,8 @@ import com.pathplanner.lib.path.PathPlannerPath;
 public final class GlobalConfig {
     public static final int version = 2025;
 
+    public static boolean devMode = true;
+
     private static HashMap<String, PathPlannerPath> aimPathDic = new HashMap<String,PathPlannerPath>();
     private static final int[] aimAprilTagIds = new int[] {
         6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22,

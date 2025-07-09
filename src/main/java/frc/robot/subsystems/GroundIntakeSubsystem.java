@@ -44,11 +44,14 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         DONE,
     }
 
-    private DigitalInput coralSensor = new DigitalInput(3);
+    private DigitalInput coralSensor = new DigitalInput(2);
     private final TalonFX m_turnMotor = new TalonFX(GIntakeConstants.GIntakeTurnID, GIntakeConstants.canBusName);
     private final TalonFX m_driveMotor = new TalonFX(GIntakeConstants.GIntakeDriveID, GIntakeConstants.canBusName);
     private final CANcoder m_CANcoder = new CANcoder(GIntakeConstants.GIntakeCCID, GIntakeConstants.canBusName);
     private MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
+
+    private Runnable startUpperIntake;
+    private Runnable stopUppeerIntake;
 
     private final double NONE_POS = -9999;
     private final double threshold = 0.05;
@@ -93,6 +96,11 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         driveMotorConfig.CurrentLimits.SupplyCurrentLowerLimit = 30;
         driveMotorConfig.CurrentLimits.SupplyCurrentLowerTime = 0.02;
         return driveMotorConfig;
+    }
+
+    public void setUpperIntakeControl(Runnable start, Runnable stop) {
+        startUpperIntake = start;
+        stopUppeerIntake = stop;
     }
 
 
@@ -256,7 +264,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     }
 
     public void reverseIntake() {
-        m_driveMotor.set(-0.3);
+        m_driveMotor.set(-0.5);
     }
 
     private boolean isCoralIn() {
@@ -270,6 +278,32 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         if (curState == GI_STATE.NONE) {
             stopIntake();
         }
+        if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.DONE) {
+            if (isCoralIn())
+            {
+                reverseIntake();
+            }
+            else {
+                stopIntake();
+            }
+            // reverseIntake();
+        }
+
+        if (isCoralIn()) {
+            if (curState == GI_STATE.EXPAND) {
+                setState(GI_STATE.RETRACT);
+                // stopIntake();
+                return;
+            }
+            if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.RUNNING) {
+                stopIntake();
+            }
+            if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.DONE) {
+                startUpperIntake.run();
+                reverseIntake();
+            }
+        }
+
         double pos = getStatePos(curState);
         SmartDashboard.putNumber("GI ccc targetPos", pos);
         SmartDashboard.putNumber("GI ccc curPos", m_CANcoder.getPosition().getValueAsDouble());

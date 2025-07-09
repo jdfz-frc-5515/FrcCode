@@ -76,32 +76,45 @@ public final class MiscUtils {
         return ret;
     }
 
-    private static Pose2d calcOffsetPoint(double x, double y, double angle, double n, double offset, double newAngle) {
-        double angleRad = Units.degreesToRadians(angle); // 将角度转换为弧度
+    // private static Pose2d calcOffsetPoint(double x, double y, double angle, double n, double offset, double newAngle) {
+    //     double angleRad = Units.degreesToRadians(angle); // 将角度转换为弧度
 
-        // 计算垂直偏移点
-        double perpendicularAngleRad = angleRad + Math.PI / 2; // 垂直方向的角度（弧度）
-        double px = x + n * Math.cos(perpendicularAngleRad); // 垂直偏移点的 x 坐标
-        double py = y + n * Math.sin(perpendicularAngleRad); // 垂直偏移点的 y 坐标
+    //     // 计算垂直偏移点
+    //     double perpendicularAngleRad = angleRad + Math.PI / 2; // 垂直方向的角度（弧度）
+    //     double px = x + n * Math.cos(perpendicularAngleRad); // 垂直偏移点的 x 坐标
+    //     double py = y + n * Math.sin(perpendicularAngleRad); // 垂直偏移点的 y 坐标
 
-        // 计算沿边偏移后的新点
-        double newPx = px + offset * Math.cos(angleRad); // 新点的 x 坐标
-        double newPy = py + offset * Math.sin(angleRad); // 新点的 y 坐标
+    //     // 计算沿边偏移后的新点
+    //     double newPx = px + offset * Math.cos(angleRad); // 新点的 x 坐标
+    //     double newPy = py + offset * Math.sin(angleRad); // 新点的 y 坐标
 
-        return new Pose2d(newPx, newPy, new Rotation2d(Units.degreesToRadians(newAngle))); 
-}
+    //     return new Pose2d(newPx, newPy, new Rotation2d(Units.degreesToRadians(newAngle))); 
+    // }
+
+    private static Pose2d calcOffsetPoint(double x, double y, double angle, double hOffset, double vOffset) {
+        String s = String.format("%f, %f, %f, %f, %f", x, y, angle, hOffset, vOffset);
+        double radAng = Units.degreesToRadians(angle);
+        double sin = Math.sin(radAng);
+        double cos = Math.cos(radAng);
+        double newPx = x - sin * hOffset - cos * vOffset;
+        double newPy = y + cos * hOffset - sin * vOffset;
+
+        return new Pose2d(newPx, newPy, new Rotation2d(radAng)); 
+    }
 
     public static Pose2d getCoralShooterPos(long apId, boolean isLeft) {
         Constants.FieldInfo.APInfo info = Constants.FieldInfo.AP_MAP.get(apId);
         if (info == null) {
             return null;
-        }
-        double hOffset = isLeft ? -Constants.FieldInfo.coralBranchOffset : Constants.FieldInfo.coralBranchOffset;
+        };
+        
+        double hOffset = isLeft ? Constants.FieldInfo.coralBranchOffset : -Constants.FieldInfo.coralBranchOffset;
         double vOffset = Constants.FieldInfo.coralVerticalOffset;
         
-        Pose2d offsetPos = calcOffsetPoint(info.getX(), info.getY(), info.getTheta2(), hOffset, vOffset, info.getTheta());
+        Pose2d offsetPos = calcOffsetPoint(info.getX(), info.getY(), info.getTheta(), hOffset, vOffset);
         return offsetPos;
     }
+    
     
     public static Pose2d getCoralBallPos(long apId) {
         Constants.FieldInfo.APInfo info = Constants.FieldInfo.AP_MAP.get(apId);
@@ -111,7 +124,7 @@ public final class MiscUtils {
         double hOffset = 0;
         double vOffset = Constants.FieldInfo.coralVerticalOffset;
         
-        Pose2d offsetPos = calcOffsetPoint(info.getX(), info.getY(), info.getTheta2(), hOffset, vOffset, info.getTheta());
+        Pose2d offsetPos = calcOffsetPoint(info.getX(), info.getY(), info.getTheta(), hOffset, vOffset);
         return offsetPos;
     } 
 }
