@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import java.awt.Cursor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -11,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.ProtectionDomain;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -31,17 +33,27 @@ import frc.robot.subsystems.TurningArm2025.TurningArm2025.TA_STATE;
 import frc.robot.utils.MiscUtils;
 
 public class GroundIntakeSubsystem extends SubsystemBase {
-    public enum GI_STATE {
-        NONE,
-        RETRACT,
-        EXPAND,
-        OUT_TAKE,   // 吐给上层Intake
-    }
+    // public enum GI_STATE___OLD {
+    //     NONE,
+    //     RETRACT,
+    //     EXPAND,
+    //     OUT_TAKE,   // 吐给上层Intake
+    // }
 
-    public enum GI_RUNNING_STATE {
-        READY,
-        RUNNING,
-        DONE,
+    // public enum GI_RUNNING_STATE {
+    //     READY,
+    //     RUNNING,
+    //     DONE,
+    // }
+
+    public enum GI_STATE {
+        IDLE,
+        EXPANDING,
+        WAIT_FOR_CORAL,
+        RETRACTING_WITHOUT_CORAL,   // -> IDLE
+        RETRACTING_WITH_CORAL,      // -> WAITING_FOR_REVERSE_INTAKE
+        WAITING_FOR_REVERSE_INTAKE,
+        REVERSE_INTAKING,           // -> IDLE   
     }
 
     private DigitalInput coralSensor = new DigitalInput(2);
@@ -61,15 +73,21 @@ public class GroundIntakeSubsystem extends SubsystemBase {
 
     double intakeMotorSpeed = 0;
 
-    GI_STATE curState = GI_STATE.NONE;
-    GI_RUNNING_STATE curRunningState = GI_RUNNING_STATE.READY;
+    GI_STATE curState = GI_STATE.IDLE;
+    // GI_RUNNING_STATE curRunningState = GI_RUNNING_STATE.READY;
 
     
-    final int DELAY_FRAME = 20;
-    int delayTime = DELAY_FRAME;
+    // final int DELAY_FRAME = 20;
+    // int delayTime = DELAY_FRAME;
 
-    final int REVERSE_INTAKE_MAX_FRAME = 100;
-    int delayRevereIntakeFrame = -1;
+    // final int REVERSE_INTAKE_MAX_FRAME = 100;
+    // int delayRevereIntakeFrame = -1;
+
+    final int MAX_WAIT_FOR_REVERSE_FRAME = 20;
+    int waitForReverseFrame = -1;
+
+    final int MAX_REVERSER_INTAKE_FRAME = 50;
+    int reverserIntakeCountdoownFrame = -1;
 
     private TalonFXConfiguration getTurnMotorConfiguration(boolean lockMotor) {
         TalonFXConfiguration turnMotorConfig = new TalonFXConfiguration();
@@ -216,46 +234,23 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     // }
 
     public void toggle() {
-        // if (curState == GI_STATE.EXPAND) {
-        //     setState(GI_STATE.RETRACT);
-        // } else if (curState == GI_STATE.RETRACT) {
-        //     setState(GI_STATE.EXPAND);
-        // } else {
-        // }
-
         switch (curState) {
-            case EXPAND:
-                setState(GI_STATE.RETRACT);
+            case IDLE:
+                curState = GI_STATE.EXPANDING;
                 break;
-            case RETRACT:
-            case NONE:
-            setState(GI_STATE.EXPAND);
-                break;
-            case OUT_TAKE:
-                // out take does not change state
+            case WAIT_FOR_CORAL:
+                curState = GI_STATE.RETRACTING_WITHOUT_CORAL;
                 break;
             default:
                 break;
         }
     }
 
-    public void setState(GI_STATE stat) {
-        if (curState == stat) {
-            return;
-        }
-        curState = stat;
-        curRunningState = GI_RUNNING_STATE.RUNNING;
-    }
-
     public GI_STATE getState() {
         return curState;
     }
 
-    public GI_RUNNING_STATE getCurRunningState() {
-        return curRunningState;
-    }
-
-    private boolean isDone(double targetPos) {
+    private boolean isArmAtPos(double targetPos) {
         if (Math.abs(m_CANcoder.getPosition().getValueAsDouble() - targetPos) < threshold) {
             return true;
         }
@@ -267,108 +262,167 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         m_CANcoder.setPosition(0);
     }
 
-    public void startIntake() {
-        // m_driveMotor.set(0.3);
-        delayRevereIntakeFrame = -1;
-        intakeMotorSpeed = 0.3;
-    }
-
-    public void stopIntake() {
-        // m_driveMotor.set(0);
-        intakeMotorSpeed = 0;
-    }
-
-    public void reverseIntake() {
-        // m_driveMotor.set(0.75);
-        intakeMotorSpeed = -0.15;
-        delayRevereIntakeFrame = REVERSE_INTAKE_MAX_FRAME;
-    }
 
     private boolean isCoralIn() {
         return getIsSensorOn();
     }
 
     protected void updateState() {
-        if (curState == GI_STATE.EXPAND) {
-            startIntake();
-        }
-        if (curState == GI_STATE.NONE) {
-            stopIntake();
-        }
-        if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.DONE) {
-            // if (isCoralIn())
-            // {
-            //     reverseIntake();
-            // }
-            // else {
-            //     stopIntake();
-            // }
-            zeroCC();
-            // reverseIntake();
-        }
-        if (isCoralIn() && curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.RUNNING) {
-            intakeMotorSpeed = 6;
-        }
-
-        do 
-        {
-            if (isCoralIn()) {
-                if (curState == GI_STATE.EXPAND) {
-                    delayTime = DELAY_FRAME;
-                    setState(GI_STATE.RETRACT);
-                    // stopIntake();
-                    break;
+        double armPos = NONE_POS;
+        switch (curState) {
+            case IDLE:
+                zeroCC();
+                intakeMotorSpeed = 0;
+                armPos = 0;
+                break;
+            case EXPANDING:
+                armPos = GIntakeConstants.expandCCRotation;
+                intakeMotorSpeed = GIntakeConstants.intakeMotorSpeed;
+                if (isArmAtPos(armPos)) {
+                    curState = GI_STATE.WAIT_FOR_CORAL;
                 }
-                // if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.RUNNING) {
-                //     stopIntake();
-                // }
-                if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.DONE) {
+                break;
+            case WAIT_FOR_CORAL:
+                intakeMotorSpeed = GIntakeConstants.intakeMotorSpeed;
+                if (isCoralIn()) {
+                    curState = GI_STATE.RETRACTING_WITH_CORAL;
+                }
+                break;
+            case RETRACTING_WITH_CORAL:
+                armPos = GIntakeConstants.retractCCRotation;
+                intakeMotorSpeed = GIntakeConstants.intakeMotorSpeedInRetractingWithCoral;
+                if (isArmAtPos(armPos)) {
+                    intakeMotorSpeed = 0;
+                    curState = GI_STATE.WAITING_FOR_REVERSE_INTAKE;
+                    waitForReverseFrame = MAX_WAIT_FOR_REVERSE_FRAME;
+                }
+                break;
+            case WAITING_FOR_REVERSE_INTAKE:
+                intakeMotorSpeed = 0;
+                if (waitForReverseFrame < 0) {
                     startUpperIntake.run();
-                    if (delayTime <= 0) {
-                        reverseIntake();
-                    }
-                    else {
-                        stopIntake();
-                    }
-                    delayTime--;
+                    curState = GI_STATE.REVERSE_INTAKING;
+                    reverserIntakeCountdoownFrame = MAX_REVERSER_INTAKE_FRAME;
                 }
-            }
-        } while(false);
-
-
-        double pos = getStatePos(curState);
-        SmartDashboard.putNumber("GI ccc targetPos", pos);
-        SmartDashboard.putNumber("GI ccc curPos", m_CANcoder.getPosition().getValueAsDouble());
-        SmartDashboard.putString("GI ccc runningState", curRunningState.name());
-        SmartDashboard.putString("GI ccc curState", curState.name());
-
-        if (MiscUtils.compareDouble(pos, NONE_POS)) {
-            return;
+                else {
+                    waitForReverseFrame--;
+                }
+                break;
+            case REVERSE_INTAKING:
+                intakeMotorSpeed = GIntakeConstants.intakeMotorReverseSpeed;
+                if (reverserIntakeCountdoownFrame < 0) {
+                    curState = GI_STATE.IDLE;
+                    intakeMotorSpeed = 0;
+                }
+                else {
+                    reverserIntakeCountdoownFrame--;
+                }
+                break;
+            case RETRACTING_WITHOUT_CORAL:
+                armPos = GIntakeConstants.retractCCRotation;
+                intakeMotorSpeed = 0;
+                if (isArmAtPos(armPos)) {
+                    curState = GI_STATE.IDLE;
+                }
+                break;
         }
-        if (isDone(pos)) {
-            curRunningState = GI_RUNNING_STATE.DONE;
-            // if (curState == GI_STATE.RETRACT && delayRevereIntakeFrame < 0) {
-            //     stopIntake();
-            // }
-        }
 
-
-        if (curRunningState == GI_RUNNING_STATE.RUNNING) {
-            m_turnMotor.setControl(motionMagicVoltage.withPosition(pos));
-        }
-        else {
+        if (MiscUtils.compareDouble(armPos, NONE_POS)) {
             m_turnMotor.stopMotor();
         }
-        
-        if (delayRevereIntakeFrame > 0) {
-            delayRevereIntakeFrame--;
-            if (delayRevereIntakeFrame == 0) {
-                delayRevereIntakeFrame = -1;
-                intakeMotorSpeed = 0;
-            }
+        else {
+            m_turnMotor.setControl(motionMagicVoltage.withPosition(armPos).withSlot(0));
         }
+
         m_driveMotor.set(intakeMotorSpeed);
+
+        SmartDashboard.putNumber("GI ccc targetPos", armPos);
+        SmartDashboard.putNumber("GI ccc curPos", m_CANcoder.getPosition().getValueAsDouble());
+        SmartDashboard.putString("GI ccc curState", curState.name());
+        SmartDashboard.putNumber("GI ccc intakeMotorSpeed", intakeMotorSpeed);
     }
+
+    // protected void updateState___OLD() {
+    //     if (curState == GI_STATE.EXPAND) {
+    //         startIntake();
+    //     }
+    //     if (curState == GI_STATE.NONE) {
+    //         stopIntake();
+    //     }
+    //     if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.DONE) {
+    //         // if (isCoralIn())
+    //         // {
+    //         //     reverseIntake();
+    //         // }
+    //         // else {
+    //         //     stopIntake();
+    //         // }
+    //         zeroCC();
+    //         // reverseIntake();
+    //     }
+    //     if (isCoralIn() && curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.RUNNING) {
+    //         intakeMotorSpeed = 6;
+    //     }
+
+    //     do 
+    //     {
+    //         if (isCoralIn()) {
+    //             if (curState == GI_STATE.EXPAND) {
+    //                 delayTime = DELAY_FRAME;
+    //                 setState(GI_STATE.RETRACT);
+    //                 // stopIntake();
+    //                 break;
+    //             }
+    //             // if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.RUNNING) {
+    //             //     stopIntake();
+    //             // }
+    //             if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.DONE) {
+    //                 startUpperIntake.run();
+    //                 if (delayTime <= 0) {
+    //                     reverseIntake();
+    //                 }
+    //                 else {
+    //                     stopIntake();
+    //                 }
+    //                 delayTime--;
+    //             }
+    //         }
+    //     } while(false);
+
+
+    //     double pos = getStatePos(curState);
+    //     SmartDashboard.putNumber("GI ccc targetPos", pos);
+    //     SmartDashboard.putNumber("GI ccc curPos", m_CANcoder.getPosition().getValueAsDouble());
+    //     SmartDashboard.putString("GI ccc runningState", curRunningState.name());
+    //     SmartDashboard.putString("GI ccc curState", curState.name());
+        
+    //     if (MiscUtils.compareDouble(pos, NONE_POS)) {
+    //         return;
+    //     }
+    //     if (isArmAtPos(pos)) {
+    //         curRunningState = GI_RUNNING_STATE.DONE;
+    //         // if (curState == GI_STATE.RETRACT && delayRevereIntakeFrame < 0) {
+    //         //     stopIntake();
+    //         // }
+    //     }
+
+
+    //     if (curRunningState == GI_RUNNING_STATE.RUNNING) {
+    //         m_turnMotor.setControl(motionMagicVoltage.withPosition(pos));
+    //     }
+    //     else {
+    //         m_turnMotor.stopMotor();
+    //     }
+        
+    //     if (delayRevereIntakeFrame > 0) {
+    //         delayRevereIntakeFrame--;
+    //         if (delayRevereIntakeFrame == 0) {
+    //             delayRevereIntakeFrame = -1;
+    //             intakeMotorSpeed = 0;
+    //         }
+    //     }
+    //     m_driveMotor.set(intakeMotorSpeed);
+    // }
 
     @Override
     public void periodic() {
@@ -382,17 +436,17 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         // This method will be called once per scheduler run during simulation
     }
 
-    public double getStatePos(GI_STATE state) {
-        switch (state) {
-            case EXPAND:
-                return GIntakeConstants.expandCCRotation;
-            case RETRACT:
-                return GIntakeConstants.retractCCRotation;
+    // public double getStatePos(GI_STATE state) {
+    //     switch (state) {
+    //         case EXPAND:
+    //             return GIntakeConstants.expandCCRotation;
+    //         case RETRACT:
+    //             return GIntakeConstants.retractCCRotation;
 
-            default:
-                return NONE_POS;
-        }
-    }
+    //         default:
+    //             return NONE_POS;
+    //     }
+    // }
 
     public void toggleDebugSensor() {
         debugSensored = !debugSensored;
@@ -405,8 +459,8 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         return coralSensor.get() == false;
     }
     protected void telemetry() {
-        SmartDashboard.putString("GroundIntake state", curState.name());
-        SmartDashboard.putString("GroundIntake sensor", "state: " + coralSensor.get());
-        SmartDashboard.putNumber("GroundIntake speed", intakeMotorSpeed);
+    
+        SmartDashboard.putString("GI ccc sensor", "state: " + coralSensor.get());
+        
     }
 }

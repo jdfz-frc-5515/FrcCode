@@ -83,6 +83,9 @@ public class Constants {
         public static final String canBusName = "rio";
         public static final double retractCCRotation = 0.0;
         public static final double expandCCRotation = 1.38;
+        public static final double intakeMotorSpeed = 0.3;
+        public static final double intakeMotorSpeedInRetractingWithCoral = 0.6;
+        public static final double intakeMotorReverseSpeed = -0.15;
 
         public static final double Velocity = 10;// 20; // 30;//50;
         public static final double Acceleration = 20; //40;// 100;// 75;
