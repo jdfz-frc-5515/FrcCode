@@ -111,6 +111,9 @@ public class RobotContainer {
 
         UpperSystem2025Cmd cmd = UpperSystem2025Cmd.inst;
 
+        // debug
+        // cmd.setGISensorTrigger(m_driverController.y());
+
         
         Trigger zeroUpperPosBtn = m_driverController.rightStick();
         Trigger aimGroundCoralBtn = m_driverController.a();
@@ -335,6 +338,10 @@ public class RobotContainer {
     }
 
     public void autoInit() {
+        LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_ARPIL_TAG_NAME_LEFT, 0);
+        LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT, 0);
+        // LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_OBJECT_DETECTION, 0);
+
         UpperSystem2025Cmd.inst.schedule();
 
         // UpperSystem2025Cmd.inst.getRequirements().forEach(sys -> {

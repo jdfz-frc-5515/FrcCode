@@ -224,6 +224,7 @@ public class UpperSystem2025Cmd extends Command {
                     ()-> {
                         // init
                         getMoveToCoralCmd();
+                        System.out.println("============================>>>>>>>>> init");
                         if (autoMoveCmd != null) {
                             autoMoveCmd.schedule();
                         }
@@ -234,18 +235,26 @@ public class UpperSystem2025Cmd extends Command {
                     interrupted -> {
                         // onEnd
                         if (interrupted) {
+                            System.out.println("============================>>>>>>>>> 0");
+
                             if (autoMoveCmd != null) {
-                                autoMoveCmd.cancel();
-                                autoMoveCmd = null;
+                                if (autoMoveCmd.isScheduled()) {
+                                    System.out.println("============================>>>>>>>>> 0.1");
+                                    autoMoveCmd.cancel();
+                                    autoMoveCmd = null;
+                                }
+
                             }
                         }
                     },
                     ()-> {
+                        System.out.println("============================>>>>>>>>> 1.2");
                         // isFinished
                         if (autoMoveCmd == null) {
                             return true;
-                        }
+                        }System.out.println("============================>>>>>>>>> 1.1");
                         if (m_chassis.isAtTargetPose()) {
+                            System.out.println("============================>>>>>>>>> 1");
                             autoMoveCmd.cancel();
                             autoMoveCmd = null;
                             return true;
@@ -255,6 +264,7 @@ public class UpperSystem2025Cmd extends Command {
                 )
             )
             , new InstantCommand(() -> {
+                System.out.println("============================>>>>>>>>> 2");
                 setStateLn();
             })
         );
@@ -1403,13 +1413,23 @@ public class UpperSystem2025Cmd extends Command {
     }
 
     private Command getMoveToCoralCmd() {
-        long targetApId = getNearestSeenCoralAprilTag();
-        if (targetApId == -1) {
-            return new InstantCommand(() -> {
-                System.out.println("getMoveToCoralCmd: no aprilTag found!!!!");
-            });
+        long targetApId = -1;
+        if (DriverStation.isAutonomous()) {
+            ControlPadHelper.ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
+            targetApId = info.aprilTagId;
         }
-        ControlPadHelper.setControlPadInfoData(targetApId, -10l, -10l);
+        else {
+            targetApId = getNearestSeenCoralAprilTag();
+            if (targetApId == -1) {
+                return new InstantCommand(() -> {
+                    System.out.println("getMoveToCoralCmd: no aprilTag found!!!!");
+                });
+            }
+    
+            ControlPadHelper.setControlPadInfoData(targetApId, -10l, -10l);
+        }
+
+
         ControlPadHelper.ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
         if (info == null) {
             return new InstantCommand(() -> {
@@ -1639,5 +1659,12 @@ public class UpperSystem2025Cmd extends Command {
         // DON'T DELETE UP CODES
         // DON'T DELETE UP CODES
         // DON'T DELETE UP CODES
+    }
+
+    // for debug
+    public void setGISensorTrigger(Trigger t) {
+        t.onTrue(new InstantCommand(() -> {
+            m_groundIntake.toggleDebugSensor();
+        }));
     }
 }

@@ -7,19 +7,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Intake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "22-L-4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
           }
         },
         {
@@ -32,18 +20,6 @@
           "type": "path",
           "data": {
             "pathName": "p01"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "17-L-4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
           }
         }
       ]

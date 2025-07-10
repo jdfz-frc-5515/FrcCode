@@ -50,14 +50,26 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     private final CANcoder m_CANcoder = new CANcoder(GIntakeConstants.GIntakeCCID, GIntakeConstants.canBusName);
     private MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
+    boolean isDebugSensorOn = false;
+    boolean debugSensored = false;
+
     private Runnable startUpperIntake;
     private Runnable stopUppeerIntake;
 
     private final double NONE_POS = -9999;
     private final double threshold = 0.05;
 
+    double intakeMotorSpeed = 0;
+
     GI_STATE curState = GI_STATE.NONE;
     GI_RUNNING_STATE curRunningState = GI_RUNNING_STATE.READY;
+
+    
+    final int DELAY_FRAME = 20;
+    int delayTime = DELAY_FRAME;
+
+    final int REVERSE_INTAKE_MAX_FRAME = 100;
+    int delayRevereIntakeFrame = -1;
 
     private TalonFXConfiguration getTurnMotorConfiguration(boolean lockMotor) {
         TalonFXConfiguration turnMotorConfig = new TalonFXConfiguration();
@@ -256,19 +268,24 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     }
 
     public void startIntake() {
-        m_driveMotor.set(0.3);
+        // m_driveMotor.set(0.3);
+        delayRevereIntakeFrame = -1;
+        intakeMotorSpeed = 0.3;
     }
 
     public void stopIntake() {
-        m_driveMotor.set(0);
+        // m_driveMotor.set(0);
+        intakeMotorSpeed = 0;
     }
 
     public void reverseIntake() {
-        m_driveMotor.set(-0.5);
+        // m_driveMotor.set(0.75);
+        intakeMotorSpeed = -0.15;
+        delayRevereIntakeFrame = REVERSE_INTAKE_MAX_FRAME;
     }
 
     private boolean isCoralIn() {
-        return coralSensor.get() == false;
+        return getIsSensorOn();
     }
 
     protected void updateState() {
@@ -279,30 +296,45 @@ public class GroundIntakeSubsystem extends SubsystemBase {
             stopIntake();
         }
         if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.DONE) {
-            if (isCoralIn())
-            {
-                reverseIntake();
-            }
-            else {
-                stopIntake();
-            }
+            // if (isCoralIn())
+            // {
+            //     reverseIntake();
+            // }
+            // else {
+            //     stopIntake();
+            // }
+            zeroCC();
             // reverseIntake();
         }
-
-        if (isCoralIn()) {
-            if (curState == GI_STATE.EXPAND) {
-                setState(GI_STATE.RETRACT);
-                // stopIntake();
-                return;
-            }
-            if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.RUNNING) {
-                stopIntake();
-            }
-            if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.DONE) {
-                startUpperIntake.run();
-                reverseIntake();
-            }
+        if (isCoralIn() && curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.RUNNING) {
+            intakeMotorSpeed = 6;
         }
+
+        do 
+        {
+            if (isCoralIn()) {
+                if (curState == GI_STATE.EXPAND) {
+                    delayTime = DELAY_FRAME;
+                    setState(GI_STATE.RETRACT);
+                    // stopIntake();
+                    break;
+                }
+                // if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.RUNNING) {
+                //     stopIntake();
+                // }
+                if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.DONE) {
+                    startUpperIntake.run();
+                    if (delayTime <= 0) {
+                        reverseIntake();
+                    }
+                    else {
+                        stopIntake();
+                    }
+                    delayTime--;
+                }
+            }
+        } while(false);
+
 
         double pos = getStatePos(curState);
         SmartDashboard.putNumber("GI ccc targetPos", pos);
@@ -315,9 +347,9 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         }
         if (isDone(pos)) {
             curRunningState = GI_RUNNING_STATE.DONE;
-            if (curState == GI_STATE.RETRACT) {
-                stopIntake();
-            }
+            // if (curState == GI_STATE.RETRACT && delayRevereIntakeFrame < 0) {
+            //     stopIntake();
+            // }
         }
 
 
@@ -328,6 +360,14 @@ public class GroundIntakeSubsystem extends SubsystemBase {
             m_turnMotor.stopMotor();
         }
         
+        if (delayRevereIntakeFrame > 0) {
+            delayRevereIntakeFrame--;
+            if (delayRevereIntakeFrame == 0) {
+                delayRevereIntakeFrame = -1;
+                intakeMotorSpeed = 0;
+            }
+        }
+        m_driveMotor.set(intakeMotorSpeed);
     }
 
     @Override
@@ -354,10 +394,19 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         }
     }
 
+    public void toggleDebugSensor() {
+        debugSensored = !debugSensored;
+    }
+
+    private boolean getIsSensorOn() {
+        if (isDebugSensorOn) {
+            return debugSensored;
+        }
+        return coralSensor.get() == false;
+    }
     protected void telemetry() {
         SmartDashboard.putString("GroundIntake state", curState.name());
         SmartDashboard.putString("GroundIntake sensor", "state: " + coralSensor.get());
-
-
+        SmartDashboard.putNumber("GroundIntake speed", intakeMotorSpeed);
     }
 }

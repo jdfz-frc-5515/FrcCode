@@ -340,9 +340,9 @@ public class ControlPadHelper {
     }
 
     public static ControlPadInfo.ControlPadInfoData getControlPadInfo() {
-        if (Robot.inst.isAutonomous()) {
-            return controlPadInfo.autoData;
-        }
+        // if (Robot.inst.isAutonomous()) {
+        //     return controlPadInfo.autoData;
+        // }
         
         if (controlPadInfo.data.aprilTagId == -1) {
             return null;

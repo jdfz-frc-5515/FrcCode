@@ -82,11 +82,11 @@ public class Constants {
         public static final int GIntakeCCID = 19;
         public static final String canBusName = "rio";
         public static final double retractCCRotation = 0.0;
-        public static final double expandCCRotation = 1.4;
+        public static final double expandCCRotation = 1.38;
 
-        public static final double Velocity = 5;// 20; // 30;//50;
-        public static final double Acceleration = 10; //40;// 100;// 75;
-        public static final double Jerk = 30; //120;
+        public static final double Velocity = 10;// 20; // 30;//50;
+        public static final double Acceleration = 20; //40;// 100;// 75;
+        public static final double Jerk = 60; //120;
 
         public static final double SensorToMechanismRatio = 1.0;
         public static final double RotorToSensorRatio = 4.857;
@@ -127,9 +127,9 @@ public class Constants {
         public static final double moveToPoseRotationkD = 0.; // TODO
 
         public static final double moveToPoseRotationToleranceRadians = Units.degreesToRadians(3.); // TODO
-        public static final double moveToPoseTranslationToleranceMeters = 0.02; // TODO
+        public static final double moveToPoseTranslationToleranceMeters = 0.03; // TODO
 
-        public static final double maxMoveToSpeed = 3.5; // TODO
+        public static final double maxMoveToSpeed = 1; //3.5; // TODO
         public static final double maxMoveToAngularVelocity = Units.degreesToRadians(200.); // TODO
 
     }
@@ -217,7 +217,7 @@ public class Constants {
         public static final double RotorToSensorRatio = 44;
         // bigger value means arm is more expanded(clockwise)
         public static final double zeroPos = 0;
-        public static final double groundIntakePos = 0.18;
+        public static final double groundIntakePos = 0.3; //0.385;  //0.18
         public static final double upIntakePos = 1.25;
         public static final double l1Pos = 1.69;//0.407227;
         public static final double l2Pos = 1.69;
