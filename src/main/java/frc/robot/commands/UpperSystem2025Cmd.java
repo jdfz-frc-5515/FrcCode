@@ -502,6 +502,17 @@ public class UpperSystem2025Cmd extends Command {
         }
     }
 
+    public void setIntakeSource(boolean isFromGround) {
+        // 设置Intake来源，地吸还是漏斗
+        m_isIntakeFromGround = isFromGround;
+        if (m_isIntakeFromGround && curState == STATE.READY_FOR_LOAD_UP_CORAL) {
+            setState(STATE.READY_FOR_LOAD_GROUND_CORAL);
+        }
+        if (!m_isIntakeFromGround && curState == STATE.READY_FOR_LOAD_GROUND_CORAL) {
+            setState(STATE.READY_FOR_LOAD_UP_CORAL);
+        }
+    }
+
     public void setSwitchIntakeSourceTrigger(Trigger t) {
         if (t == null) {
             return;
@@ -512,13 +523,14 @@ public class UpperSystem2025Cmd extends Command {
         }
         switchIntakeSourceTrigger = t;
         switchIntakeSourceTrigger.onTrue(new InstantCommand(() -> {
-            m_isIntakeFromGround = !m_isIntakeFromGround;
-            if (m_isIntakeFromGround && curState == STATE.READY_FOR_LOAD_UP_CORAL) {
-                setState(STATE.READY_FOR_LOAD_GROUND_CORAL);
-            }
-            if (!m_isIntakeFromGround && curState == STATE.READY_FOR_LOAD_GROUND_CORAL) {
-                setState(STATE.READY_FOR_LOAD_UP_CORAL);
-            }
+            setIntakeSource(!m_isIntakeFromGround);
+            // m_isIntakeFromGround = !m_isIntakeFromGround;
+            // if (m_isIntakeFromGround && curState == STATE.READY_FOR_LOAD_UP_CORAL) {
+            //     setState(STATE.READY_FOR_LOAD_GROUND_CORAL);
+            // }
+            // if (!m_isIntakeFromGround && curState == STATE.READY_FOR_LOAD_GROUND_CORAL) {
+            //     setState(STATE.READY_FOR_LOAD_UP_CORAL);
+            // }
         }));
     }
 

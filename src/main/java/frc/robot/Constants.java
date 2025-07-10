@@ -293,8 +293,8 @@ public class Constants {
     }
 
     public static final class PathPlanner {
-        public static final double constraintsSpeed = 2.;
-        public static final double constraintsAccel = 2.;
+        public static final double constraintsSpeed = 1.;
+        public static final double constraintsAccel = 1.;
     }
 
     public final class FieldInfo {

@@ -17,9 +17,9 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "p01"
+            "name": "p01"
           }
         }
       ]

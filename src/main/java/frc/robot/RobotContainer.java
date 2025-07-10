@@ -11,16 +11,22 @@ import java.util.List;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.events.EventTrigger;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -294,12 +300,36 @@ public class RobotContainer {
         }
 
         regPPEnC("Intake", () -> {
-            UpperSystem2025Cmd.inst.startIntake();
+            cmd.startIntake();
         });
         regPPEnC("Shoot", () -> {
-            UpperSystem2025Cmd.inst.startShoot();
+            cmd.startShoot();
         });
 
+        regPPEnC("GroundIntake", () -> {
+           cmd.setIntakeSource(true);
+        });
+
+        regPPEnC("UpperIntake", () -> {
+            cmd.setIntakeSource(false);
+         });
+
+        PathConstraints constraints = new PathConstraints(
+            Constants.PathPlanner.constraintsSpeed, Constants.PathPlanner.constraintsAccel,
+            Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+        try {
+            String[] ppPaths = GlobalConfig.loadAllPathPlannerPath();
+            for (int i = 0; i < ppPaths.length; ++i) {
+                String pathName = ppPaths[i];
+                PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+                regPPEnC(pathName, AutoBuilder.pathfindThenFollowPath(path, constraints));
+            }
+        }
+        catch (Exception e) {
+            System.err.println("Error loading PathPlanner paths: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void regPPEnC(String name, Runnable runnable) {

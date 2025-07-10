@@ -1,6 +1,9 @@
 package frc.robot.utils;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -126,7 +129,33 @@ public final class MiscUtils {
         
         Pose2d offsetPos = calcOffsetPoint(info.getX(), info.getY(), info.getTheta(), hOffset, vOffset);
         return offsetPos;
-    } 
+    }
+
+    public static List<String> listFilesWithSuffix(String directoryPath, String suffix) {
+        List<String> matchingFiles = new ArrayList<>();
+        File targetDir = new File(directoryPath);
+        
+        // 验证目录是否存在且可访问
+        if (!targetDir.exists() || !targetDir.isDirectory()) {
+            System.err.println("错误：目录不存在或不可访问 - " + directoryPath);
+            return matchingFiles;
+        }
+        
+        File[] files = targetDir.listFiles();
+        if (files == null) {
+            System.err.println("错误：无法读取目录内容 - " + directoryPath);
+            return matchingFiles;
+        }
+        
+        // 遍历并过滤文件
+        for (File file : files) {
+            if (file.isFile() && file.getName().toLowerCase().endsWith(suffix.toLowerCase())) {
+                matchingFiles.add(file.getAbsolutePath());
+            }
+        }
+        
+        return matchingFiles;
+    }
 }
 
 

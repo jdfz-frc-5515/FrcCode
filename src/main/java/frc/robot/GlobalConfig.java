@@ -1,10 +1,14 @@
 package frc.robot;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.pathplanner.lib.path.PathPlannerPath;
+
+import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.utils.MiscUtils;
 
 public final class GlobalConfig {
     public static final int version = 2025;
@@ -120,5 +124,24 @@ public final class GlobalConfig {
 
     public static String[] getAllAimPathNames() {
         return (String[]) aimPathDic.keySet().toArray(new String[0]);
+    }
+
+
+    public static String[] loadAllPathPlannerPath() {
+        String path =  "/home/lvuser/deploy/paths/";
+        if (RobotBase.isSimulation()) {
+            path = "./src/main/deploy/pathplanner/paths/";
+        }
+
+        List<String> lst = MiscUtils.listFilesWithSuffix(path, ".path");
+        String[] ret = new String[lst.size()];
+        int index = 0;
+        for (String fileName : lst) {
+            fileName = fileName.replace("\\", "/");
+            String pathName = fileName.substring(fileName.lastIndexOf("/") + 1, fileName.lastIndexOf("."));
+            ret[index++] = pathName;
+        }
+        
+        return ret;
     }
 }
