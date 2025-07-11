@@ -273,7 +273,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
             case IDLE:
                 zeroCC();
                 intakeMotorSpeed = 0;
-                armPos = 0;
+                // armPos = 0;
                 break;
             case EXPANDING:
                 armPos = GIntakeConstants.expandCCRotation;

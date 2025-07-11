@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -393,8 +394,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         double pigeonRot = getRotationFromPigeon();
 
         Pose2d botPos =  LimelightHelpers.getBotPose2d(llName);
-        SmartDashboard.putString(llName + "ROT-MT1", String.format("%f", botPos.getRotation().getDegrees()));
-        SmartDashboard.putString(llName + "ROT", String.format("%f - %f - %f", botRot, pigeonRot, pigeonRot - zeroOdoDegree));
+        // SmartDashboard.putString("ROT-MT1", String.format("%f", botPos.getRotation().getDegrees()));
+        SmartDashboard.putString( "ROT", String.format("%f - %f - %f", botRot, pigeonRot, pigeonRot - zeroOdoDegree));
         LimelightHelpers.SetRobotOrientation(llName, getRotationFromPigeon() - zeroOdoDegree, 0, 0, 0, 0, 0);
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(llName);
         // ImprovedLL.MT2stddevs devs = ImprovedLL.getmt2Devs();

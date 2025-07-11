@@ -128,7 +128,7 @@ public final class GlobalConfig {
 
 
     public static String[] loadAllPathPlannerPath() {
-        String path =  "/home/lvuser/deploy/paths/";
+        String path =  "/home/lvuser/deploy/pathplanner/paths/";
         if (RobotBase.isSimulation()) {
             path = "./src/main/deploy/pathplanner/paths/";
         }
@@ -136,7 +136,9 @@ public final class GlobalConfig {
         List<String> lst = MiscUtils.listFilesWithSuffix(path, ".path");
         String[] ret = new String[lst.size()];
         int index = 0;
+        System.out.println("==============================>>>>>>>> ::::::::::::::::::::::::::::::::::::::: ");
         for (String fileName : lst) {
+            System.out.println("==============================>>>>>>>> : " + fileName);
             fileName = fileName.replace("\\", "/");
             String pathName = fileName.substring(fileName.lastIndexOf("/") + 1, fileName.lastIndexOf("."));
             ret[index++] = pathName;

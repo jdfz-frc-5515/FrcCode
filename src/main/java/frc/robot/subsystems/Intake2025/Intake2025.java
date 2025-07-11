@@ -5,6 +5,8 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -183,6 +185,7 @@ public class Intake2025 extends SubsystemBase {
 
     CORAL_IN_STATE coralInState = CORAL_IN_STATE.READY;
 
+    int delayFrame = 0;
     private double updateCoralIn() {
         double speed = 0;
         switch (coralInState) {
@@ -197,23 +200,34 @@ public class Intake2025 extends SubsystemBase {
                     // speed = Constants.Intake.coralInReverseSpeed;
 
                     // majun 2025-7-9:
-                    curState = STATE.CARRYING_CORAL;
-                    coralInState = CORAL_IN_STATE.READY;
-                    speed = 0;
+                    
+                    coralInState = CORAL_IN_STATE.STEP1;
+                    delayFrame = 0;
                 }
             }
             break;
             case STEP1:
             {
-                speed = Constants.Intake.coralInReverseSpeed;
-                if (intakeCoralSensor1.get()) {
-                    // sensor1 not on
+                speed = Constants.Intake.coralInSpeed;
+                delayFrame--;
+                if (delayFrame <= 0) {
+                    speed = 0;
                     curState = STATE.CARRYING_CORAL;
                     coralInState = CORAL_IN_STATE.READY;
-                    speed = 0;
                 }
+                break;
             }
-            break;
+            // case STEP1:
+            // {
+            //     speed = Constants.Intake.coralInReverseSpeed;
+            //     if (intakeCoralSensor1.get()) {
+            //         // sensor1 not on
+            //         curState = STATE.CARRYING_CORAL;
+            //         coralInState = CORAL_IN_STATE.READY;
+            //         speed = 0;
+            //     }
+            // }
+            // break;
             case STEP2:
             {
 
@@ -226,11 +240,15 @@ public class Intake2025 extends SubsystemBase {
         double speed = 0;
         switch (curState) {
             case READY:
+                canAdjusetCoralPosition = false;
+                break;
             case CARRYING_BALL:
                 speed = 0;
                 break;
             case CARRYING_CORAL:
                 if (!intakeCoralSensor1.get() && canAdjusetCoralPosition) {
+                    // Pose2d p = null;
+                    // p.getX();
                     speed = Constants.Intake.coralInReverseSpeed;
                 }
                 else {

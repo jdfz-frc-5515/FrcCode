@@ -125,8 +125,8 @@ public class RobotContainer {
         Trigger aimGroundCoralBtn = m_driverController.a();
         Trigger aimLeftCoralBtn = m_driverController.leftBumper();
         Trigger aimRightCoralBtn = m_driverController.rightBumper();
-        Trigger intakeBtn = m_driverController.y();        // 启动intake,从上面漏斗intake
-        Trigger groundIntakeSwitchBtn = m_driverController.x(); // 启动/收起 地吸
+        Trigger intakeBtn = m_driverController.x();        // 启动intake,从上面漏斗intake
+        Trigger groundIntakeSwitchBtn = m_driverController.y(); // 启动/收起 地吸
         // Trigger catchBallBtn = m_driverController.b();    // 抓球模式下，启动抓球功能
         cmd.setResetToZeroPosTrigger(zeroUpperPosBtn);
         cmd.setAimLeftCoralTrigger(aimLeftCoralBtn);
@@ -324,6 +324,9 @@ public class RobotContainer {
                 String pathName = ppPaths[i];
                 PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
                 regPPEnC(pathName, AutoBuilder.pathfindThenFollowPath(path, constraints));
+                // regPPEnC(pathName, ()->{
+                //     System.out.println("===============================> regPPEnC: " + pathName);
+                // });
             }
         }
         catch (Exception e) {
