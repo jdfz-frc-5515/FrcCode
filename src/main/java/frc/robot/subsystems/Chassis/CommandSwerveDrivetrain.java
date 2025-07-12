@@ -393,7 +393,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         double botRot = getState().Pose.getRotation().getDegrees();
         double pigeonRot = getRotationFromPigeon();
 
-        Pose2d botPos =  LimelightHelpers.getBotPose2d(llName);
+        // Pose2d botPos =  LimelightHelpers.getBotPose2d(llName);
         // SmartDashboard.putString("ROT-MT1", String.format("%f", botPos.getRotation().getDegrees()));
         SmartDashboard.putString( "ROT", String.format("%f - %f - %f", botRot, pigeonRot, pigeonRot - zeroOdoDegree));
         LimelightHelpers.SetRobotOrientation(llName, getRotationFromPigeon() - zeroOdoDegree, 0, 0, 0, 0, 0);

@@ -250,6 +250,10 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         return curState;
     }
 
+    public boolean isIdle() {
+        return curState == GI_STATE.IDLE;
+    }
+
     private boolean isArmAtPos(double targetPos) {
         if (Math.abs(m_CANcoder.getPosition().getValueAsDouble() - targetPos) < threshold) {
             return true;
