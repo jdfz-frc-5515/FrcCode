@@ -209,7 +209,7 @@ public class Constants {
         public static final String canBusName = "rio";
         public static final double KP = 7;
         public static final double KI = 1.0;
-        public static final double KD = 0.1;
+        public static final double KD = 0.1; 
         public static final double KV = 0.0; // 0.1
         public static final double KS = 0.0;
         public static final double KA = 0.0;
@@ -220,7 +220,7 @@ public class Constants {
         public static final double RotorToSensorRatio = 44;
         // bigger value means arm is more expanded(clockwise)
         public static final double zeroPos = 0;
-        public static final double groundIntakePos = 0.27; //0.385;  //0.18
+        public static final double groundIntakePos = 0.26; //0.385;  //0.18; // 7/12:0.27
         public static final double upIntakePos = 1.25;
         public static final double l1Pos = 1.69;//0.407227;
         public static final double l2Pos = 1.69;
