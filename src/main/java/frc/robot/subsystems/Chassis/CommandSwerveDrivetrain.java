@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -432,8 +433,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             SmartDashboard.putString("MT2 pos: ", mt2.pose.toString());
             addVisionMeasurement(mt2.pose,
                 captureTime2,
-                VecBuilder.fill(data, data, 100000000)
-                // VecBuilder.fill(0.00001,0.00001, 100000000.)
+                // VecBuilder.fill(data, data, 100000000)
+                VecBuilder.fill(0.5,0.5, 100000000.)
                 // VecBuilder.fill(devs.xdev, devs.ydev, 100000000.)
             );
 
@@ -484,6 +485,22 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         ));
     }
 
+    public ChassisSpeeds getAutoMoveToPoseSpeeds(Pose2d pose, double maxMoveToSpeed){
+        m_targetPose2d = pose;
+        Pose2d currentPose = getPose();
+        m_rotationController.setSetpoint(pose.getRotation().getRadians());
+        m_translationXController.setSetpoint(pose.getX());
+        m_translationYController.setSetpoint(pose.getY());
+
+        double targetAngularVelocity = m_rotationController.calculate(currentPose.getRotation().getRadians());
+        double targetTranslationXVelocity = m_translationXController.calculate(currentPose.getX());
+        double targetTranslationYVelocity = m_translationYController.calculate(currentPose.getY());
+
+        return optimizeMoveToSpeeds(optimizeMoveToSpeeds(
+            new ChassisSpeeds(targetTranslationXVelocity, targetTranslationYVelocity, targetAngularVelocity), maxMoveToSpeed
+        ));
+    }
+
     public void customMoveWithSpeed(double xSpeed, double ySpeed) {
         SwerveRequest.RobotCentric request = new SwerveRequest.RobotCentric();
         request = request.withVelocityX(xSpeed);
@@ -514,6 +531,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         this.setControl(m_moveToPoseDrive.withSpeeds(getAutoMoveToPoseSpeeds(pose)));
     }
 
+    public void autoMoveToPose(Pose2d pose, double maxSpeed) {
+        this.setControl(m_moveToPoseDrive.withSpeeds(getAutoMoveToPoseSpeeds(pose, maxSpeed)));
+    }
+
+    public void setFieldCentric() {
+        // getPose().getRotation().getDegrees();
+        setOperatorPerspectiveForward(getPose().getRotation());
+    }
+
     private ChassisSpeeds optimizeMoveToSpeeds(ChassisSpeeds speeds) {
         ChassisSpeeds optimizedSpd = speeds;
 
@@ -525,6 +551,25 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         //if too big, apply limit;
         if(Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond) > Constants.AutoConstants.maxMoveToSpeed) {
             optimizedSpd = optimizedSpd.times(Constants.AutoConstants.maxMoveToSpeed / Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
+        }
+        if(Math.abs(speeds.omegaRadiansPerSecond) > Constants.AutoConstants.maxMoveToAngularVelocity) {
+            optimizedSpd.omegaRadiansPerSecond = Math.copySign(Constants.AutoConstants.maxMoveToAngularVelocity, speeds.omegaRadiansPerSecond);
+        }
+        return optimizedSpd;
+    }
+
+
+    private ChassisSpeeds optimizeMoveToSpeeds(ChassisSpeeds speeds, double maxMoveToSpeed) {
+        ChassisSpeeds optimizedSpd = speeds;
+
+        //If too small, apply deadband;
+        // optimizedSpd.vxMetersPerSecond = MathUtil.applyDeadband(optimizedSpd.vxMetersPerSecond, AutoConstants.moveToVelocityDeadband, 1e6);
+        // optimizedSpd.vyMetersPerSecond = MathUtil.applyDeadband(optimizedSpd.vyMetersPerSecond, AutoConstants.moveToVelocityDeadband, 1e6);
+        // optimizedSpd.omegaRadiansPerSecond = MathUtil.applyDeadband(optimizedSpd.omegaRadiansPerSecond, AutoConstants.moveToAnguVeloDeadband, 1e6);
+
+        //if too big, apply limit;
+        if(Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond) > maxMoveToSpeed) {
+            optimizedSpd = optimizedSpd.times(maxMoveToSpeed / Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
         }
         if(Math.abs(speeds.omegaRadiansPerSecond) > Constants.AutoConstants.maxMoveToAngularVelocity) {
             optimizedSpd.omegaRadiansPerSecond = Math.copySign(Constants.AutoConstants.maxMoveToAngularVelocity, speeds.omegaRadiansPerSecond);
@@ -751,6 +796,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void resetHeadingForOdo(double angle) {
+        resetRotation(new Rotation2d(Units.degreesToRadians(angle)));
         zeroOdoDegree = getRotationFromPigeon() + angle;
         // this.resetRotation(Rotation2d.fromDegrees(angle));
     }

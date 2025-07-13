@@ -8,20 +8,36 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.522731164383561,
-        "y": 1.6659674657534242
+        "x": 4.0481091910217355,
+        "y": 2.217478146813278
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.2087756849315068,
-        "y": 2.462328767123288
+        "x": 3.3689732142880287,
+        "y": 2.205580357143946
       },
       "prevControl": {
-        "x": 3.218436128347072,
-        "y": 2.3382378075853567
+        "x": 3.934746412598532,
+        "y": 2.25103181881971
+      },
+      "nextControl": {
+        "x": 2.907843422159912,
+        "y": 2.1685354367817733
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.7051339285714284,
+        "y": 2.205580357143946
+      },
+      "prevControl": {
+        "x": 1.1599299221951032,
+        "y": 2.261982378178126
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,8 +46,32 @@
   ],
   "rotationTargets": [],
   "constraintZones": [],
-  "pointTowardsZones": [],
-  "eventMarkers": [],
+  "pointTowardsZones": [
+    {
+      "fieldPosition": {
+        "x": 3.37,
+        "y": 2.2
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 1.3608923884514468,
+      "maxWaypointRelativePos": 1.977690288713919,
+      "name": "Point Towards Zone"
+    }
+  ],
+  "eventMarkers": [
+    {
+      "name": "ExpendGroundIntake",
+      "waypointRelativePos": 1.05905511811019,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "ResetGroundIntake",
+      "waypointRelativePos": 1.9,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 1.0,
     "maxAcceleration": 1.0,
@@ -42,7 +82,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 15.945395900922753
+    "rotation": 2.2906100426384914
   },
   "reversed": false,
   "folder": null,

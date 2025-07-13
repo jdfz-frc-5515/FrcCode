@@ -23,6 +23,7 @@ import frc.robot.ControlPadHelper.ControlPadInfo;
 import frc.robot.GlobalConfig;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.GroundIntakeSubsystem;
+import frc.robot.subsystems.GroundIntakeSubsystem.GI_STATE;
 import frc.robot.subsystems.Candle2025.Candle2025;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator2025.Elevator2025;
@@ -220,9 +221,28 @@ public class UpperSystem2025Cmd extends Command {
                 ControlPadHelper.setControlPadInfoData(aprilTagId, level, branch);
             }),
             new GoToCoralCmd(m_chassis)
-            , new InstantCommand(() -> {
-                setStateLn();
-            })
+            // , new InstantCommand(() -> {
+            //     setStateLn();
+            // })
+            ,new FunctionalCommand(
+                ()->{
+                     //init
+                     setStateLn();
+                },
+                ()->{
+                    // onExecute
+                },
+                (Boolean b)->{
+                    // onEnd
+                },
+                ()->{
+                    // isFinished
+                    if (curRunningState == RUNNING_STATE.DONE) {
+                        return true;
+                    }
+                    return false;
+                }
+            )
         );
         System.out.println(ret.getRequirements().toString());
         return ret;
@@ -372,6 +392,14 @@ public class UpperSystem2025Cmd extends Command {
                 }));
             }
         }
+    }
+
+    public void expendGroundIntake() {
+        m_groundIntake.expend();;
+    }
+
+    public void makeSureGroundIntakeRetracted() {
+        m_groundIntake.makeSureRetracted();
     }
 
     public void setIntakeSource(boolean isFromGround) {
@@ -650,6 +678,10 @@ public class UpperSystem2025Cmd extends Command {
     // m_elevator.onDisable();
     // m_turningArm.onDisable();
     // }
+
+    public boolean getIsGroundIntakeCoralIn() {
+        return m_groundIntake.isCoralIn();
+    }
 
     private boolean getIsCarryingBall() {
         // TODO: get this from sesnor
