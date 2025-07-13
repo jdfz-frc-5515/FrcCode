@@ -275,6 +275,16 @@ public class TurningArm2025 extends SubsystemBase {
         m_canCoder.setPosition(0);
     }
 
+    public boolean getIsInCoralSafeZone() {
+        // 所谓SafeZone是指在这个区间中，Intake可以启动Coral的位置校正，把持有的Coral往回吸一点，这个过程不会让Coral的尾部接触到漏斗的下边缘。
+        double curPos = m_canCoder.getPosition().getValueAsDouble();
+        if (curPos > Constants.TurningArm.upIntakePos && curPos < Constants.TurningArm.ball1Pos) {
+            return true;
+        }
+
+        return false;
+    }
+
     // int upC = 0;
     // int dC = 0;
 

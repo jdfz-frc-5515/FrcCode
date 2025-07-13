@@ -219,53 +219,8 @@ public class UpperSystem2025Cmd extends Command {
             new InstantCommand(() -> {
                 ControlPadHelper.setControlPadInfoData(aprilTagId, level, branch);
             }),
-            // , new ParallelCommandGroup(
-                // new FunctionalCommand(
-                //     ()-> {
-                //         // init
-                //         getMoveToCoralCmd();
-                //         System.out.println("============================>>>>>>>>> init");
-                //         if (autoMoveCmd != null) {
-                //             autoMoveCmd.schedule();
-                //         }
-                //     }, 
-                //     ()-> {
-                //         // excute
-                //     }, 
-                //     interrupted -> {
-                //         // onEnd
-                //         if (interrupted) {
-                //             System.out.println("============================>>>>>>>>> 0");
-
-                //             if (autoMoveCmd != null) {
-                //                 if (autoMoveCmd.isScheduled()) {
-                //                     System.out.println("============================>>>>>>>>> 0.1");
-                //                     autoMoveCmd.cancel();
-                //                     autoMoveCmd = null;
-                //                 }
-
-                //             }
-                //         }
-                //     },
-                //     ()-> {
-                //         System.out.println("============================>>>>>>>>> 1.2");
-                //         // isFinished
-                //         if (autoMoveCmd == null) {
-                //             return true;
-                //         }System.out.println("============================>>>>>>>>> 1.1");
-                //         if (m_chassis.isAtTargetPose()) {
-                //             System.out.println("============================>>>>>>>>> 1");
-                //             autoMoveCmd.cancel();
-                //             autoMoveCmd = null;
-                //             return true;
-                //         }
-                //         return false;
-                //     }
-                // )
-            // )
             new GoToCoralCmd(m_chassis)
             , new InstantCommand(() -> {
-                System.out.println("============================>>>>>>>>> 2");
                 setStateLn();
             })
         );
@@ -284,51 +239,6 @@ public class UpperSystem2025Cmd extends Command {
         this.aimLeftCoralBtn = t;
 
         this.aimLeftCoralBtn.whileTrue(getMoveToCoralCmdGroup(-1, -1, -1));
-        
-
-        // this.aimLeftCoralBtn.whileTrue(new SequentialCommandGroup(
-        //     new InstantCommand(() -> {
-        //         ControlPadHelper.setControlPadInfoData(-1, -1, -1);
-        //     })
-        //     , new ParallelCommandGroup(
-        //         new FunctionalCommand(
-        //             ()-> {
-        //                 // init
-        //                 getMoveToCoralCmd();
-        //                 if (autoMoveCmd != null) {
-        //                     autoMoveCmd.schedule();
-        //                 }
-        //             }, 
-        //             ()-> {
-        //                 // excute
-        //             }, 
-        //             interrupted -> {
-        //                 // onEnd
-        //                 if (interrupted) {
-        //                     if (autoMoveCmd != null) {
-        //                         autoMoveCmd.cancel();
-        //                         autoMoveCmd = null;
-        //                     }
-        //                 }
-        //             },
-        //             ()-> {
-        //                 // isFinished
-        //                 if (autoMoveCmd == null) {
-        //                     return true;
-        //                 }
-        //                 if (m_chassis.isAtTargetPose()) {
-        //                     autoMoveCmd.cancel();
-        //                     autoMoveCmd = null;
-        //                     return true;
-        //                 }
-        //                 return false;
-        //             }
-        //         )
-        //     )
-        //     , new InstantCommand(() -> {
-        //         setStateLn();
-        //     })
-        // ));
     }
 
     public void setAimRightCoralTrigger(Trigger t) {
@@ -341,50 +251,6 @@ public class UpperSystem2025Cmd extends Command {
         }
         this.aimRigthCoralBtn = t;
         this.aimRigthCoralBtn.whileTrue(getMoveToCoralCmdGroup(-1, -1, 1));
-        // this.aimRigthCoralBtn.whileTrue(new SequentialCommandGroup(
-        //     new InstantCommand(() -> {
-        //         System.out.println("Aim Left Coral");
-        //         ControlPadHelper.setControlPadInfoData(-1, -1, 1);
-        //     }),
-        //     new ParallelCommandGroup(
-        //         new FunctionalCommand(
-        //             ()-> {
-        //                 // init
-        //                 getMoveToCoralCmd();
-        //                 if (autoMoveCmd != null) {
-        //                     autoMoveCmd.schedule();
-        //                 }
-        //             }, 
-        //             ()-> {
-        //                 // excute
-        //             }, 
-        //             interrupted -> {
-        //                 // onEnd
-        //                 if (interrupted) {
-        //                     if (autoMoveCmd != null) {
-        //                         autoMoveCmd.cancel();
-        //                         autoMoveCmd = null;
-        //                     }
-        //                 }
-        //             },
-        //             ()-> {
-        //                 // isFinished
-        //                 if (autoMoveCmd == null) {
-        //                     return true;
-        //                 }
-        //                 if (m_chassis.isAtTargetPose()) {
-        //                     autoMoveCmd.cancel();
-        //                     autoMoveCmd = null;
-        //                     return true;
-        //                 }
-        //                 return false;
-        //             }
-        //         )
-        //     )
-        //     , new InstantCommand(() -> {
-        //         setStateLn();
-        //     })
-        // ));
     }
 
     public void setAimGroundCoralTrigger(Trigger t) {
@@ -439,7 +305,10 @@ public class UpperSystem2025Cmd extends Command {
         }
         groundIntakeSwitchTrigger = t;
         groundIntakeSwitchTrigger.onTrue(new InstantCommand(() -> {
-            m_groundIntake.toggle();
+            // 只有在READY_FOR_LOAD_GROUND_CORAL状态下，才允许切换地吸开关
+            if (curState == STATE.READY_FOR_LOAD_GROUND_CORAL) {
+                m_groundIntake.toggle();
+            }
         }));
     }
 
@@ -507,6 +376,11 @@ public class UpperSystem2025Cmd extends Command {
 
     public void setIntakeSource(boolean isFromGround) {
         // 设置Intake来源，地吸还是漏斗
+        
+        if (!m_groundIntake.isIdle()) {
+            // 如果地吸在非待机状态，则不允许切换
+            return;
+        }
         m_isIntakeFromGround = isFromGround;
         if (m_isIntakeFromGround && curState == STATE.READY_FOR_LOAD_UP_CORAL) {
             setState(STATE.READY_FOR_LOAD_GROUND_CORAL);
@@ -527,13 +401,6 @@ public class UpperSystem2025Cmd extends Command {
         switchIntakeSourceTrigger = t;
         switchIntakeSourceTrigger.onTrue(new InstantCommand(() -> {
             setIntakeSource(!m_isIntakeFromGround);
-            // m_isIntakeFromGround = !m_isIntakeFromGround;
-            // if (m_isIntakeFromGround && curState == STATE.READY_FOR_LOAD_UP_CORAL) {
-            //     setState(STATE.READY_FOR_LOAD_GROUND_CORAL);
-            // }
-            // if (!m_isIntakeFromGround && curState == STATE.READY_FOR_LOAD_GROUND_CORAL) {
-            //     setState(STATE.READY_FOR_LOAD_UP_CORAL);
-            // }
         }));
     }
 
@@ -872,78 +739,6 @@ public class UpperSystem2025Cmd extends Command {
 
 
     private int curRunningDir = 0;
-    // private void doStateAction_____OLD(TA_STATE taState, EV_STATE evState) {
-    //     if (curRunningState == RUNNING_STATE.NEW_SET)
-    //     {
-    //         STATE sx = lastState;
-    //         STATE sy = curState;
-    //         // sx = STATE.ZERO;
-    //         // sy = STATE.READY_FOR_LOAD_BALL;
-    //         int tx = sx.ordinal();
-    //         int ty = sy.ordinal(); //
-
-    //         curRunningDir = table[ty][tx];
-    //         System.out.println("tx: " + tx + " ty: " + ty);
-    //         System.out.println("curRunningDir is " + curRunningDir);
-    //     }
-
-    //     if (curRunningDir == -1) {
-    //         // down
-    //         switch (curRunningState) {
-    //             case NEW_SET:
-    //                 m_elevator.setState(evState);   
-    //                 curRunningState = RUNNING_STATE.RUNNING;
-    //                 break;
-    //             case RUNNING:
-    //                 if (m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE) {
-    //                     m_turningArm.setState(taState);
-    //                     if (m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE) {
-    //                         curRunningState = RUNNING_STATE.DONE;
-    //                     }
-    //                 }
-    //                 break;
-    //             case DONE:
-    //                 break;
-    //         }
-    //     }
-    //     else if (curRunningDir == 0) {
-    //         switch (curRunningState) {
-    //             case NEW_SET:
-    //                 m_turningArm.setState(taState);
-    //                 m_elevator.setState(evState);
-    //                 curRunningState = RUNNING_STATE.RUNNING;
-    //                 break;
-    //             case RUNNING:
-    //                 if (m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE &&
-    //                         m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE) {
-    //                     curRunningState = RUNNING_STATE.DONE;
-    //                 }
-    //                 break;
-    //             case DONE:
-    //                 break;
-    //         }
-    //     }
-    //     else if (curRunningDir == 1) {
-    //         // up
-    //         switch (curRunningState) {
-    //             case NEW_SET:
-    //                 m_turningArm.setState(taState);
-                      
-    //                 curRunningState = RUNNING_STATE.RUNNING;
-    //                 break;
-    //             case RUNNING:
-    //                 if (m_turningArm.getCurRunningState() == TurningArm2025.RUNNING_STATE.DONE) {
-    //                     m_elevator.setState(evState); 
-    //                     if (m_elevator.getCurRunningState() == Elevator2025.RUNNING_STATE.DONE) {
-    //                         curRunningState = RUNNING_STATE.DONE;
-    //                     }
-    //                 }
-    //                 break;
-    //             case DONE:
-    //                 break;
-    //         }
-    //     }
-    // }
 
 
     // private void doStateAction__old2(TA_STATE taState, EV_STATE evState) {
@@ -1255,8 +1050,12 @@ public class UpperSystem2025Cmd extends Command {
                 if (!getIsCarryingCoral()) {
                     setState(m_isIntakeFromGround ? STATE.READY_FOR_LOAD_GROUND_CORAL : STATE.READY_FOR_LOAD_UP_CORAL);
                 }
-                if (curRunningState == RUNNING_STATE.DONE) {
+
+                if (m_turningArm.getIsInCoralSafeZone()) {
                     m_intake.setCanAdjusetCoralPosition(true);
+                }
+                else {
+                    m_intake.setCanAdjusetCoralPosition(false);
                 }
                 break;
             default:
