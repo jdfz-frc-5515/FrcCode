@@ -24,9 +24,6 @@ public class GoToGroundCoralCmd extends Command {
     private int flew = 0;
     private BooleanSupplier m_quitCondition;
 
-    private int step = 0;
-    private double MAX_FRAME = 40;
-    private double frame = 0;
 
     public GoToGroundCoralCmd(CommandSwerveDrivetrain subsystem, BooleanSupplier quitCondition) {
         m_subsystem = subsystem;
@@ -54,6 +51,7 @@ public class GoToGroundCoralCmd extends Command {
         return coralPose2d;
     }
 
+
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
@@ -62,64 +60,40 @@ public class GoToGroundCoralCmd extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        switch (step) {
-            case 0: {
-                if (currentCoral == null) {
-                    String coralLimelight = Constants.LIME_LIGHT_OBJECT_DETECTION;
-                    boolean hasTarget = LimelightHelpers.getTV(coralLimelight);
-                    SmartDashboard.putBoolean("ll hasT", hasTarget);
-                    int didFlyTolerance = 10;
-                    if (!hasTarget) {
-                        flew += 1;
-                        if (flew >= didFlyTolerance) {
-                            System.out.println("flewn");
-                            m_subsystem.customStopMoving(true);
-                            // find new coral here
-                            return;
-                        }
-                    } else {
-                        flew = 0;
-                    }
-                    // Pose2d tempCoralPose = getTargetPose2d();
-                    // SmartDashboard.putNumber("coral angle",
-                    // tempCoralPose.getRotation().getDegrees());
-                    // SmartDashboard.putNumber("current angle",
-                    // m_subsystem.getPose().getRotation().getDegrees());
-                    // double distanceTolerance = 0.5;
-                    // double eucDistance = tempCoralPose.getTranslation().getDistance(currentCoral.getTranslation());
-                    // // SmartDashboard.putNumber("current coral X", currentCoral.getX());
-                    // // SmartDashboard.putNumber("Target Distance", eucDistance);
-                    // if (eucDistance < distanceTolerance) {
-                    //     System.out.println("no change");
-                    //     m_subsystem.autoMoveToPose(currentSCoral);
-                    //     return;
-                    // } else {
-                        // System.out.println("change");
-                        currentCoral = getTargetPose2d();
-                    // }
-
-                    SmartDashboard.putString("---z---", currentCoral.toString());
-                    m_subsystem.autoMoveToPose(currentCoral, 1.);
-                }
-                else {
-                    m_subsystem.autoMoveToPose(currentCoral, 1.);
-                    if (m_subsystem.isAtTargetPose()) {
-                        step = 1;
-                        frame = MAX_FRAME;
-                    }
-                }
-                break;
+        String coralLimelight = Constants.LIME_LIGHT_OBJECT_DETECTION;
+        boolean hasTarget = LimelightHelpers.getTV(coralLimelight);
+        SmartDashboard.putBoolean("ll hasT", hasTarget);
+        int didFlyTolerance = 10;
+        if (!hasTarget) {
+            flew += 1;
+            if (flew >= didFlyTolerance) {
+                System.out.println("flewn");
+                m_subsystem.customStopMoving(true);
+                // find new coral here
+                return;
             }
-            case 1: {
-                if (frame <= 0) {
-                    step = 2;
-                    return;
-                }
-                frame--;
-                // m_subsystem.customMoveWithSpeed(-1, 0);
-                break;
-            }
+        } else {
+            flew = 0;
         }
+        Pose2d tempCoralPose = getTargetPose2d();
+        // // SmartDashboard.putNumber("coral angle",
+        // // tempCoralPose.getRotation().getDegrees());
+        // // SmartDashboard.putNumber("current angle",
+        // // m_subsystem.getPose().getRotation().getDegrees());
+        // double distanceTolerance = 0.5;
+        // double eucDistance = tempCoralPose.getTranslation().getDistance(currentCoral.getTranslation());
+        // // SmartDashboard.putNumber("current coral X", currentCoral.getX());
+        // // SmartDashboard.putNumber("Target Distance", eucDistance);
+        // if (eucDistance < distanceTolerance) {
+        //     System.out.println("no change");
+        //     m_subsystem.autoMoveToPose(currentCoral);
+        //     return;
+        // } else {
+        //     System.out.println("change");
+        //     currentCoral = tempCoralPose;
+        // }
+        currentCoral = tempCoralPose;
+        m_subsystem.autoMoveToPose(currentCoral, 1);
         
     }
 
@@ -127,7 +101,6 @@ public class GoToGroundCoralCmd extends Command {
     @Override
     public void end(boolean interrupted) {
         currentCoral = null;
-        step = 0;
     }
 
     // Returns true when the command should end.
@@ -135,14 +108,9 @@ public class GoToGroundCoralCmd extends Command {
     public boolean isFinished() {
         if (m_quitCondition.getAsBoolean()) {
             currentCoral = null;
-            step = 0;
-            System.out.println("f1111111111111111111111111111111111111111111");
             return true;
         }
-        if (step == 2) {
-            System.out.println("f2222222222222222222222222222222222222222222");
-            return true;
-        }
+
         return false;
     }
 }

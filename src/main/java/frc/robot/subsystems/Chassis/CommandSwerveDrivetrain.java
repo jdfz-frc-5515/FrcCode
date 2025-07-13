@@ -433,8 +433,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             SmartDashboard.putString("MT2 pos: ", mt2.pose.toString());
             addVisionMeasurement(mt2.pose,
                 captureTime2,
-                // VecBuilder.fill(data, data, 100000000)
-                VecBuilder.fill(0.5,0.5, 100000000.)
+                VecBuilder.fill(data, data, 100000000)
+                // VecBuilder.fill(0.5,0.5, 100000000.)
                 // VecBuilder.fill(devs.xdev, devs.ydev, 100000000.)
             );
 
