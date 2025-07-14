@@ -240,8 +240,10 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     }
 
     public void makeSureRetracted() {
+
+        SmartDashboard.putString("makeSureRetracted----->", curState.name());
         if (curState == GI_STATE.WAIT_FOR_CORAL) {
-            curState = GI_STATE.IDLE;
+            curState = GI_STATE.RETRACTING_WITH_CORAL;
         }
     }
 

@@ -46,7 +46,7 @@ public class GoToGroundCoralCmd extends Command {
         double robotAngle = m_subsystem.getPose().getRotation().getRadians();
         double Cx = robotPose.getX() + Math.cos(robotAngle - Math.PI) * da;
         double Cy = robotPose.getY() + Math.sin(robotAngle - Math.PI) * da;
-        Rotation2d Cr = new Rotation2d(robotAngle - tx);
+        Rotation2d Cr = new Rotation2d(robotAngle - tx * 1.2);
         Pose2d coralPose2d = new Pose2d(Cx, Cy, Cr);
         return coralPose2d;
     }
