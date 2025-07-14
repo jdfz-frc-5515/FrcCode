@@ -164,7 +164,7 @@ public class UpperSystem2025Cmd extends Command {
 
     public UpperSystem2025Cmd(
             CommandSwerveDrivetrain chassis,
-            TurningArm2025 turningArm, Elevator2025 elev, Intake2025 intake, GroundIntakeSubsystem groundIntake, Candle2025 candle/*  MoveTo2025 moveto,*/
+            TurningArm2025 turningArm, Elevator2025 elev, Intake2025 intake, GroundIntakeSubsystem groundIntake/*  MoveTo2025 moveto,*/
         ) {
 
         inst = this;
@@ -183,8 +183,8 @@ public class UpperSystem2025Cmd extends Command {
         this.m_groundIntake = groundIntake;
         addRequirements(m_groundIntake);
 
-        this.m_candle = candle;
-        addRequirements(m_candle);
+        // this.m_candle = candle;
+        // addRequirements(m_candle);
 
         // this.m_moveTo = moveto;
         // addRequirements(m_moveTo);
@@ -644,7 +644,7 @@ public class UpperSystem2025Cmd extends Command {
             m_turningArm.init(); 
             m_intake.init();
             m_groundIntake.init();
-            m_candle.init();
+            // m_candle.init();
 
             // 下面两行要联动，m_isIntakeFromGround改成false的时候，setState要变成READY_FOR_LOAD_UP_CORAL
             m_isIntakeFromGround = true;
@@ -661,7 +661,7 @@ public class UpperSystem2025Cmd extends Command {
     public void execute() {
         runState();
         updateState();
-        updateLeds();
+        // updateLeds();
         telemetry();
     }
 
@@ -671,7 +671,7 @@ public class UpperSystem2025Cmd extends Command {
         m_elevator.onDisable();
         m_turningArm.onDisable();
         m_groundIntake.onDisable();
-        m_candle.onDisable();
+        // m_candle.onDisable();
     }
     
 
@@ -1101,45 +1101,45 @@ public class UpperSystem2025Cmd extends Command {
         }
     }
 
-    private void updateLeds() {
-        if (getIsCarryingCoral()) {
-            this.m_candle.showCarryingCoral();
-        }
-        else {
-            this.m_candle.showIdle();
-        }
+    // private void updateLeds() {
+    //     if (getIsCarryingCoral()) {
+    //         this.m_candle.showCarryingCoral();
+    //     }
+    //     else {
+    //         this.m_candle.showIdle();
+    //     }
 
-        ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
-        if (info == null) {
-            this.m_candle.clearLn();
-        }
-        else {
-            if (info.level == -1) {
-                // show aglea
-            }
-            else if (info.level == 0) {
-                this.m_candle.showL1();
-            }
-            else {
-                if (info.branch != 0) {
-                    boolean isLeft = (info.branch == -1);
-                    switch ((int)info.level) {
-                        case 1:
-                            m_candle.showL2(isLeft);
-                            break;
-                        case 2:
-                            m_candle.showL3(isLeft);
-                            break;
-                        case 3:
-                            m_candle.showL4(isLeft);
-                            break;
-                    }                    
-                }
-            }
+    //     ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
+    //     if (info == null) {
+    //         this.m_candle.clearLn();
+    //     }
+    //     else {
+    //         if (info.level == -1) {
+    //             // show aglea
+    //         }
+    //         else if (info.level == 0) {
+    //             this.m_candle.showL1();
+    //         }
+    //         else {
+    //             if (info.branch != 0) {
+    //                 boolean isLeft = (info.branch == -1);
+    //                 switch ((int)info.level) {
+    //                     case 1:
+    //                         m_candle.showL2(isLeft);
+    //                         break;
+    //                     case 2:
+    //                         m_candle.showL3(isLeft);
+    //                         break;
+    //                     case 3:
+    //                         m_candle.showL4(isLeft);
+    //                         break;
+    //                 }                    
+    //             }
+    //         }
             
-        }
+    //     }
 
-    }
+    // }
 
     public void setStateLn() {
         ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
