@@ -130,7 +130,7 @@ public class Constants {
         public static final double moveToPoseRotationkD = 0.; // TODO
 
         public static final double moveToPoseRotationToleranceRadians = Units.degreesToRadians(3.); // TODO
-        public static final double moveToPoseTranslationToleranceMeters = 0.03; // TODO
+        public static final double moveToPoseTranslationToleranceMeters = 0.02; // TODO
 
         public static final double maxMoveToSpeed = 3.5; // TODO
         public static final double maxMoveToAngularVelocity = Units.degreesToRadians(200.); // TODO
@@ -312,7 +312,7 @@ public class Constants {
         };
 
         public static double coralBranchOffset = 0.164338;
-        public static double coralVerticalOffset = 0.5;
+        public static double coralVerticalOffset = 0.525;
         
         // 接入点信息类
         public static class APInfo {
