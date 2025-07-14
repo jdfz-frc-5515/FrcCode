@@ -233,6 +233,18 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     //     m_turnMotor.setControl(motionMagicVoltage.withPosition(GIntakeConstants.retractCCRotation).withSlot(0));
     // }
 
+    public void expend() {
+        if (curState == GI_STATE.IDLE) {
+            curState = GI_STATE.EXPANDING;
+        }
+    }
+
+    public void makeSureRetracted() {
+        if (curState == GI_STATE.WAIT_FOR_CORAL) {
+            curState = GI_STATE.IDLE;
+        }
+    }
+
     public void toggle() {
         switch (curState) {
             case IDLE:
@@ -267,7 +279,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     }
 
 
-    private boolean isCoralIn() {
+    public boolean isCoralIn() {
         return getIsSensorOn();
     }
 

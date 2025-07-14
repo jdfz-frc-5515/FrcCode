@@ -47,6 +47,7 @@ import frc.robot.subsystems.Elevator2025.Elevator2025;
 import frc.robot.subsystems.Intake2025.Intake2025;
 import frc.robot.subsystems.TurningArm2025.TurningArm2025;
 import frc.robot.commands.GoToCoralCmd;
+import frc.robot.commands.GoToGroundCoralCmd;
 import frc.robot.commands.fineTuneDrivetrainCmd;
 
 public class RobotContainer {
@@ -87,6 +88,21 @@ public class RobotContainer {
             drivetrain.run(() -> drivetrain.driveFieldCentric(m_driverController))
         );
 
+
+        // setHeading here for auto 
+        double headingAngle = 180;  // 0 red , 180 blue
+        // // var alliance = DriverStation.getAlliance();
+        // // if (alliance.isPresent()) {
+        // //     switch (alliance.get()) {
+        // //         case Blue:
+        // //         headingAngle = 180;
+        // //         break;
+        // //         case Red:
+        // //         headingAngle = 0;
+        // //         break;
+        // //     }
+        // // }
+        drivetrain.resetHeadingForOdo(headingAngle);
 
         new UpperSystem2025Cmd(
             drivetrain,
@@ -137,7 +153,9 @@ public class RobotContainer {
 
         cmd.setGroundIntakeSwitchTrigger(groundIntakeSwitchBtn);
 
-        aimGroundCoralBtn.whileTrue(new GoToCoralCmd(drivetrain));
+        aimGroundCoralBtn.whileTrue(new GoToGroundCoralCmd(drivetrain, ()->{
+            return cmd.getIsGroundIntakeCoralIn();
+        }));
 
         // m_driverController.a().onTrue(new InstantCommand(() -> {
         //     System.out.println("00000000000000000000000000000000000");
@@ -145,7 +163,9 @@ public class RobotContainer {
         // }));
 
         // reset the field-centric heading on left bumper press
-        m_driverController.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        // m_driverController.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        m_driverController.back().onTrue(drivetrain.runOnce(() -> drivetrain.setFieldCentric()));
+        
 
         m_driverController.start().onTrue(new InstantCommand(() -> {
             drivetrain.resetHeadingForOdo(0);
@@ -294,8 +314,8 @@ public class RobotContainer {
                 // e.g. "17-L-1", "17-R-1", "18-L-2", "18-R-2", etc.
                 String leftName = apId + "-L-" + level ;
                 String rightName = apId + "-R-" + level ;
-                regPPEnC(leftName, cmd.getMoveToCoralCmdGroup(apId, level, -1));
-                regPPEnC(rightName, cmd.getMoveToCoralCmdGroup(apId, level, 1));
+                regPPEnC(leftName, cmd.getMoveToCoralCmdGroup(apId, level-1, -1));
+                regPPEnC(rightName, cmd.getMoveToCoralCmdGroup(apId, level-1, 1));
             }
         }
 
@@ -313,6 +333,14 @@ public class RobotContainer {
         regPPEnC("UpperIntake", () -> {
             cmd.setIntakeSource(false);
          });
+
+        regPPEnC("ExpendGroundIntake", ()->{
+            cmd.expendGroundIntake();
+        });
+
+        regPPEnC("ResetGroundIntake", ()->{
+            cmd.makeSureGroundIntakeRetracted();
+        });
 
         PathConstraints constraints = new PathConstraints(
             Constants.PathPlanner.constraintsSpeed, Constants.PathPlanner.constraintsAccel,

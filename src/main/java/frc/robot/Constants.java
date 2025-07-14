@@ -83,7 +83,7 @@ public class Constants {
         public static final String canBusName = "rio";
         public static final double retractCCRotation = 0.0;
         public static final double expandCCRotation = 1.38;
-        public static final double intakeMotorSpeed = 0.3;
+        public static final double intakeMotorSpeed = 0.5;
         public static final double intakeMotorSpeedInRetractingWithCoral = 0.6;
         public static final double intakeMotorReverseSpeed = -0.15;
 
@@ -253,9 +253,9 @@ public class Constants {
             public static final double KA = 0;//0.07;
         }
 
-        public static final double Velocity = 4;// 30; // 30;//50;
-        public static final double Acceleration = 30;// 100;// 75;
-        public static final double Jerk = 0;
+        public static final double Velocity = 30; // 30;//50;
+        public static final double Acceleration = 60;// 75;
+        public static final double Jerk = 180;
         public static final double SensorToMechanismRatio = 1.0;
         public static final double RotorToSensorRatio = 4.8;//11.33;
         // smaller value means higher position
@@ -312,7 +312,7 @@ public class Constants {
         };
 
         public static double coralBranchOffset = 0.164338;
-        public static double coralVerticalOffset = 0.55;
+        public static double coralVerticalOffset = 0.5;
         
         // 接入点信息类
         public static class APInfo {
