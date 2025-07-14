@@ -128,6 +128,7 @@ public class UpperSystem2025Cmd extends Command {
     private Trigger aimGroundCoralBtn;
     private Trigger intakeTrigger;
     private Trigger groundIntakeSwitchTrigger;
+    private Trigger groundIntakeOutTakeTrgger;
 
     private Trigger elevatorTuningUpTrigger;
     private Trigger elevatorTuningDownTrigger;
@@ -332,6 +333,21 @@ public class UpperSystem2025Cmd extends Command {
         }));
     }
 
+    public void setGroundIntakeOutTakeTrigger(Trigger t) {
+        if (t == null) {
+            return;
+        }
+        if (groundIntakeOutTakeTrigger != null) {
+            DriverStation.reportError("setGroundIntakeOutTakeTrigger trigger bind multiple times. Please check your code!", true);
+            return;
+        }
+        groundIntakeOutTakeTrigger = t;
+        groundIntakeOutTakeTrigger.onTrue(new InstantCommand(() -> {
+            if (curState == STATE.READY_FOR_LOAD_GROUND_CORAL) {
+                m_groundIntake.toggleOutTake();
+            }
+        }));
+    }
     public void setLnTrigger(Trigger l1, Trigger l2, Trigger l3, Trigger l4) {
         if (l1 != null) {
             if (L1Trigger != null) {
@@ -395,11 +411,15 @@ public class UpperSystem2025Cmd extends Command {
     }
 
     public void expendGroundIntake() {
-        m_groundIntake.expend();;
+        m_groundIntake.expend();
     }
 
     public void makeSureGroundIntakeRetracted() {
         m_groundIntake.makeSureRetracted();
+    }
+
+    public void toggleGroundIntakeOutTake() {
+        m_groundIntake.toggleOutTake();
     }
 
     public void setIntakeSource(boolean isFromGround) {
@@ -479,20 +499,6 @@ public class UpperSystem2025Cmd extends Command {
                 setState(STATE.BALL1);
             }
             
-        }));
-    }
-
-    public void setGroundIntakeOutTakeTrigger(Trigger t) {
-        if (t == null) {
-            return;
-        }
-        if (groundIntakeOutTakeTrigger != null) {
-            DriverStation.reportError("setGroundIntakeOutTakeTrigger trigger bind multiple times. Please check your code!", true);
-            return;
-        }
-        groundIntakeOutTakeTrigger = t;
-        groundIntakeOutTakeTrigger.onTrue(new InstantCommand(() -> {
-            // TODO: 地吸反转吐Coral
         }));
     }
 

@@ -54,6 +54,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         RETRACTING_WITH_CORAL,      // -> WAITING_FOR_REVERSE_INTAKE
         WAITING_FOR_REVERSE_INTAKE,
         REVERSE_INTAKING,           // -> IDLE   
+        OUT_TAKE,
     }
 
     private DigitalInput coralSensor = new DigitalInput(2);
@@ -139,6 +140,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         m_turnMotor.getConfigurator().apply(getTurnMotorConfiguration(true));
         m_driveMotor.getConfigurator().apply(getDriveMotorConfiguration());
 
+        zeroCC();
         if (isFirstTimeInit) {
             isFirstTimeInit = false;
             if (!loadLastPosition()) {
@@ -260,6 +262,15 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         }
     }
 
+    public void toggleOutTake() {
+        if (curState == GI_STATE.OUT_TAKE) {
+            curState = GI_STATE.RETRACTING_WITHOUT_CORAL;
+        }
+        else {
+            curState = GI_STATE.OUT_TAKE;
+        }
+    }
+
     public GI_STATE getState() {
         return curState;
     }
@@ -289,7 +300,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         double armPos = NONE_POS;
         switch (curState) {
             case IDLE:
-                zeroCC();
+                // zeroCC();
                 intakeMotorSpeed = 0;
                 // armPos = 0;
                 break;
@@ -330,6 +341,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
                 intakeMotorSpeed = GIntakeConstants.intakeMotorReverseSpeed;
                 if (reverserIntakeCountdoownFrame < 0) {
                     curState = GI_STATE.IDLE;
+                    zeroCC();
                     intakeMotorSpeed = 0;
                 }
                 else {
@@ -341,7 +353,13 @@ public class GroundIntakeSubsystem extends SubsystemBase {
                 intakeMotorSpeed = 0;
                 if (isArmAtPos(armPos)) {
                     curState = GI_STATE.IDLE;
+                    zeroCC();
                 }
+                break;
+            case OUT_TAKE:
+                armPos = GIntakeConstants.expandCCRotation;
+                // intakeMotorSpeed = GIntakeConstants.intakeMotorReverseSpeed;
+                intakeMotorSpeed = 0;
                 break;
         }
 

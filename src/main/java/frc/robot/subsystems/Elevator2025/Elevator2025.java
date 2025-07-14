@@ -20,6 +20,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -104,6 +105,7 @@ public class Elevator2025 extends SubsystemBase {
         // elevatorConfiguration.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         // elevatorConfiguration.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
+        // elevatorConfiguration.Slot0.kG = 0.1;
         elevatorConfiguration.Slot0.kP = Constants.Elevator.Up.KP;
         elevatorConfiguration.Slot0.kI = Constants.Elevator.Up.KI;
         elevatorConfiguration.Slot0.kD = Constants.Elevator.Up.KD;
@@ -111,6 +113,7 @@ public class Elevator2025 extends SubsystemBase {
         elevatorConfiguration.Slot0.kV = Constants.Elevator.Up.KV;
         elevatorConfiguration.Slot0.kA = Constants.Elevator.Up.KA;
 
+        // elevatorConfiguration.Slot1.kG = 0.1;
         elevatorConfiguration.Slot1.kP = Constants.Elevator.Down.KP;
         elevatorConfiguration.Slot1.kI = Constants.Elevator.Down.KI;
         elevatorConfiguration.Slot1.kD = Constants.Elevator.Down.KD;
@@ -127,6 +130,9 @@ public class Elevator2025 extends SubsystemBase {
 
         elevatorConfiguration.Feedback.SensorToMechanismRatio = Constants.Elevator.SensorToMechanismRatio;
         elevatorConfiguration.Feedback.RotorToSensorRatio = Constants.Elevator.RotorToSensorRatio;
+
+        // elevatorConfiguration.Slot0.GravityType = GravityTypeValue.Elevator_Static;
+        // elevatorConfiguration.Slot1.GravityType = GravityTypeValue.Elevator_Static;
         return elevatorConfiguration;
     }
 

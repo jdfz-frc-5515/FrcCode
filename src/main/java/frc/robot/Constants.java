@@ -220,8 +220,8 @@ public class Constants {
         public static final double RotorToSensorRatio = 44;
         // bigger value means arm is more expanded(clockwise)
         public static final double zeroPos = 0;
-        public static final double groundIntakePos = 0.26; //0.385;  //0.18; // 7/12:0.27
-        public static final double upIntakePos = 1.25;
+        public static final double groundIntakePos = 0.2;// 0.26; //0.385;  //0.18; // 7/12:0.27
+        public static final double upIntakePos = 1.15; //1.25;
         public static final double l1Pos = 1.69;//0.407227;
         public static final double l2Pos = 1.69;
         public static final double dodgePos =  1.139307;  // the pos that allows elevator to move
@@ -238,7 +238,7 @@ public class Constants {
         public static final String canBusName = "rio";
         public static class Up {
             public static final double KP = 5; // 25;  // 5; // 20.0;
-            public static final double KI = 0; //3.2; // 0;
+            public static final double KI = 0.005; //3.2; // 0;
             public static final double KD = 0.1; //0.2;
             public static final double KV = 0.5;//1;//0.1;
             public static final double KS = 0.05;//0.05;
@@ -246,8 +246,8 @@ public class Constants {
         }
         public static class Down {
             public static final double KP = 5; // 10.0;
-            public static final double KI = 0;
-            public static final double KD = 0.1;
+            public static final double KI = 1;
+            public static final double KD = -0.35;
             public static final double KV = 1;//1;//0.1;
             public static final double KS = 0;//0.05;
             public static final double KA = 0;//0.07;

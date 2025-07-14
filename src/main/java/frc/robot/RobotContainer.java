@@ -186,10 +186,12 @@ public class RobotContainer {
         cmd.setLnTrigger(m_driverController2.a(), m_driverController2.b(), m_driverController2.x(), m_driverController2.y());
         cmd.setSwitchIntakeSourceTrigger(m_driverController2.rightBumper());
         
-        cmd.setGroundIntakeOutTakeTrigger(m_driverController2.rightTrigger());
+        // cmd.setGroundIntakeOutTakeTrigger(m_driverController2.rightTrigger());
 
         cmd.setElevatorLevelDownTrigger(m_driverController2.povDown());
         cmd.setElevatorLevelUpTrigger(m_driverController2.povUp());
+
+        cmd.setGroundIntakeOutTakeTrigger(m_driverController2.povLeft());
     }
 
     private void configureDriver3Bindings() {
@@ -346,21 +348,21 @@ public class RobotContainer {
             Constants.PathPlanner.constraintsSpeed, Constants.PathPlanner.constraintsAccel,
             Units.degreesToRadians(540), Units.degreesToRadians(720));
 
-        try {
-            String[] ppPaths = GlobalConfig.loadAllPathPlannerPath();
-            for (int i = 0; i < ppPaths.length; ++i) {
-                String pathName = ppPaths[i];
-                PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
-                regPPEnC(pathName, AutoBuilder.pathfindThenFollowPath(path, constraints));
-                // regPPEnC(pathName, ()->{
-                //     System.out.println("===============================> regPPEnC: " + pathName);
-                // });
-            }
-        }
-        catch (Exception e) {
-            System.err.println("Error loading PathPlanner paths: " + e.getMessage());
-            e.printStackTrace();
-        }
+        // try {
+        //     String[] ppPaths = GlobalConfig.loadAllPathPlannerPath();
+        //     for (int i = 0; i < ppPaths.length; ++i) {
+        //         String pathName = ppPaths[i];
+        //         PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+        //         regPPEnC(pathName, AutoBuilder.pathfindThenFollowPath(path, constraints));
+        //         // regPPEnC(pathName, ()->{
+        //         //     System.out.println("===============================> regPPEnC: " + pathName);
+        //         // });
+        //     }
+        // }
+        // catch (Exception e) {
+        //     System.err.println("Error loading PathPlanner paths: " + e.getMessage());
+        //     e.printStackTrace();
+        // }
     }
 
     private void regPPEnC(String name, Runnable runnable) {
