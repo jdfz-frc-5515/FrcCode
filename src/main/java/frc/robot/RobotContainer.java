@@ -29,26 +29,25 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.UpperSystem2025Cmd;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.GroundIntakeSubsystem;
 import frc.robot.subsystems.ImprovedCommandXboxController;
-import frc.robot.subsystems.Candle2025.Candle2025;
+import frc.robot.subsystems.PlayCandleSubsystem;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator2025.Elevator2025;
 import frc.robot.subsystems.Intake2025.Intake2025;
 import frc.robot.subsystems.TurningArm2025.TurningArm2025;
-import frc.robot.commands.GoToCoralCmd;
 import frc.robot.commands.GoToGroundCoralCmd;
 import frc.robot.commands.fineTuneDrivetrainCmd;
+import frc.robot.Constants.Candle;
+import frc.robot.commands.CandleCmd;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -70,7 +69,7 @@ public class RobotContainer {
     TurningArm2025 m_turningArm = new TurningArm2025();
     Elevator2025 m_elevator = new Elevator2025();
     Intake2025 m_intake = new Intake2025();
-    Candle2025 m_candle = new Candle2025();
+    PlayCandleSubsystem m_candle = new PlayCandleSubsystem();
 
     private List<Trigger> pathplannerEvents = new ArrayList<Trigger>();
     
@@ -106,7 +105,7 @@ public class RobotContainer {
 
         new UpperSystem2025Cmd(
             drivetrain,
-            m_turningArm, m_elevator, m_intake, gIntakeSubsystem, m_candle
+            m_turningArm, m_elevator, m_intake, gIntakeSubsystem
         );
 
         configureDriver1Bindings();
@@ -190,6 +189,8 @@ public class RobotContainer {
 
         cmd.setElevatorLevelDownTrigger(m_driverController2.povDown());
         cmd.setElevatorLevelUpTrigger(m_driverController2.povUp());
+        m_driverController2.povLeft().onTrue(new CandleCmd(m_candle, false));
+        m_driverController2.povRight().onTrue(new CandleCmd(m_candle, true));
     }
 
     private void configureDriver3Bindings() {
