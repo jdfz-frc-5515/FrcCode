@@ -23,33 +23,21 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "UpperIntake"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "22-R"
+            "pathName": "p01"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Intake"
+            "name": "FaceGroundCoral"
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 1.0
+            "name": "Go"
           }
         },
         {

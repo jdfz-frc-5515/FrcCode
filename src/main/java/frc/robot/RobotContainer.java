@@ -40,6 +40,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.GroundIntakeSubsystem;
 import frc.robot.subsystems.ImprovedCommandXboxController;
 import frc.robot.subsystems.PlayCandleSubsystem;
+import frc.robot.subsystems.Candle2025.Candle2025;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator2025.Elevator2025;
 import frc.robot.subsystems.Intake2025.Intake2025;
@@ -48,6 +49,8 @@ import frc.robot.commands.GoToGroundCoralCmd;
 import frc.robot.commands.fineTuneDrivetrainCmd;
 import frc.robot.Constants.Candle;
 import frc.robot.commands.CandleCmd;
+import frc.robot.commands.FaceGroundCoralCmd;
+import frc.robot.commands.GoForward;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -69,7 +72,8 @@ public class RobotContainer {
     TurningArm2025 m_turningArm = new TurningArm2025();
     Elevator2025 m_elevator = new Elevator2025();
     Intake2025 m_intake = new Intake2025();
-    PlayCandleSubsystem m_candle = new PlayCandleSubsystem();
+    // PlayCandleSubsystem m_candle = new PlayCandleSubsystem();
+    Candle2025 m_candle = new Candle2025();
 
     private List<Trigger> pathplannerEvents = new ArrayList<Trigger>();
     
@@ -105,6 +109,7 @@ public class RobotContainer {
 
         new UpperSystem2025Cmd(
             drivetrain,
+            m_candle,
             m_turningArm, m_elevator, m_intake, gIntakeSubsystem
         );
 
@@ -317,8 +322,8 @@ public class RobotContainer {
                 // e.g. "17-L-1", "17-R-1", "18-L-2", "18-R-2", etc.
                 String leftName = apId + "-L-" + level ;
                 String rightName = apId + "-R-" + level ;
-                regPPEnC(leftName, cmd.getMoveToCoralCmdGroup(apId, level-1, -1));
-                regPPEnC(rightName, cmd.getMoveToCoralCmdGroup(apId, level-1, 1));
+                regPPEnC(leftName, cmd.getMoveToCoralCmdGroup(apId, level-1, -1, true));
+                regPPEnC(rightName, cmd.getMoveToCoralCmdGroup(apId, level-1, 1, false));
             }
         }
 
@@ -345,9 +350,12 @@ public class RobotContainer {
             cmd.makeSureGroundIntakeRetracted();
         });
 
-        PathConstraints constraints = new PathConstraints(
-            Constants.PathPlanner.constraintsSpeed, Constants.PathPlanner.constraintsAccel,
-            Units.degreesToRadians(540), Units.degreesToRadians(720));
+        regPPEnC("FaceGroundCoral", new FaceGroundCoralCmd(drivetrain));
+        regPPEnC("Go", new GoForward(drivetrain, cmd, 2));
+
+        // PathConstraints constraints = new PathConstraints(
+        //     Constants.PathPlanner.constraintsSpeed, Constants.PathPlanner.constraintsAccel,
+        //     Units.degreesToRadians(540), Units.degreesToRadians(720));
 
         // try {
         //     String[] ppPaths = GlobalConfig.loadAllPathPlannerPath();
@@ -420,8 +428,10 @@ public class RobotContainer {
 
     public void onDisabled() {
 
-        LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT, 2);
-        LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_ARPIL_TAG_NAME_LEFT, 2);
-        // LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_OBJECT_DETECTION, 2);
+        if (GlobalConfig.devMode) {
+            LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT, 2);
+            LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_ARPIL_TAG_NAME_LEFT, 2);
+            // LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_OBJECT_DETECTION, 2);
+        }
     }
 }

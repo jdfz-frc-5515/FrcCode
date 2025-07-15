@@ -25,6 +25,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -89,6 +90,8 @@ public class GroundIntakeSubsystem extends SubsystemBase {
 
     final int MAX_REVERSER_INTAKE_FRAME = 50;
     int reverserIntakeCountdoownFrame = -1;
+
+    double sensorTime = -1;
 
     private TalonFXConfiguration getTurnMotorConfiguration(boolean lockMotor) {
         TalonFXConfiguration turnMotorConfig = new TalonFXConfiguration();
@@ -492,7 +495,23 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         if (isDebugSensorOn) {
             return debugSensored;
         }
-        return coralSensor.get() == false;
+        
+        if (coralSensor.get() == false) {
+            double now = Timer.getFPGATimestamp();
+            if (sensorTime < 0) {
+                sensorTime = now;
+            }
+            else {
+                if (now - sensorTime > 0.1) {
+                    return true;
+                }
+            }
+        }
+        else {
+            sensorTime = -1;
+        }
+
+        return false;
     }
     protected void telemetry() {
     

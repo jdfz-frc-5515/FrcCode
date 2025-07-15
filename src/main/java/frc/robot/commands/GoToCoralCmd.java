@@ -29,11 +29,14 @@ public class GoToCoralCmd extends Command {
 
     private boolean isInitOk = true;
     private BooleanSupplier m_isBallModeSupplier;
-    public GoToCoralCmd(CommandSwerveDrivetrain subsystem, BooleanSupplier isBallMode) {
+    private BooleanSupplier m_isSourceModeSupplier;
+    private boolean m_isSourceLeft = false;
+    public GoToCoralCmd(CommandSwerveDrivetrain subsystem, BooleanSupplier isBallMode, BooleanSupplier isSourceMode, boolean isLeft) {
         m_subsystem = subsystem;
         addRequirements(subsystem);
-
+        m_isSourceModeSupplier = isSourceMode;
         m_isBallModeSupplier = isBallMode;
+        m_isSourceLeft = isLeft;
     }
 
     // public Pose2d getTargetPose2d() {
@@ -111,6 +114,15 @@ public class GoToCoralCmd extends Command {
         long apId = info.aprilTagId;
 
         if (m_isBallModeSupplier.getAsBoolean()) {
+            m_targetPos = MiscUtils.getCoralBallPos(apId);
+        }
+        else if (m_isSourceModeSupplier.getAsBoolean()) {
+            m_targetPos = MiscUtils.getSourcePosByAlliance(m_isSourceLeft);
+        }
+        else if (info.level == 0) {
+            m_targetPos = MiscUtils.getCoralShooterPos(apId, info.branch == -1);
+        }
+        else if (info.level == 1 || info.level == -1) {
             m_targetPos = MiscUtils.getCoralBallPos(apId);
         }
         else if (info.branch == 1 || info.branch == -1) {

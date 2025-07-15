@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.0481091910217355,
-        "y": 2.217478146813278
+        "x": 3.9286827891079277,
+        "y": 1.9990254586435419
       },
       "isLocked": false,
       "linkedName": null
@@ -20,24 +20,24 @@
         "y": 2.205580357143946
       },
       "prevControl": {
-        "x": 3.934746412598532,
-        "y": 2.25103181881971
+        "x": 3.715049765793047,
+        "y": 2.2260063292811902
       },
       "nextControl": {
-        "x": 2.907843422159912,
-        "y": 2.1685354367817733
+        "x": 2.1868819287288312,
+        "y": 2.1358115052598516
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.7179545454545455,
-        "y": 2.095497159090909
+        "x": 2.1538636363636363,
+        "y": 2.205580357143946
       },
       "prevControl": {
-        "x": 1.1727505390782198,
-        "y": 2.151899180125088
+        "x": 2.403655744996765,
+        "y": 2.1953871013041635
       },
       "nextControl": null,
       "isLocked": false,
@@ -64,17 +64,11 @@
       "waypointRelativePos": 1.05905511811019,
       "endWaypointRelativePos": null,
       "command": null
-    },
-    {
-      "name": "ResetGroundIntake",
-      "waypointRelativePos": 1.9,
-      "endWaypointRelativePos": null,
-      "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 1.0,
+    "maxAcceleration": 1.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

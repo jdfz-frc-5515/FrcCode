@@ -8,6 +8,7 @@ import java.util.Map;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -125,10 +126,34 @@ public final class MiscUtils {
             return null;
         }
         double hOffset = 0;
-        double vOffset = Constants.FieldInfo.coralVerticalOffset;
+        double vOffset = Constants.FieldInfo.agleaVerticalOffset;
         
         Pose2d offsetPos = calcOffsetPoint(info.getX(), info.getY(), info.getTheta(), hOffset, vOffset);
         return offsetPos;
+    }
+
+    public static Pose2d getSourcePos(long apId) {
+        Constants.FieldInfo.APInfo info = Constants.FieldInfo.AP_MAP.get(apId);
+        if (info == null) {
+            return null;
+        }
+        
+        double hOffset = Constants.FieldInfo.sourceHorizontalOffset;
+        double vOffset = Constants.FieldInfo.sourceVerticalOffset;;
+        
+        Pose2d offsetPos = calcOffsetPoint(info.getX(), info.getY(), info.getTheta(), hOffset, vOffset);
+
+        Translation2d trans = offsetPos.getTranslation();
+        Rotation2d rot = offsetPos.getRotation();
+        // offsetPos = new Pose2d(new Translation2d(trans.getX(), trans.getY()), new Rotation2d(Units.degreesToRadians(rot.getDegrees() + 180)));
+        return offsetPos;
+    }
+
+    public static Pose2d getSourcePosByAlliance(boolean isLeft) {
+        long apId = DriverStation.getAlliance().get().equals(Alliance.Blue) ? 
+            (isLeft ? 13 : 12) : (isLeft ? 1 : 2);
+        
+        return getSourcePos(apId);
     }
 
     public static List<String> listFilesWithSuffix(String directoryPath, String suffix) {

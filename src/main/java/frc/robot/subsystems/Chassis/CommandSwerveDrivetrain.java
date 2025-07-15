@@ -47,6 +47,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 import frc.robot.subsystems.ImprovedCommandXboxController;
+import frc.robot.utils.MiscUtils;
 import frc.robot.LimelightHelpers;
 import frc.robot.Constants;
 
@@ -341,8 +342,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-        updateOdometry(Constants.LIME_LIGHT_ARPIL_TAG_NAME_LEFT);
-        updateOdometry(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT);
+        double dist = updateOdometry(Constants.LIME_LIGHT_ARPIL_TAG_NAME_SKY, -1);
+        if (MiscUtils.compareDouble(dist, 0)) {
+            dist = -1;
+        }
+        updateOdometry(Constants.LIME_LIGHT_ARPIL_TAG_NAME_LEFT, dist);
+        updateOdometry(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT, dist);
+        
     }
 
     private void startSimThread() {
@@ -389,7 +395,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     static final double MAX_LL_LATENCY = 100; // 100 ms, this is the maximum latency we accept from the limelight
-    public void updateOdometry(String llName){
+    // 如果LL看到目标，则返回到目标的距离
+    // 参数minDist表示当前看到的目标距离大于这个值，则忽略此目标，负数则无效
+    public double updateOdometry(String llName, double minDist){
 
         double botRot = getState().Pose.getRotation().getDegrees();
         double pigeonRot = getRotationFromPigeon();
@@ -403,9 +411,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // ImprovedLL.mt2stdDev stdDev = ImprovedLL.getmt2Dev(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT); 
         if(mt2 == null) {
             // DriverStation.reportWarning(llName + " Diconnected!", false);
-            return;
+            return -1;
         }
         
+        if (minDist > 0 && mt2.avgTagDist > minDist) {
+            return -1;
+        }
+        SmartDashboard.putNumber(llName+"-DIST", mt2.avgTagDist);
         if (Math.abs(getSpeeds().omegaRadiansPerSecond) <= 4*Math.PI 
             && mt2.tagCount > 0 
             && mt2.avgTagDist < 4 
@@ -440,6 +452,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
             SmartDashboard.putNumber("tA", mt2.avgTagArea );
             SmartDashboard.putNumber("Dev", data);
+
+            return mt2.avgTagDist;
         }
         else {
             if (mt2.latency >= MAX_LL_LATENCY) {
@@ -449,6 +463,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 DriverStation.reportWarning(llName + "vision ignored", false);
             }
         }
+        return -1;
         
     }
 

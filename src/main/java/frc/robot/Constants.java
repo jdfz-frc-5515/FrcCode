@@ -31,6 +31,7 @@ import java.util.Map;
 public class Constants {
     public static String LIME_LIGHT_ARPIL_TAG_NAME_RIGHT = "limelight-right";
     public static String LIME_LIGHT_ARPIL_TAG_NAME_LEFT = "limelight-left";
+    public static String LIME_LIGHT_ARPIL_TAG_NAME_SKY = "limelight-sky";
     public static String LIME_LIGHT_OBJECT_DETECTION = "limelight-up";
 
     public static class GlobalConstants {
@@ -132,7 +133,7 @@ public class Constants {
         public static final double moveToPoseRotationToleranceRadians = Units.degreesToRadians(3.); // TODO
         public static final double moveToPoseTranslationToleranceMeters = 0.02; // TODO
 
-        public static final double maxMoveToSpeed = 3.5; // TODO
+        public static final double maxMoveToSpeed = 1.5; // TODO
         public static final double maxMoveToAngularVelocity = Units.degreesToRadians(200.); // TODO
 
     }
@@ -313,6 +314,9 @@ public class Constants {
 
         public static double coralBranchOffset = 0.164338;
         public static double coralVerticalOffset = 0.525;
+        public static double agleaVerticalOffset = 0.8;
+        public static double sourceHorizontalOffset = 0.0; // 水平偏移量
+        public static double sourceVerticalOffset = -0.35;
         
         // 接入点信息类
         public static class APInfo {
@@ -361,6 +365,13 @@ public class Constants {
             map.put(10l, new APInfo(10, 12.227306, 4.0259, 0, 270, 0, Arrays.asList(1, 2)));
             map.put(11l, new APInfo(11, 12.643358, 3.306318, 60, 330, 1, Arrays.asList(1)));
             
+            map.put(1l, new APInfo(8, 16.7, 0.655, 126, 0, -1, Arrays.asList()));
+            map.put(2l, new APInfo(9, 16.7, 7.39648, 234, 0, -1, Arrays.asList()));
+            map.put(12l, new APInfo(10, 0.851, 0.655, 54, 0, -1, Arrays.asList()));
+            map.put(13l, new APInfo(11, 0.851, 7.39648, 306, 0, -1, Arrays.asList()));
+            
+
+
             AP_MAP = Collections.unmodifiableMap(map);
         }
 

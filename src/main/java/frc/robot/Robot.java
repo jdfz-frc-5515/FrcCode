@@ -4,9 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.utils.MiscUtils;
 
 public class Robot extends TimedRobot {
     public static Robot inst = null;
@@ -16,6 +18,16 @@ public class Robot extends TimedRobot {
     private final RobotContainer m_robotContainer;
 
     public Robot() {
+        // Pose2d p; 
+        // p = MiscUtils.getSourcePos(1);
+        // System.out.println("Source 1 Position: " + p.getTranslation().getX() + ", " + p.getTranslation().getY() + ", " + p.getRotation().getDegrees());
+        // p = MiscUtils.getSourcePos(2);
+        // System.out.println("Source 2 Position: " + p.getTranslation().getX() + ", " + p.getTranslation().getY() + ", " + p.getRotation().getDegrees());
+        // p = MiscUtils.getSourcePos(12);
+        // System.out.println("Source 12 Position: " + p.getTranslation().getX() + ", " + p.getTranslation().getY() + ", " + p.getRotation().getDegrees());
+        // p = MiscUtils.getSourcePos(13);
+        // System.out.println("Source 13 Position: " + p.getTranslation().getX() + ", " + p.getTranslation().getY() + ", " + p.getRotation().getDegrees());
+        
         inst = this;
         Constants.initializeConstants();
         m_robotContainer = new RobotContainer();
