@@ -119,12 +119,6 @@ public class GoToCoralCmd extends Command {
         else if (m_isSourceModeSupplier.getAsBoolean()) {
             m_targetPos = MiscUtils.getSourcePosByAlliance(m_isSourceLeft);
         }
-        else if (info.level == 0) {
-            m_targetPos = MiscUtils.getCoralShooterPos(apId, info.branch == -1);
-        }
-        else if (info.level == 1 || info.level == -1) {
-            m_targetPos = MiscUtils.getCoralBallPos(apId);
-        }
         else if (info.branch == 1 || info.branch == -1) {
             m_targetPos = MiscUtils.getCoralShooterPos(apId, info.branch == -1);
         }

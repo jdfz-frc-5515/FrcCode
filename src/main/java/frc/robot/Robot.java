@@ -27,6 +27,11 @@ public class Robot extends TimedRobot {
         // System.out.println("Source 12 Position: " + p.getTranslation().getX() + ", " + p.getTranslation().getY() + ", " + p.getRotation().getDegrees());
         // p = MiscUtils.getSourcePos(13);
         // System.out.println("Source 13 Position: " + p.getTranslation().getX() + ", " + p.getTranslation().getY() + ", " + p.getRotation().getDegrees());
+
+        // Source 1 Position: 16.436378314346825, 1.017844121977164, 126.0
+        // Source 2 Position: 16.436378314346825, 7.033635878022837, 234.0
+        // Source 12 Position: 1.1146216856531743, 1.017844121977164, 54.0
+        // Source 13 Position: 1.114621685653174, 7.033635878022836, 306.0
         
         inst = this;
         Constants.initializeConstants();

@@ -315,8 +315,8 @@ public class Constants {
         public static double coralBranchOffset = 0.164338;
         public static double coralVerticalOffset = 0.525;
         public static double agleaVerticalOffset = 0.8;
-        public static double sourceHorizontalOffset = 0.0; // 水平偏移量
-        public static double sourceVerticalOffset = -0.35;
+        public static double sourceHorizontalOffset = 0.0; // 水平偏移量 +往右偏（面向source方向）
+        public static double sourceVerticalOffset = -(0.857 / 2 + 0.02);  // 车子尺寸：0.857x0.857， 距离bump的距离是0.02米
         
         // 接入点信息类
         public static class APInfo {

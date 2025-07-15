@@ -96,7 +96,7 @@ public final class MiscUtils {
     // }
 
     private static Pose2d calcOffsetPoint(double x, double y, double angle, double hOffset, double vOffset) {
-        String s = String.format("%f, %f, %f, %f, %f", x, y, angle, hOffset, vOffset);
+        // String s = String.format("%f, %f, %f, %f, %f", x, y, angle, hOffset, vOffset);
         double radAng = Units.degreesToRadians(angle);
         double sin = Math.sin(radAng);
         double cos = Math.cos(radAng);
@@ -143,9 +143,6 @@ public final class MiscUtils {
         
         Pose2d offsetPos = calcOffsetPoint(info.getX(), info.getY(), info.getTheta(), hOffset, vOffset);
 
-        Translation2d trans = offsetPos.getTranslation();
-        Rotation2d rot = offsetPos.getRotation();
-        // offsetPos = new Pose2d(new Translation2d(trans.getX(), trans.getY()), new Rotation2d(Units.degreesToRadians(rot.getDegrees() + 180)));
         return offsetPos;
     }
 
