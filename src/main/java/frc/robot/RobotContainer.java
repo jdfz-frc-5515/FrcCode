@@ -182,7 +182,7 @@ public class RobotContainer {
 
     private void configureDriver2Bindings() {
         UpperSystem2025Cmd cmd = UpperSystem2025Cmd.inst;
-        cmd.setLnTrigger(m_driverController2.a(), m_driverController2.b(), m_driverController2.x(), m_driverController2.y());
+        cmd.setLnTrigger(m_driverController2.a(), m_driverController2.b(), m_driverController2.x(), m_driverController2.y(), m_driverController2.leftBumper());
         cmd.setSwitchIntakeSourceTrigger(m_driverController2.rightBumper());
         
         // cmd.setGroundIntakeOutTakeTrigger(m_driverController2.rightTrigger());

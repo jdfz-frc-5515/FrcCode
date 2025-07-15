@@ -147,6 +147,7 @@ public class UpperSystem2025Cmd extends Command {
     private Trigger L2Trigger;
     private Trigger L3Trigger;
     private Trigger L4Trigger;
+    private Trigger BallTrigger;
 
     private Trigger groundIntakeOutTakeTrigger;  // 地吸反转，吐Coral
 
@@ -161,6 +162,8 @@ public class UpperSystem2025Cmd extends Command {
     ActionRunner m_actionRunner = null;
 
     private boolean m_isIntakeFromGround = true; // 从地吸拿Coral还是从漏斗拿
+
+    private boolean m_isBallMode = false; // 是否是Aglea模式，还是Coral模式
 
     public UpperSystem2025Cmd(
             CommandSwerveDrivetrain chassis,
@@ -221,14 +224,32 @@ public class UpperSystem2025Cmd extends Command {
             new InstantCommand(() -> {
                 ControlPadHelper.setControlPadInfoData(aprilTagId, level, branch);
             }),
-            new GoToCoralCmd(m_chassis)
+            new GoToCoralCmd(m_chassis, ()->m_isBallMode)
             // , new InstantCommand(() -> {
             //     setStateLn();
             // })
             ,new FunctionalCommand(
                 ()->{
                      //init
-                     setStateLn();
+                     if (m_isBallMode) {
+                        ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
+                        if (info != null) {
+                            long apId = info.aprilTagId;
+                            Constants.FieldInfo.APInfo apInfo = Constants.FieldInfo.AP_MAP.get(apId);
+                            if (apInfo != null) {
+                                if (apInfo.getAlgea() == 0) {
+                                    setStateBall1();
+                                }
+                                else {
+                                    setStateBall2();
+                                }
+                            }
+                        }
+                     }
+                     else {
+                        setStateLn();
+                     }
+                     
                 },
                 ()->{
                     // onExecute
@@ -245,7 +266,6 @@ public class UpperSystem2025Cmd extends Command {
                 }
             )
         );
-        System.out.println(ret.getRequirements().toString());
         return ret;
     }
 
@@ -348,7 +368,19 @@ public class UpperSystem2025Cmd extends Command {
             }
         }));
     }
-    public void setLnTrigger(Trigger l1, Trigger l2, Trigger l3, Trigger l4) {
+    public void setLnTrigger(Trigger l1, Trigger l2, Trigger l3, Trigger l4, Trigger ball) {
+        if (ball != null) {
+            if (BallTrigger != null) {
+                DriverStation.reportError("setLnTrigger BallTrigger trigger bind multiple times. Please check your code!", true);
+            }
+            else {
+                BallTrigger = ball;
+                BallTrigger.onTrue(new InstantCommand(() -> {
+                    m_isBallMode = true;
+                    ControlPadHelper.setControlPadInfoData(-10, -1, 0);                 
+                }));
+            }
+        }
         if (l1 != null) {
             if (L1Trigger != null) {
                 DriverStation.reportError("setLnTrigger L1 trigger bind multiple times. Please check your code!", true);
@@ -356,10 +388,11 @@ public class UpperSystem2025Cmd extends Command {
             else {
                 L1Trigger = l1;
                 L1Trigger.onTrue(new InstantCommand(() -> {
+                    m_isBallMode = false;
                     ControlPadHelper.setControlPadInfoData(-10, 0, -10);
-                    if (getIsCarryingCoral()) {
-                        setState(STATE.L1);
-                    }                    
+                    // if (getIsCarryingCoral()) {
+                    //     setState(STATE.L1);
+                    // }                    
                 }));
             }
         }
@@ -371,6 +404,7 @@ public class UpperSystem2025Cmd extends Command {
             else {
                 L2Trigger = l2;
                 L2Trigger.onTrue(new InstantCommand(() -> {
+                    m_isBallMode = false;
                     ControlPadHelper.setControlPadInfoData(-10, 1, -10);
                     // if (getIsCarryingCoral()) {
                     //     setState(STATE.L2);
@@ -386,6 +420,7 @@ public class UpperSystem2025Cmd extends Command {
             else {
                 L3Trigger = l3;
                 L3Trigger.onTrue(new InstantCommand(() -> {
+                    m_isBallMode = false;
                     ControlPadHelper.setControlPadInfoData(-10, 2, -10);
                     // if (getIsCarryingCoral()) {
                     //     setState(STATE.L3);
@@ -401,6 +436,7 @@ public class UpperSystem2025Cmd extends Command {
             else {
                 L4Trigger = l4;
                 L4Trigger.onTrue(new InstantCommand(() -> {
+                    m_isBallMode = false;
                     ControlPadHelper.setControlPadInfoData(-10, 3, -10);
                     // if (getIsCarryingCoral()) {
                     //     setState(STATE.L4);
@@ -1312,13 +1348,13 @@ public class UpperSystem2025Cmd extends Command {
         return autoMoveCmd;
     }
 
-    private void moveToGroundCoral() {
-        if (autoMoveCmd != null) {
-            autoMoveCmd.cancel();
-            autoMoveCmd = null;
-        }
-        autoMoveCmd = new GoToCoralCmd(m_chassis);
-    }
+    // private void moveToGroundCoral() {
+    //     if (autoMoveCmd != null) {
+    //         autoMoveCmd.cancel();
+    //         autoMoveCmd = null;
+    //     }
+    //     autoMoveCmd = new GoToCoralCmd(m_chassis);
+    // }
 
     // return: -1 down, 1 up, 0 evelvator no move
     private int getMovingDir(STATE pre, STATE cur) {
