@@ -9,6 +9,7 @@ import frc.robot.utils.MiscUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -27,9 +28,12 @@ public class GoToCoralCmd extends Command {
     private Pose2d m_targetPos;
 
     private boolean isInitOk = true;
-    public GoToCoralCmd(CommandSwerveDrivetrain subsystem) {
+    private BooleanSupplier m_isBallModeSupplier;
+    public GoToCoralCmd(CommandSwerveDrivetrain subsystem, BooleanSupplier isBallMode) {
         m_subsystem = subsystem;
         addRequirements(subsystem);
+
+        m_isBallModeSupplier = isBallMode;
     }
 
     // public Pose2d getTargetPose2d() {
@@ -81,6 +85,8 @@ public class GoToCoralCmd extends Command {
     @Override
     public void initialize() {
         isInitOk = true;
+        m_targetPos = null;
+        
          long targetApId = -1;
         if (DriverStation.isAutonomous()) {
             ControlPadHelper.ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
@@ -103,26 +109,35 @@ public class GoToCoralCmd extends Command {
             return;
         }
         long apId = info.aprilTagId;
-        Pose2d targetPos;
-        if (info.branch == 0) {
-            targetPos = MiscUtils.getCoralBallPos(apId);
+
+        if (m_isBallModeSupplier.getAsBoolean()) {
+            m_targetPos = MiscUtils.getCoralBallPos(apId);
         }
         else if (info.branch == 1 || info.branch == -1) {
-            targetPos = MiscUtils.getCoralShooterPos(apId, info.branch == -1);
+            m_targetPos = MiscUtils.getCoralShooterPos(apId, info.branch == -1);
         }
         else {
-            targetPos = new Pose2d();
+            // targetPos = new Pose2d();
         }
 
-        m_targetPos = targetPos;
+        // m_targetPos = targetPos;
         // for test
-        SmartDashboard.putString("MoveToCoralState", String.format("AP: %d, level: %d, branch: %d, targetPos: %s", apId, info.level, info.branch, targetPos.toString()));
+        if (m_targetPos == null) {
+            isInitOk = false;
+        }
+        else {
+            SmartDashboard.putString("MoveToCoralState", String.format("AP: %d, level: %d, branch: %d, targetPos: %s", apId, info.level, info.branch, m_targetPos.toString()));
+        }
+        
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        m_subsystem.autoMoveToPose(m_targetPos);
+        if (m_targetPos != null) {
+            m_subsystem.autoMoveToPose(m_targetPos);
+        }
+        
     }
 
     // Called once the command ends or is interrupted.
