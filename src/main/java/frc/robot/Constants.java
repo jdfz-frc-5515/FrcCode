@@ -122,9 +122,9 @@ public class Constants {
                 Units.degreesToRadians(720.));
 
         // Move To Pose
-        public static final double moveToPoseTranslationkP = 5.; // TODO
+        public static final double moveToPoseTranslationkP = 3; // TODO
         public static final double moveToPoseTranslationkI = 0.; // TODO
-        public static final double moveToPoseTranslationkD = 0.; // TODO
+        public static final double moveToPoseTranslationkD = 0.0; // TODO
 
         public static final double moveToPoseRotationkP = 5.; // TODO
         public static final double moveToPoseRotationkI = 0.; // TODO
@@ -133,7 +133,7 @@ public class Constants {
         public static final double moveToPoseRotationToleranceRadians = Units.degreesToRadians(3.); // TODO
         public static final double moveToPoseTranslationToleranceMeters = 0.02; // TODO
 
-        public static final double maxMoveToSpeed = 1.5; // TODO
+        public static final double maxMoveToSpeed = 3.5; // TODO
         public static final double maxMoveToAngularVelocity = Units.degreesToRadians(200.); // TODO
 
     }
@@ -263,12 +263,12 @@ public class Constants {
         public static final double zeroPos = 0;
         public static final double basePos = 0;
 
-        public static final double l1Pos = -4.41582; // -1.75;
-        public static final double l2Pos = -4.41582;
+        public static final double l1Pos = -3.7; // -1.75;
+        public static final double l2Pos = -3.7;
         public static final double l3Pos = -8.28;
         public static final double l4Pos = -14.2;
-        public static final double ball1Pos = -2.8;
-        public static final double ball2Pos = -7;
+        public static final double ball1Pos = -2.2;
+        public static final double ball2Pos = -5.5;
         public static final double upDodgePos = -6.5;
         public static final double downDodgePos = -3.47;
     }

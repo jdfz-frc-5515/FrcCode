@@ -219,9 +219,20 @@ public class UpperSystem2025Cmd extends Command {
         }));
     }
 
+    boolean m_isShutdownAutoMoveToSource = false;
+
+    public void setShutdownAutoMoveToSource(boolean isShutdown) {
+        m_isShutdownAutoMoveToSource = isShutdown;
+    }
+
     private boolean getIsAutoMoveToSource() {
+        if (m_isShutdownAutoMoveToSource) {
+            return false;
+        }
         return (curState == STATE.READY_FOR_LOAD_UP_CORAL) && !m_isBallMode;
     }
+
+    int count = 0;
 
     public Command getMoveToCoralCmdGroup(long aprilTagId, long level, long branch, boolean isLeft) {
         // 这是一个Command的组合，组合了移动到目标，然后抬升电梯两个动作
@@ -264,7 +275,30 @@ public class UpperSystem2025Cmd extends Command {
                 },
                 ()->{
                     // isFinished
-                    if (curRunningState == RUNNING_STATE.DONE) {
+                    ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
+                    if (info == null) {
+                        return true;
+                    }
+
+                    // level of branch. 0 is bottom, 1 is 1st level, 2 is 2nd level, 3 is 3rd level
+                    STATE s = STATE.NONE;
+                    switch ((int)info.level) {
+                        case 0:
+                            s = STATE.L1;
+                            break;
+                        case 1:
+                            s = STATE.L2;
+                            break;
+                        case 2:
+                            s = STATE.L3;
+                            break;
+                        case 3:
+                            s = STATE.L4;
+                            break;
+                    }
+                    if (curRunningState == RUNNING_STATE.DONE && curState == s) {
+                        count++;
+                        SmartDashboard.putNumber("--------------------0000", count);
                         return true;
                     }
                     return false;
@@ -614,6 +648,7 @@ public class UpperSystem2025Cmd extends Command {
         }
         lockElevatorTrigger = t;
         lockElevatorTrigger.onTrue(new InstantCommand(() -> {
+            System.out.println("=========================> lock");
             m_elevator.lockMotor();
             m_turningArm.lockMotor();
             m_groundIntake.lockMotor();
@@ -626,6 +661,7 @@ public class UpperSystem2025Cmd extends Command {
         }
         unlockElevatorTrigger = t;
         unlockElevatorTrigger.onTrue(new InstantCommand(() -> {
+            System.out.println("=========================> unlock");
             m_elevator.unlockMotor();
             m_turningArm.unlockMotor();
             m_groundIntake.unlockMotor();
@@ -1146,6 +1182,15 @@ public class UpperSystem2025Cmd extends Command {
         if (getIsCarryingCoral()) {
             this.m_candle.showCarryingCoral();
         }
+        else if (m_isBallMode) {
+            this.m_candle.showBallMode();
+        }
+        else if (m_isIntakeFromGround) {
+            this.m_candle.showWaitGroundCoral();
+        }
+        else if (!m_isIntakeFromGround) {
+            this.m_candle.showWaitUpCoral();
+        }
         else {
             this.m_candle.showIdle();
         }
@@ -1162,20 +1207,20 @@ public class UpperSystem2025Cmd extends Command {
                 this.m_candle.showL1();
             }
             else {
-                if (info.branch != 0) {
-                    boolean isLeft = (info.branch == -1);
+                // if (info.branch != 0) {
                     switch ((int)info.level) {
+                        case 0:
                         case 1:
-                            m_candle.showL2(isLeft);
+                            m_candle.showL2();
                             break;
                         case 2:
-                            m_candle.showL3(isLeft);
+                            m_candle.showL3();
                             break;
                         case 3:
-                            m_candle.showL4(isLeft);
+                            m_candle.showL4();
                             break;
                     }                    
-                }
+                // }
             }
             
         }

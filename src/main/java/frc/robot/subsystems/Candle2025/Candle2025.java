@@ -45,6 +45,9 @@ public class Candle2025 extends SubsystemBase {
     enum COLOR {
         NONE,
         IDLE,
+        WAIT_GROUND_CORAL,
+        WAIT_UP_CORAL,
+        BALL_MODE,
         CARRYING_CORAL,
         L1,
         L2,
@@ -57,13 +60,16 @@ public class Candle2025 extends SubsystemBase {
     private COLOR[] mergedSlot = new COLOR[ledNum];
     
     private final List<Tuple3<Integer>> palette = Arrays.asList(
-        new Tuple3<>(0, 0, 0),
-        new Tuple3<>(15, 79, 242),
-        new Tuple3<>(245, 242, 66),
-        new Tuple3<>(255, 255, 255),
-        new Tuple3<>(235, 16, 16),
-        new Tuple3<>(10, 247, 18),
-        new Tuple3<>(168, 7, 222)
+        new Tuple3<>(0, 0, 0),  // NONE
+        new Tuple3<>(0, 0, 0),  // IDLE
+        new Tuple3<>(0, 0, 0),  // WAIT_GROUND_CORAL
+        new Tuple3<>(0, 0, 0),     // WAIT_UP_CORAL
+        new Tuple3<>(15, 79, 242),      // BALL_MODE
+        new Tuple3<>(245, 242, 66),     // CARRYING_CORAL
+        new Tuple3<>(255, 255, 255),    // L1
+        new Tuple3<>(235, 16, 16),      // L2
+        new Tuple3<>(10, 247, 18),      // L3
+        new Tuple3<>(168, 7, 222)       // L4
     );
 
     private boolean isNeedUpdate = false;
@@ -148,6 +154,33 @@ public class Candle2025 extends SubsystemBase {
         isNeedUpdate = true;
     }
 
+    public void showWaitUpCoral() {
+        int slotIdx = 0;
+        COLOR[] slot = slots[slotIdx];
+        for (int i = 0; i < slot.length; ++i) {
+            slot[i] = COLOR.WAIT_UP_CORAL;
+        }
+        isNeedUpdate = true;
+    }
+
+    public void showWaitGroundCoral() {
+        int slotIdx = 0;
+        COLOR[] slot = slots[slotIdx];
+        for (int i = 0; i < slot.length; ++i) {
+            slot[i] = COLOR.WAIT_GROUND_CORAL;
+        }
+        isNeedUpdate = true;
+    }
+
+    public void showBallMode() {
+        int slotIdx = 0;
+        COLOR[] slot = slots[slotIdx];
+        for (int i = 0; i < slot.length; ++i) {
+            slot[i] = COLOR.BALL_MODE;
+        }
+        isNeedUpdate = true;
+    }
+
     public void showL1() {
         clearLn();
         // int slotIdx = 1;
@@ -170,19 +203,22 @@ public class Candle2025 extends SubsystemBase {
         isNeedUpdate = true;
     }
 
-    public void showL2(boolean isLeft) {
+    public void showL2() {
         clearLn();
-        showLn(COLOR.L2, isLeft);
+        showLn(COLOR.L2, true);
+        showLn(COLOR.L2, false);
     }
 
-    public void showL3(boolean isLeft) {
+    public void showL3() {
         clearLn();
-        showLn(COLOR.L3, isLeft);
+        showLn(COLOR.L3, true);
+        showLn(COLOR.L3, false);
     }
 
-    public void showL4(boolean isLeft) {
+    public void showL4() {
         clearLn();
-        showLn(COLOR.L4, isLeft);
+        showLn(COLOR.L4, true);
+        showLn(COLOR.L4, false);
     }
 
     private void clearSlot(int idx) {

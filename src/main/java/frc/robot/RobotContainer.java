@@ -385,7 +385,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return new PathPlannerAuto("auto01");
+        return new PathPlannerAuto("autoSource");
     }
 
     public void update() {
@@ -407,6 +407,7 @@ public class RobotContainer {
         // LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_OBJECT_DETECTION, 0);
 
         UpperSystem2025Cmd.inst.schedule();
+        UpperSystem2025Cmd.inst.setShutdownAutoMoveToSource(false);
     }
 
     public void autoInit() {
@@ -415,7 +416,7 @@ public class RobotContainer {
         // LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_OBJECT_DETECTION, 0);
 
         UpperSystem2025Cmd.inst.schedule();
-
+        UpperSystem2025Cmd.inst.setShutdownAutoMoveToSource(true);
         // UpperSystem2025Cmd.inst.getRequirements().forEach(sys -> {
         //     System.out.println("up: " + sys.getName());
         // });

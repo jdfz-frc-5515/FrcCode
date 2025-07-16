@@ -13,7 +13,7 @@ import frc.robot.utils.MiscUtils;
 public final class GlobalConfig {
     public static final int version = 2025;
 
-    public static boolean devMode = true;
+    public static boolean devMode = false;
 
     private static HashMap<String, PathPlannerPath> aimPathDic = new HashMap<String,PathPlannerPath>();
     private static final int[] aimAprilTagIds = new int[] {

@@ -51,6 +51,12 @@
           "data": {
             "name": "Shoot"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "17-R"
+          }
         }
       ]
     }

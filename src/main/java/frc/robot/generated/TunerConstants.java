@@ -62,11 +62,13 @@ public class TunerConstants {
                 // stator current limit to help avoid brownouts without impacting performance.
                 .withSupplyCurrentLimit(Amps.of(30))
                 .withSupplyCurrentLimitEnable(true)
-        ).withClosedLoopRamps(
-            new ClosedLoopRampsConfigs()
-                .withDutyCycleClosedLoopRampPeriod(0.1)
-                .withVoltageClosedLoopRampPeriod(0.1)
-        );
+        )
+        // .withClosedLoopRamps(
+        //     new ClosedLoopRampsConfigs()
+        //         .withDutyCycleClosedLoopRampPeriod(0)
+        //         .withVoltageClosedLoopRampPeriod(0)
+        // )
+        ;
     private static final TalonFXConfiguration steerInitialConfigs = new TalonFXConfiguration()
         .withCurrentLimits(
             new CurrentLimitsConfigs()
