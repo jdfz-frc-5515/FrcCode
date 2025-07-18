@@ -6,31 +6,27 @@ package frc.robot.commands;
 
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
 import frc.robot.utils.MiscUtils;
+import frc.robot.utils.SmartDashboardEx;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.LimelightHelpers;
 import frc.robot.Constants;
 import frc.robot.ControlPadHelper;
 
 /** An example command that uses an example subsystem. */
 public class GoToCoralCmd extends Command {
-    private final CommandSwerveDrivetrain m_subsystem;
-    private Pose2d m_targetPos;
+    protected final CommandSwerveDrivetrain m_subsystem;
+    protected Pose2d m_targetPos;
 
-    private boolean isInitOk = true;
-    private BooleanSupplier m_isBallModeSupplier;
-    private BooleanSupplier m_isSourceModeSupplier;
-    private boolean m_isSourceLeft = false;
+    protected boolean isInitOk = true;
+    protected BooleanSupplier m_isBallModeSupplier;
+    protected BooleanSupplier m_isSourceModeSupplier;
+    protected boolean m_isSourceLeft = false;
     public GoToCoralCmd(CommandSwerveDrivetrain subsystem, BooleanSupplier isBallMode, BooleanSupplier isSourceMode, boolean isLeft) {
         m_subsystem = subsystem;
         addRequirements(subsystem);
@@ -38,29 +34,6 @@ public class GoToCoralCmd extends Command {
         m_isBallModeSupplier = isBallMode;
         m_isSourceLeft = isLeft;
     }
-
-    // public Pose2d getTargetPose2d() {
-    //     String coralLimeLight = Constants.LIME_LIGHT_OBJECT_DETECTION;
-    //     double lh = 0.922; // ll to ground height
-    //     double la = Math.toRadians(45); // ll angle against the wall
-    //     double tx = Math.toRadians(LimelightHelpers.getTX(coralLimeLight));
-    //     double ty = Math.toRadians(LimelightHelpers.getTY(coralLimeLight));
-    //     double lg1 = Math.tan(Math.PI / 2 - la + ty) * lh;
-    //     double lg2 = Math.sqrt(Math.pow(lg1, 2) + Math.pow(lh, 2)) * Math.tan(tx);
-    //     double da = Math.sqrt(Math.pow(lg1, 2) + Math.pow(lg2, 2)); // direct distance
-    //     Pose2d robotPose = m_subsystem.getPose();
-    //     double robotAngle = m_subsystem.getPose().getRotation().getRadians();
-    //     double shiftLeft = 0.05;
-    //     double shiftAngle = robotAngle;
-    //     double shiftX = Math.sin(shiftAngle)*shiftLeft;
-    //     double shiftY = Math.cos(shiftAngle)*shiftLeft;
-    //     double Cx = robotPose.getX() + Math.cos(robotAngle - Math.PI) * da+shiftX;
-    //     double Cy = robotPose.getY() + Math.sin(robotAngle - Math.PI) * da-shiftY;
-    //     Rotation2d Cr = new Rotation2d(robotAngle - tx);
-    //     Pose2d coralPose2d = new Pose2d(Cx, Cy, Cr);
-    //     return coralPose2d;
-    // }
-
 
     public long getNearestSeenCoralAprilTag() {
         Constants.FieldInfo.APInfo[] apList = MiscUtils.getApInfoByAlliance();
@@ -132,7 +105,7 @@ public class GoToCoralCmd extends Command {
             isInitOk = false;
         }
         else {
-            SmartDashboard.putString("MoveToCoralState", String.format("AP: %d, level: %d, branch: %d, targetPos: %s", apId, info.level, info.branch, m_targetPos.toString()));
+            SmartDashboardEx.putString("MoveToCoralState", String.format("AP: %d, level: %d, branch: %d, targetPos: %s", apId, info.level, info.branch, m_targetPos.toString()));
         }
         
     }

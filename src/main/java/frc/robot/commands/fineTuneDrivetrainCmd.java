@@ -4,7 +4,6 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 // import frc.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
@@ -47,9 +46,7 @@ public class fineTuneDrivetrainCmd extends Command {
             if (direction == 3) {
                 y_speed = -0.5;
             }
-            SmartDashboard.putBoolean("min moving", true);
             m_subsystem.customMoveWithSpeed(x_speed, y_speed);
-            SmartDashboard.putBoolean("min moving", false);
         }
         else if (direction == 4) {
             // 逆时针旋转

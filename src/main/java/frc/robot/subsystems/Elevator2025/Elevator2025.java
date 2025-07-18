@@ -26,11 +26,11 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.TurningArm2025.TurningArm2025.TA_STATE;
 import frc.robot.utils.MiscUtils;
+import frc.robot.utils.SmartDashboardEx;
 
 public class Elevator2025 extends SubsystemBase {
     public enum EV_STATE {
@@ -276,8 +276,8 @@ public class Elevator2025 extends SubsystemBase {
     }
 
     protected void updateState() {
-        SmartDashboard.putNumber("ELEVATOR ccc1", m_canCoder.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber("ELEVATOR ccc2", m_primaryMotor.getPosition().getValueAsDouble());
+        SmartDashboardEx.putNumber("ELEVATOR ccc1", m_canCoder.getPosition().getValueAsDouble());
+        SmartDashboardEx.putNumber("ELEVATOR ccc2", m_primaryMotor.getPosition().getValueAsDouble());
         
         // double pos = Constants.Elevator.basePos;
         // switch (curState) {
@@ -331,22 +331,22 @@ public class Elevator2025 extends SubsystemBase {
             // m_primaryMotor.setControl(driveVelocity.withVelocity(0.1));
             driveDutyCycle.Output = -output;
             m_primaryMotor.setControl(driveDutyCycle);
-            SmartDashboard.putNumber("ELEVATOR ccc TUNING pos", m_canCoder.getPosition().getValueAsDouble());
+            SmartDashboardEx.putNumberSDOnly("ELEVATOR ccc TUNING pos", m_canCoder.getPosition().getValueAsDouble());
             curRunningState = RUNNING_STATE.DONE;
             return;
         } else if (curState == EV_STATE.TUNING_DOWN) {
             // m_primaryMotor.setControl(driveVelocity.withVelocity(-0.1));
             driveDutyCycle.Output = output;
             m_primaryMotor.setControl(driveDutyCycle);
-            SmartDashboard.putNumber("ELEVATOR ccc TUNING pos", m_canCoder.getPosition().getValueAsDouble());
+            SmartDashboardEx.putNumberSDOnly("ELEVATOR ccc TUNING pos", m_canCoder.getPosition().getValueAsDouble());
             curRunningState = RUNNING_STATE.DONE;
             return;
         }
         double pos = getStatePos(curState);
         pos += elevatorOffset;
-        SmartDashboard.putNumber("ELEVATOR ccc targetPos", pos);
-        SmartDashboard.putString("ELEVATOR ccc curState", curState.name());
-        SmartDashboard.putString("ELEVATOR ccc curRuningState", curRunningState.name());
+        SmartDashboardEx.putNumber("ELEVATOR ccc targetPos", pos);
+        SmartDashboardEx.putString("ELEVATOR ccc curState", curState.name());
+        SmartDashboardEx.putString("ELEVATOR ccc curRuningState", curRunningState.name());
 
         if (MiscUtils.compareDouble(pos, NONE_POS)) {
             return;
@@ -356,7 +356,7 @@ public class Elevator2025 extends SubsystemBase {
         }
 
         updatePidSlot(pos);
-        SmartDashboard.putNumber("ELEVATOR ccc pidSlot", (int)curPidSlot);
+        SmartDashboardEx.putNumberSDOnly("ELEVATOR ccc pidSlot", (int)curPidSlot);
         m_primaryMotor.setControl(motionMagicVoltage1.withPosition(pos).withSlot(curPidSlot));
     }
     

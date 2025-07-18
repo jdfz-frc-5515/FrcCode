@@ -19,10 +19,10 @@ import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.event.EventLoop;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.ControlPadHelper.TopicWrap.TopicType;
 import frc.robot.utils.MiscUtils;
+import frc.robot.utils.SmartDashboardEx;
 
 public class ControlPadHelper {
     public static class DebugCtrl {
@@ -315,9 +315,9 @@ public class ControlPadHelper {
         controlPadInfo.data.branch = datas[2];
         controlPadInfo.compareOld();
 
-        SmartDashboard.putNumber("ControlPad aprilTagId", controlPadInfo.data.aprilTagId);
-        SmartDashboard.putNumber("ControlPad level", controlPadInfo.data.level);
-        SmartDashboard.putNumber("ControlPad branch", controlPadInfo.data.branch);
+        SmartDashboardEx.putNumber("ControlPad aprilTagId", controlPadInfo.data.aprilTagId);
+        SmartDashboardEx.putNumber("ControlPad level", controlPadInfo.data.level);
+        SmartDashboardEx.putNumber("ControlPad branch", controlPadInfo.data.branch);
     }
 
     private static void refreshVirtualControl() {

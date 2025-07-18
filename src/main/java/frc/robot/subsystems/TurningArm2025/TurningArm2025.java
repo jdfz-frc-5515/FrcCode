@@ -23,13 +23,14 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.Elevator2025.Elevator2025.EV_STATE;
 import frc.robot.utils.MiscUtils;
+import frc.robot.utils.SmartDashboardEx;
 import edu.wpi.first.wpilibj.DutyCycle;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class TurningArm2025 extends SubsystemBase {
     public enum TA_STATE {
@@ -184,8 +185,8 @@ public class TurningArm2025 extends SubsystemBase {
     }
 
     protected void updateState() {
-        SmartDashboard.putNumber("ARM ccc1", m_canCoder.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber("ARM ccc2", m_armMotor.getPosition().getValueAsDouble());
+        SmartDashboardEx.putNumberSDOnly("ARM ccc1", m_canCoder.getPosition().getValueAsDouble());
+        SmartDashboardEx.putNumberSDOnly("ARM ccc2", m_armMotor.getPosition().getValueAsDouble());
 
         double output = 0.030;
         if (curState == TA_STATE.TUNING_UP) {
@@ -194,7 +195,7 @@ public class TurningArm2025 extends SubsystemBase {
             // m_armMotor.setControl(driveVelocity);
             driveDutyCycle.Output = output;
             m_armMotor.setControl(driveDutyCycle);
-            SmartDashboard.putNumber("ELEVATOR ccc TUNING pos", m_canCoder.getPosition().getValueAsDouble());
+            SmartDashboardEx.putNumberSDOnly("ELEVATOR ccc TUNING pos", m_canCoder.getPosition().getValueAsDouble());
             curRunningState = RUNNING_STATE.DONE;
             return;
         } else if (curState == TA_STATE.TUNING_DOWN) {
@@ -204,14 +205,14 @@ public class TurningArm2025 extends SubsystemBase {
 
             driveDutyCycle.Output = -output;
             m_armMotor.setControl(driveDutyCycle);
-            SmartDashboard.putNumber("ELEVATOR ccc TUNING pos", m_canCoder.getPosition().getValueAsDouble());
+            SmartDashboardEx.putNumberSDOnly("ELEVATOR ccc TUNING pos", m_canCoder.getPosition().getValueAsDouble());
             curRunningState = RUNNING_STATE.DONE;
             return;
         }
         
         double pos = getStatePos(curState);
-        SmartDashboard.putNumber("ARM ccc targetPos", pos);
-        SmartDashboard.putString("ARM ccc curState", curState.name());
+        SmartDashboardEx.putNumber("ARM ccc targetPos", pos);
+        SmartDashboardEx.putString("ARM ccc curState", curState.name());
 
         if (MiscUtils.compareDouble(pos, NONE_POS)) {
             return;

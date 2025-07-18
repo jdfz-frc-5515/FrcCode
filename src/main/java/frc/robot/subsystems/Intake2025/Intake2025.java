@@ -8,10 +8,10 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.utils.MiscUtils;
+import frc.robot.utils.SmartDashboardEx;
 
 public class Intake2025 extends SubsystemBase {
     public static final TalonFX m_motor = new TalonFX(Constants.Intake.motorID,
@@ -300,10 +300,10 @@ public class Intake2025 extends SubsystemBase {
     }
 
     protected void telemetry() {
-        SmartDashboard.putString("Intake2025 state", curState.name());
-        SmartDashboard.putString("Intake2025 coral in state", coralInState.name());
-        SmartDashboard.putString("Intake2025_Sensor0", "state: " + intakeCoralSensor0.get());
-        SmartDashboard.putString("Intake2025_Sensor1", "state: " + intakeCoralSensor1.get());
+        SmartDashboardEx.putString("Intake2025 state", curState.name());
+        SmartDashboardEx.putString("Intake2025 coral in state", coralInState.name());
+        SmartDashboardEx.putString("Intake2025_Sensor0", "state: " + intakeCoralSensor0.get());
+        SmartDashboardEx.putString("Intake2025_Sensor1", "state: " + intakeCoralSensor1.get());
 
     }
 }

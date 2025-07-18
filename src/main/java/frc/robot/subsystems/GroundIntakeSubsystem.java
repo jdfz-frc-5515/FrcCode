@@ -26,12 +26,12 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.GIntakeConstants;
 import frc.robot.subsystems.TurningArm2025.TurningArm2025.TA_STATE;
 import frc.robot.utils.MiscUtils;
+import frc.robot.utils.SmartDashboardEx;
 
 public class GroundIntakeSubsystem extends SubsystemBase {
     // public enum GI_STATE___OLD {
@@ -220,23 +220,6 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         m_turnMotor.getConfigurator().apply(getTurnMotorConfiguration(true));
     }
 
-    // public PositionVoltage goToRotationRequestion(double expectRotation) {
-    //     PositionVoltage turnRequest = new PositionVoltage(expectRotation);
-    //     SmartDashboard.putNumber("destination", expectRotation);
-    //     return turnRequest;
-    // }
-
-    // public void expandGIntake() {
-    //     // PositionVoltage request = goToRotationRequestion(GIntakeConstants.expandCCRotation);
-
-    //     m_turnMotor.setControl(motionMagicVoltage.withPosition(GIntakeConstants.expandCCRotation).withSlot(0));
-    // }
-
-    // public void retractGIntake() {
-    //     // PositionVoltage request = goToRotationRequestion(GIntakeConstants.retractCCRotation);
-    //     // System.out.println("retract request");
-    //     m_turnMotor.setControl(motionMagicVoltage.withPosition(GIntakeConstants.retractCCRotation).withSlot(0));
-    // }
 
     public void expend() {
         if (curState == GI_STATE.IDLE) {
@@ -246,7 +229,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
 
     public void makeSureRetracted() {
 
-        SmartDashboard.putString("makeSureRetracted----->", curState.name());
+        SmartDashboardEx.putString("makeSureRetracted----->", curState.name(), true, false);
         if (curState == GI_STATE.WAIT_FOR_CORAL) {
             curState = GI_STATE.RETRACTING_WITH_CORAL;
         }
@@ -375,93 +358,11 @@ public class GroundIntakeSubsystem extends SubsystemBase {
 
         m_driveMotor.set(intakeMotorSpeed);
 
-        SmartDashboard.putNumber("GI ccc targetPos", armPos);
-        SmartDashboard.putNumber("GI ccc curPos", m_CANcoder.getPosition().getValueAsDouble());
-        SmartDashboard.putString("GI ccc curState", curState.name());
-        SmartDashboard.putNumber("GI ccc intakeMotorSpeed", intakeMotorSpeed);
+        SmartDashboardEx.putNumber("GI ccc targetPos", armPos);
+        SmartDashboardEx.putNumber("GI ccc curPos", m_CANcoder.getPosition().getValueAsDouble());
+        SmartDashboardEx.putString("GI ccc curState", curState.name());
+        SmartDashboardEx.putNumber("GI ccc intakeMotorSpeed", intakeMotorSpeed);
     }
-
-    // protected void updateState___OLD() {
-    //     if (curState == GI_STATE.EXPAND) {
-    //         startIntake();
-    //     }
-    //     if (curState == GI_STATE.NONE) {
-    //         stopIntake();
-    //     }
-    //     if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.DONE) {
-    //         // if (isCoralIn())
-    //         // {
-    //         //     reverseIntake();
-    //         // }
-    //         // else {
-    //         //     stopIntake();
-    //         // }
-    //         zeroCC();
-    //         // reverseIntake();
-    //     }
-    //     if (isCoralIn() && curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.RUNNING) {
-    //         intakeMotorSpeed = 6;
-    //     }
-
-    //     do 
-    //     {
-    //         if (isCoralIn()) {
-    //             if (curState == GI_STATE.EXPAND) {
-    //                 delayTime = DELAY_FRAME;
-    //                 setState(GI_STATE.RETRACT);
-    //                 // stopIntake();
-    //                 break;
-    //             }
-    //             // if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.RUNNING) {
-    //             //     stopIntake();
-    //             // }
-    //             if (curState == GI_STATE.RETRACT && curRunningState == GI_RUNNING_STATE.DONE) {
-    //                 startUpperIntake.run();
-    //                 if (delayTime <= 0) {
-    //                     reverseIntake();
-    //                 }
-    //                 else {
-    //                     stopIntake();
-    //                 }
-    //                 delayTime--;
-    //             }
-    //         }
-    //     } while(false);
-
-
-    //     double pos = getStatePos(curState);
-    //     SmartDashboard.putNumber("GI ccc targetPos", pos);
-    //     SmartDashboard.putNumber("GI ccc curPos", m_CANcoder.getPosition().getValueAsDouble());
-    //     SmartDashboard.putString("GI ccc runningState", curRunningState.name());
-    //     SmartDashboard.putString("GI ccc curState", curState.name());
-        
-    //     if (MiscUtils.compareDouble(pos, NONE_POS)) {
-    //         return;
-    //     }
-    //     if (isArmAtPos(pos)) {
-    //         curRunningState = GI_RUNNING_STATE.DONE;
-    //         // if (curState == GI_STATE.RETRACT && delayRevereIntakeFrame < 0) {
-    //         //     stopIntake();
-    //         // }
-    //     }
-
-
-    //     if (curRunningState == GI_RUNNING_STATE.RUNNING) {
-    //         m_turnMotor.setControl(motionMagicVoltage.withPosition(pos));
-    //     }
-    //     else {
-    //         m_turnMotor.stopMotor();
-    //     }
-        
-    //     if (delayRevereIntakeFrame > 0) {
-    //         delayRevereIntakeFrame--;
-    //         if (delayRevereIntakeFrame == 0) {
-    //             delayRevereIntakeFrame = -1;
-    //             intakeMotorSpeed = 0;
-    //         }
-    //     }
-    //     m_driveMotor.set(intakeMotorSpeed);
-    // }
 
     @Override
     public void periodic() {
@@ -515,7 +416,7 @@ public class GroundIntakeSubsystem extends SubsystemBase {
     }
     protected void telemetry() {
     
-        SmartDashboard.putString("GI ccc sensor", "state: " + coralSensor.get());
+        SmartDashboardEx.putString("GI ccc sensor", "state: " + coralSensor.get());
         
     }
 }

@@ -71,14 +71,14 @@ public class MoveToCmd extends Command {
         // switch (this.m_moveToSubSys.getAimMoveCmdState()) {
         //     case MOVE_TO_CMD_STATE_FINISHED:
         //         System.out.println("isfinish 1");
-        //         SmartDashboard.putString("MoveTo2025Cmd", "AIM_MOVE_CMD_STATE_FINISHED");
+        //         SmartDashboardEx.putString("MoveTo2025Cmd", "AIM_MOVE_CMD_STATE_FINISHED");
         //         return true;
         //     case MOVE_TO_CMD_STATE_RUNNING:
         //     // System.out.println("isfinish 4");
         //         return false;
         //     case MOVE_TO_CMD_STATE_UNKOWN:
         //         // System.out.println("isfinish 5");
-        //         SmartDashboard.putString("MoveTo2025Cmd", "AIM_MOVE_CMD_STATE_UNKOWN");
+        //         SmartDashboardEx.putString("MoveTo2025Cmd", "AIM_MOVE_CMD_STATE_UNKOWN");
         //         return false;
         // }
         

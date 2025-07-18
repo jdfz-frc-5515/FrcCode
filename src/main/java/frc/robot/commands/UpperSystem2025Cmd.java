@@ -33,12 +33,13 @@ import frc.robot.subsystems.TurningArm2025.TurningArm2025;
 import frc.robot.subsystems.TurningArm2025.TurningArm2025.TA_STATE;
 
 import frc.robot.utils.MiscUtils;
+import frc.robot.utils.SmartDashboardEx;
 import frc.robot.utils.ActionRunner;
 
 public class UpperSystem2025Cmd extends Command {
     public static UpperSystem2025Cmd inst = null;
 
-    private enum STATE {
+    public enum STATE {
         NONE,
         ZERO,
         READY_FOR_LOAD_GROUND_CORAL,
@@ -232,7 +233,17 @@ public class UpperSystem2025Cmd extends Command {
         return (curState == STATE.READY_FOR_LOAD_UP_CORAL) && !m_isBallMode;
     }
 
-    int count = 0;
+    public Command getMoveToCoralAndElevatorToLnCmd(long aprilTagId, long level, long branch) {
+        // 这是一个Command的组合，组合了移动到目标，然后抬升电梯两个动作
+        Command ret = new SequentialCommandGroup(
+            new InstantCommand(() -> {
+                ControlPadHelper.setControlPadInfoData(aprilTagId, level, branch);
+            }),
+            new GoToCoralAndElevatorToLnCmd(m_chassis, this)
+        );
+        return ret;
+    }
+
 
     public Command getMoveToCoralCmdGroup(long aprilTagId, long level, long branch, boolean isLeft) {
         // 这是一个Command的组合，组合了移动到目标，然后抬升电梯两个动作
@@ -241,9 +252,6 @@ public class UpperSystem2025Cmd extends Command {
                 ControlPadHelper.setControlPadInfoData(aprilTagId, level, branch);
             }),
             new GoToCoralCmd(m_chassis, ()->m_isBallMode, ()->getIsAutoMoveToSource(), isLeft)
-            // , new InstantCommand(() -> {
-            //     setStateLn();
-            // })
             ,new FunctionalCommand(
                 ()->{
                      //init
@@ -297,8 +305,6 @@ public class UpperSystem2025Cmd extends Command {
                             break;
                     }
                     if (curRunningState == RUNNING_STATE.DONE && curState == s) {
-                        count++;
-                        SmartDashboard.putNumber("--------------------0000", count);
                         return true;
                     }
                     return false;
@@ -774,7 +780,8 @@ public class UpperSystem2025Cmd extends Command {
         return false;
     }
 
-    private boolean getIsCarryingCoral() {
+
+    public boolean getIsCarryingCoral() {
         if (m_intake.getIsCarryingCoral()) {
             return true;
         }
@@ -1227,10 +1234,17 @@ public class UpperSystem2025Cmd extends Command {
 
     }
 
-    public void setStateLn() {
+    public boolean isStateDone(STATE state) {
+        if (curState == state && curRunningState == RUNNING_STATE.DONE) {
+            return true;
+        }
+        return false;
+    }
+
+    public STATE setStateLn() {
         ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
         if (info == null) {
-            return;
+            return STATE.NONE;
         }
         STATE newState = STATE.NONE;
         switch ((int)info.level) {
@@ -1250,6 +1264,8 @@ public class UpperSystem2025Cmd extends Command {
         if (newState != STATE.NONE) {
             setState(newState);
         }
+
+        return newState;
     }
 
     public void setStateL1() {
@@ -1587,13 +1603,13 @@ public class UpperSystem2025Cmd extends Command {
         // DON'T DELETE BELOW SmartDashboard push, cause ControlPad is using them!!!
         // DON'T DELETE BELOW SmartDashboard push, cause ControlPad is using them!!!
         // DON'T DELETE BELOW SmartDashboard push, cause ControlPad is using them!!!
-        SmartDashboard.putString("US2025Cmd_State", "state: " + curState + " running state: " + curRunningState);
-        // SmartDashboard.putString("US2025Cmd_CarryingState",
+        SmartDashboardEx.putString("US2025Cmd_State", "state: " + curState + " running state: " + curRunningState, false, true);
+        // SmartDashboardEx.putString("US2025Cmd_CarryingState",
         //     "isCarryingCoral: " + m_intake.getIsCarryingCarol() + " isCarryingBall: " + getIsCarryingBall());
-        SmartDashboard.putString("US2025Cmd_CarryingState",
-            "isCarryingCoral: " + getIsCarryingCoral() + " isCarryingBall: " + getIsCarryingBall());
+        SmartDashboardEx.putString("US2025Cmd_CarryingState",
+            "isCarryingCoral: " + getIsCarryingCoral() + " isCarryingBall: " + getIsCarryingBall(), false, true);
 
-        SmartDashboard.putString("US2025Cmd_Sub_Running_State", "arm: " + m_turningArm.getCurRunningState() + " elevator: " + m_elevator.getCurRunningState() + " elevator state: " + m_elevator.getState());
+        SmartDashboardEx.putString("US2025Cmd_Sub_Running_State", "arm: " + m_turningArm.getCurRunningState() + " elevator: " + m_elevator.getCurRunningState() + " elevator state: " + m_elevator.getState(), false, true);
         // DON'T DELETE UP CODES
         // DON'T DELETE UP CODES
         // DON'T DELETE UP CODES

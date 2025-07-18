@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.UpperSystem2025Cmd;
+import frc.robot.commands.WaitForShootOverCmd;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.GroundIntakeSubsystem;
 import frc.robot.subsystems.ImprovedCommandXboxController;
@@ -220,98 +221,6 @@ public class RobotContainer {
             }));
     }
 
-    // private void registerPathplannerEventsAndNamedCommands() {
-    //     pathplannerEvents.add(new EventTrigger("LN").onTrue(new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateLn();
-    //     })));
-    //     pathplannerEvents.add(new EventTrigger(("Raise2L1")).onTrue(new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateL1();
-    //     })));
-    //     pathplannerEvents.add(new EventTrigger(("Raise2L2")).onTrue(new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateL2();
-    //     })));
-    //     pathplannerEvents.add(new EventTrigger(("Raise2L3")).onTrue(new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateL3();
-    //     })));
-    //     pathplannerEvents.add(new EventTrigger(("Raise2L4")).onTrue(new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateL4();
-    //     })));
-
-    //     pathplannerEvents.add(new EventTrigger(("Ball1")).onTrue(new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateBall1();
-    //     })));
-
-    //     pathplannerEvents.add(new EventTrigger(("Ball2")).onTrue(new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateBall2();
-    //     })));
-
-    //     pathplannerEvents.add(new EventTrigger(("Intake")).onTrue(new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.startIntake();
-    //     })));
-    //     pathplannerEvents.add(new EventTrigger(("Shoot")).onTrue(new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.startShoot();
-    //     })));
-
-    //     NamedCommands.registerCommand("LN", new InstantCommand(()->{
-    //         UpperSystem2025Cmd.inst.setStateLn();
-    //     }));
-    //     NamedCommands.registerCommand("Raise2L1",new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateL1();
-    //     }));
-    //     NamedCommands.registerCommand("Raise2L2",new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateL2();
-    //     }));
-    //     NamedCommands.registerCommand("Raise2L3",new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateL3();
-    //     }));
-    //     NamedCommands.registerCommand("Raise2L4",new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateL4();
-    //     }));
-
-    //     NamedCommands.registerCommand("Ball1",new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateBall1();
-    //     }));
-
-    //     NamedCommands.registerCommand("Ball2",new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.setStateBall2();
-    //     }));
-
-    //     NamedCommands.registerCommand("Intake",new InstantCommand(() -> {
-    //         UpperSystem2025Cmd.inst.startIntake();
-    //     }));
-    //     // NamedCommands.registerCommand("Shoot",new InstantCommand(() -> {
-    //     //     UpperSystem2025Cmd.inst.startShoot();
-    //     // }));
-
-        
-    //     String[] list = GlobalConfig.getAllAimPathNames();
-    //     for (int i = 0; i < list.length; ++i) {
-    //         String name = list[i];
-    //         // pathplannerEvents.add(new EventTrigger((name)).onTrue(new MoveToByPath2025Cmd(m_moveToSubSys, s_Swerve, name)));
-    //         NamedCommands.registerCommand(name, 
-    //             new SequentialCommandGroup(
-    //                 // new InstantCommand(() -> {
-    //                 //     if (name.startsWith("ap")) {
-    //                 //         GlobalConfig.ExtractApPathName(name);
-    //                 //     }
-    //                 // }), 
-    //                 // new MoveToByPath2025Cmd(m_moveToSubSys, s_Swerve, name),
-    //                 // new WaitShooterCmd2025(m_elevator),
-    //                 // new InstantCommand(() -> {
-    //                 //     // System.out.println("auto shoot ----------------------->>>>>>>>>>>>>>>");
-    //                 //     UpperSystem2025Cmd.inst.startShoot();
-    //                 // })
-    //             )
-    //         );
-            
-    //         // NamedCommands.registerCommand(name,new InstantCommand(()->{}));
-    //     }
-
-    //     // NamedCommands.registerCommand("SetHead", new InstantCommand(()->{
-            
-    //     // }));
-    // }
-
     private void registerPathplannerEventsAndNamedCommands() {
         UpperSystem2025Cmd cmd = UpperSystem2025Cmd.inst;
         long[] aprilTags = {17,18,19,20,21,22,6,7,8,9,10,11,};
@@ -322,8 +231,13 @@ public class RobotContainer {
                 // e.g. "17-L-1", "17-R-1", "18-L-2", "18-R-2", etc.
                 String leftName = apId + "-L-" + level ;
                 String rightName = apId + "-R-" + level ;
-                regPPEnC(leftName, cmd.getMoveToCoralCmdGroup(apId, level-1, -1, true));
-                regPPEnC(rightName, cmd.getMoveToCoralCmdGroup(apId, level-1, 1, false));
+
+                
+                // regPPEnC(leftName, cmd.getMoveToCoralCmdGroup(apId, level-1, -1, true));
+                // regPPEnC(rightName, cmd.getMoveToCoralCmdGroup(apId, level-1, 1, false));
+
+                regPPEnC(leftName, cmd.getMoveToCoralAndElevatorToLnCmd(apId, level-1, -1));
+                regPPEnC(rightName, cmd.getMoveToCoralAndElevatorToLnCmd(apId, level-1, 1));
             }
         }
 
@@ -352,6 +266,8 @@ public class RobotContainer {
 
         regPPEnC("FaceGroundCoral", new FaceGroundCoralCmd(drivetrain));
         regPPEnC("Go", new GoForward(drivetrain, cmd, 2));
+
+        regPPEnC("WaitForShoot", new WaitForShootOverCmd(m_intake));
 
         // PathConstraints constraints = new PathConstraints(
         //     Constants.PathPlanner.constraintsSpeed, Constants.PathPlanner.constraintsAccel,

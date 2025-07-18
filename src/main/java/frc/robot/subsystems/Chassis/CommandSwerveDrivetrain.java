@@ -24,8 +24,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -48,6 +46,7 @@ import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 import frc.robot.subsystems.ImprovedCommandXboxController;
 import frc.robot.utils.MiscUtils;
+import frc.robot.utils.SmartDashboardEx;
 import frc.robot.LimelightHelpers;
 import frc.robot.Constants;
 
@@ -85,6 +84,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     
     PIDController m_translationXController, m_translationYController, m_rotationController;
     Pose2d m_targetPose2d = new Pose2d();
+    double m_distFromTarget = Double.MAX_VALUE;
+    double m_angleDistFromTarget = Double.MAX_VALUE;
     /** Swerve request to apply during Manual drivemode */
     private static double manual_MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private static double manual_MaxAngularRate = RotationsPerSecond.of(1.).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -403,8 +404,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         double pigeonRot = getRotationFromPigeon();
 
         // Pose2d botPos =  LimelightHelpers.getBotPose2d(llName);
-        // SmartDashboard.putString("ROT-MT1", String.format("%f", botPos.getRotation().getDegrees()));
-        SmartDashboard.putString( "ROT", String.format("%f - %f - %f", botRot, pigeonRot, pigeonRot - zeroOdoDegree));
+        // SmartDashboardEx.putString("ROT-MT1", String.format("%f", botPos.getRotation().getDegrees()));
+        // SmartDashboardEx.putString( "ROT", String.format("%f - %f - %f", botRot, pigeonRot, pigeonRot - zeroOdoDegree));
         LimelightHelpers.SetRobotOrientation(llName, getRotationFromPigeon() - zeroOdoDegree, 0, 0, 0, 0, 0);
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(llName);
         // ImprovedLL.MT2stddevs devs = ImprovedLL.getmt2Devs();
@@ -417,7 +418,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (minDist > 0 && mt2.avgTagDist > minDist) {
             return -1;
         }
-        SmartDashboard.putNumber(llName+"-DIST", mt2.avgTagDist);
+        // SmartDashboardEx.putNumber(llName+"-DIST", mt2.avgTagDist);
         if (Math.abs(getSpeeds().omegaRadiansPerSecond) <= 4*Math.PI 
             && mt2.tagCount > 0 
             && mt2.avgTagDist < 4 
@@ -425,24 +426,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // && mt2.latency < MAX_LL_LATENCY // 抛弃高延时
         ) {
 
-            // 以下1,2,3来自DeepSeek
-            // 1. 获取当前 FPGA 时间基准
-            double currentFPGATime = Timer.getFPGATimestamp();
-
-            // 2. 将延迟转换为秒
-            double latencySeconds = mt2.latency / 1000.0;
-
-            // 3. 计算实际捕获时间
-            double captureTime = currentFPGATime - latencySeconds;
-
-            // 旧版：
             double captureTime2 = Utils.fpgaToCurrentTime(mt2.timestampSeconds);
 
-            SmartDashboard.putNumber("CapTime latency", mt2.latency);
-            SmartDashboard.putString("CapTime", String.format("c1: %f, c2: %f", captureTime, captureTime2));
-
             double data = Constants.PoseEstimatorConstants.tAtoDev.get(mt2.avgTagArea);
-            SmartDashboard.putString("MT2 pos: ", mt2.pose.toString());
+            // SmartDashboardEx.putString("MT2 pos: ", mt2.pose.toString());
             addVisionMeasurement(mt2.pose,
                 captureTime2,
                 VecBuilder.fill(data, data, 100000000)
@@ -450,8 +437,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 // VecBuilder.fill(devs.xdev, devs.ydev, 100000000.)
             );
 
-            SmartDashboard.putNumber("tA", mt2.avgTagArea );
-            SmartDashboard.putNumber("Dev", data);
+            // SmartDashboardEx.putNumber("tA", mt2.avgTagArea );
+            // SmartDashboardEx.putNumber("Dev", data);
 
             return mt2.avgTagDist;
         }
@@ -480,9 +467,25 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public boolean isAtTargetPose(){
-        return isAtPose(m_targetPose2d);
+        // return isAtPose(m_targetPose2d);
+        Translation2d t = m_targetPose2d.getTranslation();
+        Rotation2d r = m_targetPose2d.getRotation();
+        double dist = getPose().getTranslation().minus(t).getNorm();
+        double angleDist = Math.abs(getPose().getRotation().minus(r).getRadians());
+        m_distFromTarget = dist;
+        m_angleDistFromTarget = angleDist;
+        return (dist <= Constants.AutoConstants.moveToPoseTranslationToleranceMeters) &&
+            (angleDist <= Constants.AutoConstants.moveToPoseRotationToleranceRadians);
     }
 
+    public double getDistFromTargetPose(){
+        return m_distFromTarget;
+    }
+
+    public double getAngleDistFromTargetPose(){
+        return m_angleDistFromTarget;
+    }
+    
     /** Caution this would reset your targetPose to this pose */
     public ChassisSpeeds getAutoMoveToPoseSpeeds(Pose2d pose){
         m_targetPose2d = pose;
@@ -621,9 +624,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             targetAngularVelocity = 0.;
         }
 
-        SmartDashboard.putNumber("targetXVeloUnoptimized", targetTranslationXVelocity);
-        SmartDashboard.putNumber("targetYVeloUnoptimized", targetTranslationYVelocity);
-        SmartDashboard.putNumber("targetAngularVeloUnoptimized", targetAngularVelocity);
+        // SmartDashboardEx.putNumber("targetXVeloUnoptimized", targetTranslationXVelocity);
+        // SmartDashboardEx.putNumber("targetYVeloUnoptimized", targetTranslationYVelocity);
+        // SmartDashboardEx.putNumber("targetAngularVeloUnoptimized", targetAngularVelocity);
 
         return optimizeMoveToSpeeds(
             new ChassisSpeeds(targetTranslationXVelocity, targetTranslationYVelocity, targetAngularVelocity)

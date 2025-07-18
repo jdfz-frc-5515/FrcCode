@@ -5,13 +5,13 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
+import frc.robot.utils.SmartDashboardEx;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
 import frc.robot.Constants;
@@ -62,12 +62,12 @@ public class GoToGroundCoralCmd extends Command {
     public void execute() {
         String coralLimelight = Constants.LIME_LIGHT_OBJECT_DETECTION;
         boolean hasTarget = LimelightHelpers.getTV(coralLimelight);
-        SmartDashboard.putBoolean("ll hasT", hasTarget);
+        SmartDashboardEx.putBoolean("ll hasT", hasTarget);
         int didFlyTolerance = 10;
         if (!hasTarget) {
             flew += 1;
             if (flew >= didFlyTolerance) {
-                System.out.println("flewn");
+                // System.out.println("flewn");
                 m_subsystem.customStopMoving(true);
                 // find new coral here
                 return;
@@ -76,14 +76,14 @@ public class GoToGroundCoralCmd extends Command {
             flew = 0;
         }
         Pose2d tempCoralPose = getTargetPose2d();
-        // // SmartDashboard.putNumber("coral angle",
+        // // SmartDashboardEx.putNumber("coral angle",
         // // tempCoralPose.getRotation().getDegrees());
-        // // SmartDashboard.putNumber("current angle",
+        // // SmartDashboardEx.putNumber("current angle",
         // // m_subsystem.getPose().getRotation().getDegrees());
         // double distanceTolerance = 0.5;
         // double eucDistance = tempCoralPose.getTranslation().getDistance(currentCoral.getTranslation());
-        // // SmartDashboard.putNumber("current coral X", currentCoral.getX());
-        // // SmartDashboard.putNumber("Target Distance", eucDistance);
+        // // SmartDashboardEx.putNumber("current coral X", currentCoral.getX());
+        // // SmartDashboardEx.putNumber("Target Distance", eucDistance);
         // if (eucDistance < distanceTolerance) {
         //     System.out.println("no change");
         //     m_subsystem.autoMoveToPose(currentCoral);

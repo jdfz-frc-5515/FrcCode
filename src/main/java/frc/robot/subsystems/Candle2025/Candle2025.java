@@ -11,12 +11,9 @@ package frc.robot.subsystems.Candle2025;
 // import com.revrobotics.RelativeEncoder;
 // import edu.wpi.first.wpilibj.DigitalInput;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj.Timer;
 
-import java.security.PrivateKey;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import java.util.Arrays;
 import java.util.List;
 
