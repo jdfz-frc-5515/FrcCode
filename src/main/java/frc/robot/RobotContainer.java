@@ -95,7 +95,7 @@ public class RobotContainer {
 
 
         // setHeading here for auto 
-        double headingAngle = 180;  // 0 red , 180 blue
+        double headingAngle = 0;  // 0 red , 180 blue
         // // var alliance = DriverStation.getAlliance();
         // // if (alliance.isPresent()) {
         // //     switch (alliance.get()) {
