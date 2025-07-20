@@ -23,9 +23,9 @@ public class GoToCoralAndElevatorToLnCmd extends GoToCoralCmd {
         m_isElevatorToLning = false;
         m_liftState = UpperSystem2025Cmd.STATE.NONE;
 
-        if (!m_upSys.getIsCarryingCoral()) {
-            m_isElevatorToLnDone = true;
-        }
+        // if (!m_upSys.getIsCarryingCoral()) {
+        //     m_isElevatorToLnDone = true;
+        // }
     }
 
     @Override
@@ -45,8 +45,10 @@ public class GoToCoralAndElevatorToLnCmd extends GoToCoralCmd {
                 }
             }
             else if (!m_isElevatorToLning && m_subsystem.getDistFromTargetPose() < LIFTING_DISTANCE) {
-                m_isElevatorToLning = true;
                 m_liftState = m_upSys.setStateLn();
+                if (m_liftState != UpperSystem2025Cmd.STATE.NONE) {
+                    m_isElevatorToLning = true;
+                }
             }            
         }
 
