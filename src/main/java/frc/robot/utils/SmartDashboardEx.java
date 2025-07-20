@@ -65,9 +65,9 @@ public class SmartDashboardEx {
         
         // 按时间戳排序（自然顺序，时间戳小在前）
         lines.sort((line1, line2) -> {
-            long ts1 = Long.parseLong(line1.split(" ")[0]);
-            long ts2 = Long.parseLong(line2.split(" ")[0]);
-            return Long.compare(ts1, ts2);
+            double ts1 = Double.parseDouble(line1.split("->")[0]);
+            double ts2 = Double.parseDouble(line2.split("->")[0]);
+            return Double.compare(ts1, ts2);
         });
         
         // 拼接为多行字符串

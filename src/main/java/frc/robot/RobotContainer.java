@@ -46,6 +46,7 @@ import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator2025.Elevator2025;
 import frc.robot.subsystems.Intake2025.Intake2025;
 import frc.robot.subsystems.TurningArm2025.TurningArm2025;
+import frc.robot.utils.SmartDashboardEx;
 import frc.robot.commands.GoToGroundCoralCmd;
 import frc.robot.commands.fineTuneDrivetrainCmd;
 import frc.robot.Constants.Candle;
@@ -345,6 +346,7 @@ public class RobotContainer {
 
     public void onDisabled() {
 
+        SmartDashboardEx.flush();
         if (GlobalConfig.devMode) {
             LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_ARPIL_TAG_NAME_RIGHT, 2);
             LimelightHelpers.setPipelineIndex(Constants.LIME_LIGHT_ARPIL_TAG_NAME_LEFT, 2);
