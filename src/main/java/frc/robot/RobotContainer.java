@@ -53,6 +53,7 @@ import frc.robot.commands.fineTuneDrivetrainCmd;
 import frc.robot.Constants.Candle;
 import frc.robot.commands.CandleCmd;
 import frc.robot.commands.FaceGroundCoralCmd;
+import frc.robot.commands.FakeGoToCoralAndElevatorToLnCmd;
 import frc.robot.commands.GoForward;
 
 public class RobotContainer {
@@ -275,6 +276,8 @@ public class RobotContainer {
         regPPEnC("Go", new GoForward(drivetrain, cmd, 2));
 
         regPPEnC("WaitForShoot", new WaitForShootOverCmd(m_intake));
+
+        regPPEnC("FakeMove", new FakeGoToCoralAndElevatorToLnCmd(drivetrain, cmd));
 
         // PathConstraints constraints = new PathConstraints(
         //     Constants.PathPlanner.constraintsSpeed, Constants.PathPlanner.constraintsAccel,

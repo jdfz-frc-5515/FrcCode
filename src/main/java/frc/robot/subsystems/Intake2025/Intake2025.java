@@ -292,6 +292,10 @@ public class Intake2025 extends SubsystemBase {
         }
     }
 
+    public boolean getIsStartIntake() {
+        return curState == STATE.CORAL_IN;
+    }
+
     @Override
     public void periodic() {
         // updateIsCarryingCarol();

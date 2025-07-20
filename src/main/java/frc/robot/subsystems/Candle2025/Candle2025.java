@@ -50,6 +50,7 @@ public class Candle2025 extends SubsystemBase {
         L2,
         L3,
         L4,
+        INTAKING,
         NUM,
     }
 
@@ -66,7 +67,8 @@ public class Candle2025 extends SubsystemBase {
         new Tuple3<>(255, 255, 255),    // L1
         new Tuple3<>(235, 16, 16),      // L2
         new Tuple3<>(10, 247, 18),      // L3
-        new Tuple3<>(168, 7, 222)       // L4
+        new Tuple3<>(168, 7, 222),       // L4
+        new Tuple3<>(0, 0, 255)         // UP_INTAKING     
     );
 
     private boolean isNeedUpdate = false;
@@ -140,6 +142,20 @@ public class Candle2025 extends SubsystemBase {
         }
 
         isNeedUpdate = true;
+    }
+
+    public void showIntaking(boolean isShow) {
+        if (isShow) {
+            int slotIdx = 0;
+            COLOR[] slot = slots[slotIdx];
+            for (int i = 0; i < slot.length; ++i) {
+                slot[i] = COLOR.INTAKING;
+            }
+            isNeedUpdate = true;            
+        }
+        else {
+            clearSlot(0);
+        }
     }
 
     public void showCarryingCoral() {

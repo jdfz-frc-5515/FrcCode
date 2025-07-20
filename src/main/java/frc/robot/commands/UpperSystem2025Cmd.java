@@ -1187,52 +1187,53 @@ public class UpperSystem2025Cmd extends Command {
     }
 
     private void updateLeds() {
-        if (getIsCarryingCoral()) {
-            this.m_candle.showCarryingCoral();
-        }
-        else if (m_isBallMode) {
-            this.m_candle.showBallMode();
-        }
-        else if (m_isIntakeFromGround) {
-            this.m_candle.showWaitGroundCoral();
-        }
-        else if (!m_isIntakeFromGround) {
-            this.m_candle.showWaitUpCoral();
-        }
-        else {
-            this.m_candle.showIdle();
-        }
+        // if (getIsCarryingCoral()) {
+        //     this.m_candle.showCarryingCoral();
+        // }
+        // else if (m_isBallMode) {
+        //     this.m_candle.showBallMode();
+        // }
+        // else if (m_isIntakeFromGround) {
+        //     this.m_candle.showWaitGroundCoral();
+        // }
+        // else if (!m_isIntakeFromGround) {
+        //     this.m_candle.showWaitUpCoral();
+        // }
+        // else {
+        //     this.m_candle.showIdle();
+        // }
 
-        ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
-        if (info == null) {
-            this.m_candle.clearLn();
-        }
-        else {
-            if (info.level == -1) {
-                // show aglea
-            }
-            else if (info.level == 0) {
-                this.m_candle.showL1();
-            }
-            else {
-                // if (info.branch != 0) {
-                    switch ((int)info.level) {
-                        case 0:
-                        case 1:
-                            m_candle.showL2();
-                            break;
-                        case 2:
-                            m_candle.showL3();
-                            break;
-                        case 3:
-                            m_candle.showL4();
-                            break;
-                    }                    
-                // }
-            }
+        // ControlPadInfo.ControlPadInfoData info = ControlPadHelper.getControlPadInfo();
+        // if (info == null) {
+        //     this.m_candle.clearLn();
+        // }
+        // else {
+        //     if (info.level == -1) {
+        //         // show aglea
+        //     }
+        //     else if (info.level == 0) {
+        //         this.m_candle.showL1();
+        //     }
+        //     else {
+        //         // if (info.branch != 0) {
+        //             switch ((int)info.level) {
+        //                 case 0:
+        //                 case 1:
+        //                     m_candle.showL2();
+        //                     break;
+        //                 case 2:
+        //                     m_candle.showL3();
+        //                     break;
+        //                 case 3:
+        //                     m_candle.showL4();
+        //                     break;
+        //             }                    
+        //         // }
+        //     }
             
-        }
+        // }
 
+        m_candle.showIntaking(m_intake.getIsStartIntake());
     }
 
     public boolean isStateDone(STATE state) {
