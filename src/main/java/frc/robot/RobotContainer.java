@@ -84,6 +84,8 @@ public class RobotContainer {
     private final StructPublisher<Pose2d> robotPospublisher = NetworkTableInstance.getDefault()
         .getStructTopic("MyPose", Pose2d.struct).publish();
 
+    Command m_autoPath;
+
     public RobotContainer() {
         FollowPathCommand.warmupCommand().schedule();
         ControlPadHelper.init();
@@ -122,6 +124,8 @@ public class RobotContainer {
         registerPathplannerEventsAndNamedCommands();
 
         drivetrain.registerTelemetry(logger::telemeterize);
+        
+        m_autoPath = new PathPlannerAuto("Red3CRLS");
     }
 
     private void configureDriver1Bindings() {
@@ -304,7 +308,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return new PathPlannerAuto("Red3CRLS");
+        return m_autoPath;
     }
 
     public void update() {

@@ -133,7 +133,7 @@ public class Constants {
         public static final double moveToPoseRotationToleranceRadians = Units.degreesToRadians(3.); // TODO
         public static final double moveToPoseTranslationToleranceMeters = 0.02; // TODO
 
-        public static final double maxMoveToSpeed = 4; // TODO
+        public static final double maxMoveToSpeed = 4.5; // TODO
         public static final double maxMoveToAngularVelocity = Units.degreesToRadians(200.); // TODO
 
     }
