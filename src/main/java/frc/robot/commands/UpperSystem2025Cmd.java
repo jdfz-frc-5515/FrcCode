@@ -797,16 +797,16 @@ public class UpperSystem2025Cmd extends Command {
         return curState == STATE.BALL1 || curState == STATE.BALL2;
     }
 
-    private void setState(STATE newState) {
+    private boolean setState(STATE newState) {
         System.out.println("UpperSystem2025Cmd::setState: try set: " + curState + " -> " + newState
                 + " isCarryingCoral: " + getIsCarryingCoral() + " isCarryingBall: " + getIsCarryingBall());
         if (curState == newState) {
-            return;
+            return false;
         }
 
         if (curState == STATE.ZERO && (newState != STATE.READY_FOR_LOAD_GROUND_CORAL && newState != STATE.READY_FOR_LOAD_UP_CORAL)) {
             // if we are in zero state, we can only go to READY_FOR_LOAD_CORAL state or READY_FOR_LOAD_UP_CORAL
-            return;
+            return false;
         }
 
         if (newState == STATE.L1 || newState == STATE.L2 || newState == STATE.L3 || newState == STATE.L4) {
@@ -818,30 +818,30 @@ public class UpperSystem2025Cmd extends Command {
                     && curState != STATE.L4) {
                 // if we are not in READY_FOR_LOAD_CORAL, READY_FOR_LOAD_UP_CORAL, L1, L2, L3, L4, 
                 // refuse to go to L1, L2, L3, L4
-                return;
+                return false;
             }
             if (!getIsCarryingCoral() || getIsCarryingBall()) {
                 // if we are not carrying Coral or are carrying ball, refuse to go to L1, L2,
                 // L3, L4
-                return;
+                return false;
             }
         }
 
         if (newState == STATE.BALL1 || newState == STATE.BALL2) {
             if (curState != STATE.READY_FOR_LOAD_GROUND_CORAL && curState != STATE.READY_FOR_LOAD_UP_CORAL && curState != STATE.BALL1 && curState != STATE.BALL2) {
                 // if we are not in READY_FOR_LOAD_BALL, refuse to go to BALL1
-                return;
+                return false;
             }
             if (getIsCarryingCoral()) {
                 // if we are not carrying ball or are carrying coral, refuse to go to BALL1
-                return;
+                return false;
             }
         }
 
         if (newState == STATE.READY_FOR_LOAD_GROUND_CORAL || newState == STATE.READY_FOR_LOAD_UP_CORAL) {
             if (getIsCarryingBall() || getIsCarryingCoral()) {
                 // if we are carrying ball or coral, refuse to go to READY_FOR_LOAD_CORAL or READY_FOR_LOAD_UP_CORAL
-                return;
+                return false;
             }
         }
 
@@ -857,6 +857,7 @@ public class UpperSystem2025Cmd extends Command {
         curState = newState;
 
         System.out.println("UpperSystem2025Cmd::setState: try set: comfirmed");
+        return true;
     }
 
 
@@ -1262,7 +1263,9 @@ public class UpperSystem2025Cmd extends Command {
                 break;
         }
         if (newState != STATE.NONE) {
-            setState(newState);
+            if (!setState(newState)) {
+                return STATE.NONE;
+            }
         }
 
         return newState;
