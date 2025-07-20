@@ -13,13 +13,19 @@
         {
           "type": "named",
           "data": {
-            "name": "22-L-4"
+            "name": "11-L-4"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForShoot"
           }
         },
         {
@@ -31,7 +37,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "22-RLS"
+            "pathName": "11-LLS"
           }
         },
         {
@@ -49,7 +55,7 @@
         {
           "type": "named",
           "data": {
-            "name": "17-R-4"
+            "name": "6-L-4"
           }
         },
         {
@@ -59,9 +65,15 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "WaitForShoot"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "22-RLS"
+            "pathName": "6-LLS"
           }
         },
         {
@@ -79,7 +91,19 @@
         {
           "type": "named",
           "data": {
-            "name": "17-L-4"
+            "name": "6-L-4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForShoot"
           }
         }
       ]
