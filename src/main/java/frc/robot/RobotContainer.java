@@ -302,7 +302,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return new PathPlannerAuto("Red3CRLS");
+        return new PathPlannerAuto("testRedAuto");
     }
 
     public void update() {
