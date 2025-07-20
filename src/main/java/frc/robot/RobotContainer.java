@@ -13,6 +13,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.events.EventTrigger;
@@ -84,6 +85,7 @@ public class RobotContainer {
         .getStructTopic("MyPose", Pose2d.struct).publish();
 
     public RobotContainer() {
+        FollowPathCommand.warmupCommand().schedule();
         ControlPadHelper.init();
 
         swerveStatePublisher = NetworkTableInstance.getDefault()
@@ -95,7 +97,7 @@ public class RobotContainer {
 
 
         // setHeading here for auto 
-        double headingAngle = 180;  // 0 red , 180 blue
+        double headingAngle = 0;  // 0 red , 180 blue
         // // var alliance = DriverStation.getAlliance();
         // // if (alliance.isPresent()) {
         // //     switch (alliance.get()) {
@@ -302,7 +304,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return new PathPlannerAuto("Blue3CLLS");
+        return new PathPlannerAuto("Red3CRLS");
     }
 
     public void update() {
