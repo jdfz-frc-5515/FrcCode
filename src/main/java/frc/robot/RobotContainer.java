@@ -95,7 +95,7 @@ public class RobotContainer {
 
 
         // setHeading here for auto 
-        double headingAngle = 0;  // 0 red , 180 blue
+        double headingAngle = 180;  // 0 red , 180 blue
         // // var alliance = DriverStation.getAlliance();
         // // if (alliance.isPresent()) {
         // //     switch (alliance.get()) {
@@ -302,7 +302,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return new PathPlannerAuto("testRedAuto");
+        return new PathPlannerAuto("Blue3CLLS");
     }
 
     public void update() {
