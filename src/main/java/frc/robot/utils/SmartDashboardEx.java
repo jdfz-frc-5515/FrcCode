@@ -31,7 +31,7 @@ public class SmartDashboardEx {
 
     // 存储所有记录的数据结构：键 -> 记录列表（按时间顺序）
     private static final Map<String, List<RecordEntry>> recordMap = new HashMap<>();
-    private static final boolean useFileLog = true;
+    private static final boolean useFileLog = false;
     private static String logPathname;
     
     // 记录键值对（如果与最近一次记录相同则忽略）

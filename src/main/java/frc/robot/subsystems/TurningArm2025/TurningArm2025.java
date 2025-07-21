@@ -57,7 +57,7 @@ public class TurningArm2025 extends SubsystemBase {
     }
 
     private final double NONE_POS = -9999;
-    private final double threshold = 0.05;
+    private final double threshold = 0.005;
 
     TA_STATE curState = TA_STATE.NONE;
     RUNNING_STATE curRunningState = RUNNING_STATE.READY;

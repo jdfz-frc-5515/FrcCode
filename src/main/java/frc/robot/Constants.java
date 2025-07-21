@@ -133,7 +133,7 @@ public class Constants {
         public static final double moveToPoseRotationToleranceRadians = Units.degreesToRadians(3.); // TODO
         public static final double moveToPoseTranslationToleranceMeters = 0.02; // TODO
 
-        public static final double maxMoveToSpeed = 4.5; // TODO
+        public static final double maxMoveToSpeed = 3; // TODO
         public static final double maxMoveToAngularVelocity = Units.degreesToRadians(200.); // TODO
 
     }
@@ -208,28 +208,28 @@ public class Constants {
         public static final int motorID = 13;
         public static final int canCoderID = 14;
         public static final String canBusName = "rio";
-        public static final double KP = 7;
-        public static final double KI = 1.0;
-        public static final double KD = 0.1; 
+        public static final double KP = 60; //7;
+        public static final double KI = 0.1;// 1.0;
+        public static final double KD = 0.0; // 0.1; 
         public static final double KV = 0.0; // 0.1
         public static final double KS = 0.0;
         public static final double KA = 0.0;
-        public static final double Velocity = 10; // 100.0;
-        public static final double Acceleration = 20; // 600.0;
+        public static final double Velocity = 4; // 100.0;
+        public static final double Acceleration = 5; // 600.0;
         public static final double Jerk = 0.0;
         public static final double SensorToMechanismRatio = 1.0;
-        public static final double RotorToSensorRatio = 44;
+        public static final double RotorToSensorRatio = 44 * 49.11111;
         // bigger value means arm is more expanded(clockwise)
         public static final double zeroPos = 0;
-        public static final double groundIntakePos = 0.2;// 0.26; //0.385;  //0.18; // 7/12:0.27
-        public static final double upIntakePos = 1.15; //1.25;
-        public static final double l1Pos = 1.69;//0.407227;
-        public static final double l2Pos = 1.69;
+        public static final double groundIntakePos = 0.01;// 0.000061;// 0.26; //0.385;  //0.18; // 7/12:0.27
+        public static final double upIntakePos = 0.1237; //  1.15; //1.25;
+        public static final double l1Pos = 0.1780;//0.407227;
+        public static final double l2Pos = 0.1780;
         public static final double dodgePos =  1.139307;  // the pos that allows elevator to move
-        public static final double l3Pos = 1.80;
-        public static final double l4Pos = 1.80;
-        public static final double ball1Pos = 4.3;
-        public static final double ball2Pos = 4.3;
+        public static final double l3Pos = 0.1780; //1.80;
+        public static final double l4Pos = 0.1780; //1.80;
+        public static final double ball1Pos = 0.425;//4.3;
+        public static final double ball2Pos = 0.425;//4.3;
     }
 
     public static final class Elevator {

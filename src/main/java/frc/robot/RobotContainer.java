@@ -56,6 +56,7 @@ import frc.robot.commands.FaceGroundCoralCmd;
 import frc.robot.commands.FakeGoToCoralAndElevatorToLnCmd;
 import frc.robot.commands.GoForward;
 
+
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(1).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -85,6 +86,8 @@ public class RobotContainer {
     private final StructPublisher<Pose2d> robotPospublisher = NetworkTableInstance.getDefault()
         .getStructTopic("MyPose", Pose2d.struct).publish();
 
+    private final double HEADING_RED = 0;
+    private final double HEADING_BLUE = 180;
     Command m_autoPath;
 
     public RobotContainer() {
@@ -100,7 +103,7 @@ public class RobotContainer {
 
 
         // setHeading here for auto 
-        double headingAngle = 0;  // 0 red , 180 blue
+        double headingAngle = HEADING_BLUE;  // HEADING_RED or HEADING_BLU=]0.;
         // // var alliance = DriverStation.getAlliance();
         // // if (alliance.isPresent()) {
         // //     switch (alliance.get()) {
@@ -126,7 +129,7 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
         
-        m_autoPath = new PathPlannerAuto("Red3CLLS");
+        m_autoPath = new PathPlannerAuto("Blue3CLLS");
     }
 
     private void configureDriver1Bindings() {
