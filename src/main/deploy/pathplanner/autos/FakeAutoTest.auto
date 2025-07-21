@@ -41,15 +41,9 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "20-LLS"
-          }
-        },
-        {
           "type": "wait",
           "data": {
-            "waitTime": 0.5
+            "waitTime": 3.0
           }
         },
         {
@@ -77,15 +71,9 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "19-LLS"
-          }
-        },
-        {
           "type": "wait",
           "data": {
-            "waitTime": 0.5
+            "waitTime": 3.0
           }
         },
         {

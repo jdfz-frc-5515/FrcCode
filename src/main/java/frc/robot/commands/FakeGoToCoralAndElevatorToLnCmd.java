@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.ControlPadHelper;
 import frc.robot.subsystems.Chassis.CommandSwerveDrivetrain;
 
 public class FakeGoToCoralAndElevatorToLnCmd extends GoToCoralCmd {
@@ -21,6 +22,8 @@ public class FakeGoToCoralAndElevatorToLnCmd extends GoToCoralCmd {
     @Override
     public void initialize() {
         // super.initialize();
+
+        ControlPadHelper.setControlPadInfoData(17, 3, -10l);
         m_isMovingDone = false;
         m_isElevatorToLnDone = false;
         m_isElevatorToLning = false;

@@ -126,7 +126,7 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
         
-        m_autoPath = new PathPlannerAuto("Red3CRLS");
+        m_autoPath = new PathPlannerAuto("Red3CLLS");
     }
 
     private void configureDriver1Bindings() {
