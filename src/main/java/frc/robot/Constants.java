@@ -208,10 +208,10 @@ public class Constants {
         public static final int motorID = 13;
         public static final int canCoderID = 14;
         public static final String canBusName = "rio";
-        public static final double KP = 60; //7;
-        public static final double KI = 0.1;// 1.0;
+        public static final double KP = 0; // 60; //7;
+        public static final double KI = 0; //0.1;// 1.0;
         public static final double KD = 0.0; // 0.1; 
-        public static final double KV = 0.0; // 0.1
+        public static final double KV = 6.08; // 0.0; // 0.1
         public static final double KS = 0.0;
         public static final double KA = 0.0;
         public static final double Velocity = 4; // 100.0;

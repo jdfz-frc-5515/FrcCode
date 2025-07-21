@@ -223,6 +223,7 @@ public class TurningArm2025 extends SubsystemBase {
 
 
         m_armMotor.setControl(motionMagicVoltage.withPosition(pos));
+        // m_armMotor.getClosedLoopError()
     }
 
     private void saveLastPosition() {
