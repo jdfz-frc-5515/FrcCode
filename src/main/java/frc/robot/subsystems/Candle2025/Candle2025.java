@@ -234,6 +234,19 @@ public class Candle2025 extends SubsystemBase {
         showLn(COLOR.L4, false);
     }
 
+    public void showSpecial(boolean isShow) {
+        if (!isShow) {
+            clearSlot(1);
+            return;
+        }
+        int slotIdx = 1;
+        COLOR[] slot = slots[slotIdx];
+        for (int i = 0; i < slot.length; ++i) {
+            slot[i] = COLOR.L4;
+        }
+        isNeedUpdate = true;
+    }
+
     private void clearSlot(int idx) {
         if (idx < 0 || idx >= slotNum) {
             return;

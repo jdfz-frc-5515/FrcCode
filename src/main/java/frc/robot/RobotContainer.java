@@ -208,6 +208,10 @@ public class RobotContainer {
         cmd.setElevatorLevelUpTrigger(m_driverController2.povUp());
 
         cmd.setGroundIntakeOutTakeTrigger(m_driverController2.povLeft());
+
+        m_driverController2.povRight().onTrue(new InstantCommand(() -> {
+            cmd.toggleSpecialLed();
+        }));
         // m_driverController2.povLeft().onTrue(new CandleCmd(m_candle, false));
         // m_driverController2.povRight().onTrue(new CandleCmd(m_candle, true));
     }

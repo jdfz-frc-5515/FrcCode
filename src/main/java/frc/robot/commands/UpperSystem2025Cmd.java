@@ -166,6 +166,8 @@ public class UpperSystem2025Cmd extends Command {
 
     private boolean m_isBallMode = false; // 是否是Aglea模式，还是Coral模式
 
+    private boolean m_isShowSpecialLed = false;
+
     public UpperSystem2025Cmd(
             CommandSwerveDrivetrain chassis,
             Candle2025 candle,
@@ -1163,6 +1165,7 @@ public class UpperSystem2025Cmd extends Command {
             case READY_FOR_LOAD_GROUND_CORAL:
             case READY_FOR_LOAD_UP_CORAL:
                 if (getIsCarryingCoral()) {
+                    m_isShowSpecialLed = false;
                     setState(STATE.L1);
                 }
                 break;
@@ -1234,6 +1237,13 @@ public class UpperSystem2025Cmd extends Command {
         // }
 
         m_candle.showIntaking(m_intake.getIsStartIntake());
+
+        m_candle.showSpecial(m_isShowSpecialLed);
+
+    }
+
+    public void toggleSpecialLed() {
+        m_isShowSpecialLed = !m_isShowSpecialLed;
     }
 
     public boolean isStateDone(STATE state) {
