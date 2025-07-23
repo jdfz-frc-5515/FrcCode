@@ -1238,8 +1238,8 @@ public class UpperSystem2025Cmd extends Command {
 
         m_candle.showIntaking(m_intake.getIsStartIntake());
 
-        m_candle.showSpecial(m_isShowSpecialLed);
-
+        // m_candle.showSpecial(m_isShowSpecialLed);
+        m_candle.showRainbow(m_isShowSpecialLed);
     }
 
     public void toggleSpecialLed() {

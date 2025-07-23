@@ -208,10 +208,10 @@ public class Constants {
         public static final int motorID = 13;
         public static final int canCoderID = 14;
         public static final String canBusName = "rio";
-        public static final double KP = 0; // 60; //7;
-        public static final double KI = 0; //0.1;// 1.0;
-        public static final double KD = 0.0; // 0.1; 
-        public static final double KV = 6.08; // 0.0; // 0.1
+        public static final double KP = 20; // 60; //7;
+        public static final double KI = 0.1; //0.1;// 1.0;
+        public static final double KD = 0.05; // 0.1; 
+        public static final double KV = 5.5;//6.08; // 0.0; // 0.1
         public static final double KS = 0.0;
         public static final double KA = 0.0;
         public static final double Velocity = 4; // 100.0;
@@ -247,7 +247,7 @@ public class Constants {
         }
         public static class Down {
             public static final double KP = 5; // 10.0;
-            public static final double KI = 1;
+            public static final double KI = 0.5;
             public static final double KD = -0.35;
             public static final double KV = 1;//1;//0.1;
             public static final double KS = 0;//0.05;
@@ -265,8 +265,8 @@ public class Constants {
 
         public static final double l1Pos = -3.7; // -1.75;
         public static final double l2Pos = -3.7;
-        public static final double l3Pos = -8.28;
-        public static final double l4Pos = -14.2;
+        public static final double l3Pos = -7.65; //-8.28;
+        public static final double l4Pos = -14;
         public static final double ball1Pos = -2.2;
         public static final double ball2Pos = -5.5;
         public static final double upDodgePos = -6.5;

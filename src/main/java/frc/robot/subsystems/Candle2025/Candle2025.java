@@ -53,7 +53,7 @@ public class Candle2025 extends SubsystemBase {
         INTAKING,
         NUM,
     }
-
+    public RainbowAnimation rainbowAnim = new RainbowAnimation(1, 0.5, 57, false, 33);
     private COLOR[][] slots = new COLOR[slotNum][ledNum];
     private COLOR[] mergedSlot = new COLOR[ledNum];
     
@@ -245,6 +245,15 @@ public class Candle2025 extends SubsystemBase {
             slot[i] = COLOR.L4;
         }
         isNeedUpdate = true;
+    }
+
+    public void showRainbow(boolean isShow) {
+        if (!isShow) {
+            // clearSlot(1);
+            led.clearAnimation(0);
+            return;
+        }
+        led.animate(rainbowAnim);
     }
 
     private void clearSlot(int idx) {

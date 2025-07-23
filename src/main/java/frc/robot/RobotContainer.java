@@ -103,7 +103,7 @@ public class RobotContainer {
 
 
         // setHeading here for auto 
-        double headingAngle = HEADING_BLUE;  // HEADING_RED or HEADING_BLU=]0.;
+        double headingAngle = HEADING_RED;  // HEADING_RED or HEADING_BLU=]0.;
         // // var alliance = DriverStation.getAlliance();
         // // if (alliance.isPresent()) {
         // //     switch (alliance.get()) {
@@ -129,7 +129,7 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
         
-        m_autoPath = new PathPlannerAuto("Blue3CLLS");
+        m_autoPath = new PathPlannerAuto("RedMid");
     }
 
     private void configureDriver1Bindings() {

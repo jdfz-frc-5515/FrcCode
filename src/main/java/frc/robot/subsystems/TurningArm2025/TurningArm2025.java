@@ -57,7 +57,7 @@ public class TurningArm2025 extends SubsystemBase {
     }
 
     private final double NONE_POS = -9999;
-    private final double threshold = 0.005;
+    private final double threshold = 0.01;
 
     TA_STATE curState = TA_STATE.NONE;
     RUNNING_STATE curRunningState = RUNNING_STATE.READY;
@@ -185,9 +185,9 @@ public class TurningArm2025 extends SubsystemBase {
     }
 
     protected void updateState() {
-        SmartDashboardEx.putNumberSDOnly("ARM ccc1", m_canCoder.getPosition().getValueAsDouble());
-        SmartDashboardEx.putNumberSDOnly("ARM ccc2", m_armMotor.getPosition().getValueAsDouble());
-
+        SmartDashboardEx.putNumberSDOnly("ARM ccc cc", m_canCoder.getPosition().getValueAsDouble());
+        SmartDashboardEx.putNumberSDOnly("ARM ccc motor", m_armMotor.getPosition().getValueAsDouble());
+        SmartDashboardEx.putNumberSDOnly("ARM ccc error", m_armMotor.getClosedLoopError().getValueAsDouble());
         double output = 0.030;
         if (curState == TA_STATE.TUNING_UP) {
             // driveVelocity.Acceleration = 0.1;
@@ -223,7 +223,6 @@ public class TurningArm2025 extends SubsystemBase {
 
 
         m_armMotor.setControl(motionMagicVoltage.withPosition(pos));
-        // m_armMotor.getClosedLoopError()
     }
 
     private void saveLastPosition() {
